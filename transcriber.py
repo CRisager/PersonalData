@@ -100,7 +100,7 @@ def save_transcript(transcript, audio_path, timestamp):
     return transcript_path
 
 
-def transcribe_audio(audio_path, model_size="base"):
+def transcribe_audio(audio_path, model_size="base.en"):
     """
     Transcribes audio file using Whisper.
     
