@@ -178,3 +178,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Run by doing this in terminal:
+# python.exe transcriber.py 

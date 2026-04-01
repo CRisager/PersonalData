@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List
 
@@ -172,7 +174,42 @@ def parse_args() -> argparse.Namespace:
 		default="FillerWordData.json",
 		help="Path to filler-word JSON dataset",
 	)
+	parser.add_argument(
+		"--output-format",
+		choices=["json", "csv"],
+		default="json",
+		help="Export format for analysis results (default: json)",
+	)
+	parser.add_argument(
+		"--output",
+		default=None,
+		help="Optional output file path. Defaults to recordings/filler_analysis_<timestamp>.<ext>",
+	)
 	return parser.parse_args()
+
+
+def export_results(results: Dict[str, object], output_path: Path, output_format: str) -> None:
+	"""Export analysis results as JSON or CSV."""
+	output_path.parent.mkdir(parents=True, exist_ok=True)
+
+	if output_format == "json":
+		with output_path.open("w", encoding="utf-8") as file:
+			json.dump(results, file, indent=2, ensure_ascii=False)
+		return
+
+	# CSV export uses one row per filler to avoid nested structures in a single cell.
+	filler_counts = results.get("filler_word_counts", {})
+	with output_path.open("w", newline="", encoding="utf-8") as file:
+		writer = csv.writer(file)
+		writer.writerow(["transcript_path", results.get("transcript_path", "")])
+		writer.writerow(["dataset_path", results.get("dataset_path", "")])
+		writer.writerow(["total_words", results.get("total_words", 0)])
+		writer.writerow(["total_filler_words", results.get("total_filler_words", 0)])
+		writer.writerow(["filler_percentage", results.get("filler_percentage", 0.0)])
+		writer.writerow([])
+		writer.writerow(["filler_word", "count"])
+		for word, count in filler_counts.items():
+			writer.writerow([word, count])
 
 
 def main() -> None:
@@ -186,6 +223,11 @@ def main() -> None:
 		raise FileNotFoundError(f"Dataset file not found: {dataset_path}")
 
 	results = analyze_transcript(transcript_path, dataset_path)
+	timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+	default_output = Path("recordings") / f"filler_analysis_{timestamp}.{args.output_format}"
+	output_path = Path(args.output) if args.output else default_output
+
+	export_results(results, output_path, args.output_format)
 
 	print("Filler Word Analysis")
 	print("=" * 40)
@@ -195,8 +237,11 @@ def main() -> None:
 	print(f"Filler percentage: {results['filler_percentage']}%")
 	print("Filler word counts:")
 	print(results["filler_word_counts"])
+	print(f"Results exported to: {output_path}")
 
 
 if __name__ == "__main__":
 	main()
 
+# Run by doing this in terminal:
+# python.exe FillerWords.py recordings/transcript_20260401_143433.txt 
