@@ -1,0 +1,305 @@
+{
+  "access": {
+    "embargo": {
+      "active": false,
+      "reason": null
+    },
+    "files": "public",
+    "record": "public",
+    "status": "open"
+  },
+  "created": "2022-09-28T23:38:46.841031+00:00",
+  "custom_fields": {
+    "meeting:meeting": {
+      "acronym": "INTERSPEECH",
+      "dates": "2022-09-18",
+      "place": "Incheon, Korea",
+      "title": "23rd Conference of the International Speech Communication Association",
+      "url": "https://interspeech2022.org/"
+    }
+  },
+  "deletion_status": {
+    "is_deleted": false,
+    "status": "P"
+  },
+  "files": {
+    "count": 5,
+    "enabled": true,
+    "entries": {
+      "PodcastFillers.csv": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:68d8614ad562263c621b90dc81f06abd",
+        "ext": "csv",
+        "id": "f282fcb5-fe87-45b4-b3e6-34a51cea9692",
+        "key": "PodcastFillers.csv",
+        "links": {
+          "content": "https://zenodo.org/api/records/7121457/files/PodcastFillers.csv/content",
+          "self": "https://zenodo.org/api/records/7121457/files/PodcastFillers.csv"
+        },
+        "metadata": null,
+        "mimetype": "text/csv",
+        "size": 21698037,
+        "storage_class": "L"
+      },
+      "PodcastFillers.z01": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:e0941abae2a9e5bbe0e7c28f6140ccc7",
+        "ext": "z01",
+        "id": "bd2a4e0d-83aa-4d98-a385-be6574e715df",
+        "key": "PodcastFillers.z01",
+        "links": {
+          "content": "https://zenodo.org/api/records/7121457/files/PodcastFillers.z01/content",
+          "self": "https://zenodo.org/api/records/7121457/files/PodcastFillers.z01"
+        },
+        "metadata": null,
+        "mimetype": "application/octet-stream",
+        "size": 6442450944,
+        "storage_class": "L"
+      },
+      "PodcastFillers.z02": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:25a149c5dc76fa7c91d0edb6e77aedb6",
+        "ext": "z02",
+        "id": "dafca802-0e0a-4d80-92c9-63e36ee099f7",
+        "key": "PodcastFillers.z02",
+        "links": {
+          "content": "https://zenodo.org/api/records/7121457/files/PodcastFillers.z02/content",
+          "self": "https://zenodo.org/api/records/7121457/files/PodcastFillers.z02"
+        },
+        "metadata": null,
+        "mimetype": "application/octet-stream",
+        "size": 6442450944,
+        "storage_class": "L"
+      },
+      "PodcastFillers.z03": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:399c44abb9ec35aa56d6fbf75043164b",
+        "ext": "z03",
+        "id": "bc61cb5c-c171-4498-81ef-cc12d4715cb1",
+        "key": "PodcastFillers.z03",
+        "links": {
+          "content": "https://zenodo.org/api/records/7121457/files/PodcastFillers.z03/content",
+          "self": "https://zenodo.org/api/records/7121457/files/PodcastFillers.z03"
+        },
+        "metadata": null,
+        "mimetype": "application/octet-stream",
+        "size": 6442450944,
+        "storage_class": "L"
+      },
+      "PodcastFillers.zip": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:20e9f6b93b1b5c2e1c9d8b774ca28c33",
+        "ext": "zip",
+        "id": "f6cd5a0d-0be9-48b7-8bc7-3950b2f19576",
+        "key": "PodcastFillers.zip",
+        "links": {
+          "content": "https://zenodo.org/api/records/7121457/files/PodcastFillers.zip/content",
+          "self": "https://zenodo.org/api/records/7121457/files/PodcastFillers.zip"
+        },
+        "metadata": null,
+        "mimetype": "application/zip",
+        "size": 5915177141,
+        "storage_class": "L"
+      }
+    },
+    "order": [],
+    "total_bytes": 25264228010
+  },
+  "id": "7121457",
+  "is_draft": false,
+  "is_published": true,
+  "links": {
+    "access": "https://zenodo.org/api/records/7121457/access",
+    "access_grants": "https://zenodo.org/api/records/7121457/access/grants",
+    "access_links": "https://zenodo.org/api/records/7121457/access/links",
+    "access_request": "https://zenodo.org/api/records/7121457/access/request",
+    "access_users": "https://zenodo.org/api/records/7121457/access/users",
+    "archive": "https://zenodo.org/api/records/7121457/files-archive",
+    "archive_media": "https://zenodo.org/api/records/7121457/media-files-archive",
+    "communities": "https://zenodo.org/api/records/7121457/communities",
+    "communities-suggestions": "https://zenodo.org/api/records/7121457/communities-suggestions",
+    "doi": "https://doi.org/10.5281/zenodo.7121457",
+    "draft": "https://zenodo.org/api/records/7121457/draft",
+    "file_modification": "https://zenodo.org/api/records/7121457/file-modification",
+    "files": "https://zenodo.org/api/records/7121457/files",
+    "latest": "https://zenodo.org/api/records/7121457/versions/latest",
+    "latest_html": "https://zenodo.org/records/7121457/latest",
+    "media_files": "https://zenodo.org/api/records/7121457/media-files",
+    "parent": "https://zenodo.org/api/records/6609214",
+    "parent_doi": "https://doi.org/10.5281/zenodo.6609214",
+    "parent_doi_html": "https://zenodo.org/doi/10.5281/zenodo.6609214",
+    "parent_html": "https://zenodo.org/records/6609214",
+    "preview_html": "https://zenodo.org/records/7121457?preview=1",
+    "request_deletion": "https://zenodo.org/api/records/7121457/request-deletion",
+    "requests": "https://zenodo.org/api/records/7121457/requests",
+    "reserve_doi": "https://zenodo.org/api/records/7121457/draft/pids/doi",
+    "self": "https://zenodo.org/api/records/7121457",
+    "self_doi": "https://doi.org/10.5281/zenodo.7121457",
+    "self_doi_html": "https://zenodo.org/doi/10.5281/zenodo.7121457",
+    "self_html": "https://zenodo.org/records/7121457",
+    "self_iiif_manifest": "https://zenodo.org/api/iiif/record:7121457/manifest",
+    "self_iiif_sequence": "https://zenodo.org/api/iiif/record:7121457/sequence/default",
+    "versions": "https://zenodo.org/api/records/7121457/versions"
+  },
+  "media_files": {
+    "count": 0,
+    "enabled": false,
+    "entries": {},
+    "order": [],
+    "total_bytes": 0
+  },
+  "metadata": {
+    "creators": [
+      {
+        "affiliations": [
+          {
+            "name": "University of Rochester"
+          }
+        ],
+        "person_or_org": {
+          "family_name": "Ge Zhu",
+          "identifiers": [
+            {
+              "identifier": "0000-0003-0994-5476",
+              "scheme": "orcid"
+            }
+          ],
+          "name": "Ge Zhu",
+          "type": "personal"
+        }
+      },
+      {
+        "affiliations": [
+          {
+            "name": "Adobe Research"
+          }
+        ],
+        "person_or_org": {
+          "family_name": "Juan-Pablo Caceres",
+          "name": "Juan-Pablo Caceres",
+          "type": "personal"
+        }
+      },
+      {
+        "affiliations": [
+          {
+            "name": "Adobe Research"
+          }
+        ],
+        "person_or_org": {
+          "family_name": "Justin Salamon",
+          "name": "Justin Salamon",
+          "type": "personal"
+        }
+      }
+    ],
+    "description": "<p><strong>OVERVIEW:</strong><br>\nThe PodcastFillers dataset consists of 199 full-length podcast episodes in English with manually annotated filler words and automatically generated transcripts. The podcast audio recordings, sourced from SoundCloud (www.soundcloud.com), are CC-licensed, gender-balanced, and total 145 hours of audio from over 350 speakers. The annotations are provided under a non-commercial license and consist of 85,803 manually annotated audio events including approximately 35,000 filler words (&ldquo;uh&rdquo; and &ldquo;um&rdquo;) and 50,000 non-filler events such as breaths, music, laughter, repeated words, and noise. The annotated events are also provided as pre-processed 1-second audio clips. The dataset also includes automatically generated speech transcripts from a speech-to-text system. A detailed description is provided below.</p>\n\n<p>The PodcastFillers dataset homepage:&nbsp;<strong><a href=\"http://PodcastFillers.github.io\">PodcastFillers.github.io</a></strong><br>\nThe preprocessing utility functions and code repository for reproducing our experimental results:&nbsp;<strong><a href=\"https://github.com/gzhu06/PodcastFillers_Utils\">PodcastFillersUtils</a></strong></p>\n\n<p>&nbsp;</p>\n\n<p><strong>LICENSE:</strong></p>\n\n<p>The PodcastFillers dataset has separate licenses for the audio data and for the metadata. The metadata includes all annotations, speech-to-text transcriptions, and model outputs including VAD activations and FillerNet classification predictions.</p>\n\n<p><strong>Note:</strong> <strong>PodcastFillers is provided for research purposes only. </strong>The metadata license prohibits commercial use, which in turn prohibits deploying technology developed using the PodcastFillers metadata (such as the CSV annotations or audio clips extracted based on these annotations) in commercial applications.</p>\n\n<p>## License for PodcastFillers Dataset metadata</p>\n\n<p>This license agreement (the &ldquo;License&rdquo;) between Adobe Inc., having a place of business at 345 Park Avenue, San Jose, California 95110-2704 (&ldquo;Adobe&rdquo;), and you, the individual or entity exercising rights under this License (&ldquo;you&rdquo; or &ldquo;your&rdquo;), sets forth the terms for your use of certain research materials that are owned by Adobe (the &ldquo;Licensed Materials&rdquo;). By exercising rights under this License, you accept and agree to be bound by its terms. If you are exercising rights under this License on behalf of an entity, then &ldquo;you&rdquo; means you and such entity, and you (personally) represent and warrant that you (personally) have all necessary authority to bind that entity to the terms of this License.</p>\n\n<p>1.&nbsp;&nbsp; &nbsp;GRANT OF LICENSE.<br>\n1.1&nbsp;&nbsp; &nbsp;Adobe grants you a nonexclusive, worldwide, royalty-free, revocable, fully paid license to (A) reproduce, use, modify, and publicly display the Licensed Materials for noncommercial research purposes only; and (B) redistribute the Licensed Materials, and modifications or derivative works thereof, for noncommercial research purposes only, provided that you give recipients a copy of this License upon redistribution.<br>\n1.2&nbsp;&nbsp; &nbsp;You may add your own copyright statement to your modifications and/or provide additional or different license terms for use, reproduction, modification, public display, and redistribution of your modifications and derivative works, provided that such license terms limit the use, reproduction, modification, public display, and redistribution of such modifications and derivative works to noncommercial research purposes only.<br>\n1.3&nbsp;&nbsp; &nbsp;For purposes of this License, noncommercial research purposes include academic research and teaching only. Noncommercial research purposes do not include commercial licensing or distribution, development of commercial products, or any other activity that results in commercial gain.<br>\n2.&nbsp;&nbsp; &nbsp;OWNERSHIP AND ATTRIBUTION. Adobe and its licensors own all right, title, and interest in the Licensed Materials. You must retain all copyright notices and/or disclaimers in the Licensed Materials.<br>\n3.&nbsp;&nbsp; &nbsp;DISCLAIMER OF WARRANTIES. THE LICENSED MATERIALS ARE PROVIDED &ldquo;AS IS&rdquo; WITHOUT WARRANTY OF ANY KIND. THE ENTIRE RISK AS TO THE USE, RESULTS, AND PERFORMANCE OF THE LICENSED MATERIALS IS ASSUMED BY YOU. ADOBE DISCLAIMS ALL WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, WITH REGARD TO YOUR USE OF THE LICENSED MATERIALS, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT OF THIRD-PARTY RIGHTS.<br>\n4.&nbsp;&nbsp; &nbsp;LIMITATION OF LIABILITY. IN NO EVENT WILL ADOBE BE LIABLE FOR ANY ACTUAL, INCIDENTAL, SPECIAL OR CONSEQUENTIAL DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS OR OTHER COMMERCIAL LOSS, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE LICENSED MATERIALS, EVEN IF ADOBE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.<br>\n5.&nbsp;&nbsp; &nbsp;TERM AND TERMINATION. &nbsp;<br>\n5.1&nbsp;&nbsp; &nbsp;The License is effective upon acceptance by you and will remain in effect unless terminated earlier in accordance with Section 5.2.<br>\n5.2&nbsp;&nbsp; &nbsp;Any breach of any material provision of this License will automatically terminate the rights granted herein.<br>\n5.3&nbsp;&nbsp; &nbsp;Sections 2 (Ownership and Attribution), 3 (Disclaimer of Warranties), 4 (Limitation of Liability) will survive termination of this License.<br>\n## License for PodcastFillers Dataset audio files</p>\n\n<p>All of the podcast episode audio files come from SoundCloud. Please see podcast_episode_license.csv (included in the dataset) for a detailed license info for each episode. They include CC-BY-3.0, CC-BY-SA 3.0 and CC-BY-ND-3.0 licenses.<br>\n&nbsp;</p>\n\n<p><strong>ACKNOWLEDGEMENT:</strong><br>\nPlease cite the following paper in work that makes use of this dataset:</p>\n\n<p><a href=\"https://arxiv.org/abs/2203.15135\">Filler Word Detection and Classification: A Dataset and Benchmark</a><br>\nGe Zhu, Juan-Pablo Caceres and Justin Salamon<br>\nIn 23rd Annual Cong. of the Int. Speech Communication Association (INTERSPEECH), Incheon, Korea, Sep. 2022.</p>\n\n<p>Bibtex</p>\n\n<pre><code>@inproceedings{Zhu:FillerWords:INTERSPEECH:22,\n\u00a0 title = {Filler Word Detection and Classification: A Dataset and Benchmark},\n\u00a0 booktitle = {23rd Annual Cong.~of the Int.~Speech Communication Association (INTERSPEECH)},\n\u00a0 address = {Incheon, Korea},\u00a0\n\u00a0 month = {Sep.},\n\u00a0 url = {https://arxiv.org/abs/2203.15135},\n\u00a0 author = {Zhu, Ge and Caceres, Juan-Pablo and Salamon, Justin},\n\u00a0 year = {2022},\n}</code></pre>\n\n<p>&nbsp;</p>\n\n<p><strong>ANNOTATIONS:</strong><br>\nThe annotations include 85,803 manually annotated audio events covering common English filler-word and non-filler-word events. We also provide automatically-generated speech transcripts from a speech-to-text system, which do not contain the manually annotated events.<br>\nFull label vocabulary<br>\nEach of the 85,803 manually annotated events is labeled as one of 5 filler classes or 8 non-filler classes (label: number of events).</p>\n\n<p>Fillers<br>\n- Uh: 17,907<br>\n- Um: 17,078<br>\n- You know: 668<br>\n- Other: 315<br>\n- Like: 157</p>\n\n<p>Non-fillers<br>\n- Words: 12,709<br>\n- Repetitions: 9,024<br>\n- Breath: 8,288<br>\n- Laughter: 6,623<br>\n- Music&nbsp;&nbsp; &nbsp;: 5,060<br>\n- Agree (agreement sounds, e.g., &ldquo;mm-hmm&rdquo;, &ldquo;ah-ha&rdquo;): 3,755<br>\n- Noise&nbsp;&nbsp; &nbsp;: 2,735<br>\n- Overlap (overlapping speakers): 1,484</p>\n\n<p>Total: 85,803&nbsp;<br>\nConsolidated label vocabulary<br>\n76,689 of the audio events are also labeled with a smaller, consolidated vocabulary with 6 classes. The consolidated vocabulary was obtained by removing classes with less than 5,000 annotations (like, you know, other, agreement sounds, overlapping speakers, noise), and grouping &ldquo;repetitions&rdquo; and &ldquo;words&rdquo; into &ldquo;words&rdquo;.</p>\n\n<p>- Words: 21,733<br>\n- Uh: 17,907<br>\n- Um: 17,078<br>\n- Breath: 8,288<br>\n- Laughter: 6,623<br>\n- Music&nbsp;&nbsp; &nbsp;: 5,060</p>\n\n<p>- Total: 76,689</p>\n\n<p>The consolidated vocabulary was used to train <a href=\"https://arxiv.org/abs/2203.15135\">FillerNet</a></p>\n\n<p>For a detailed description of how the dataset was created, please see our paper.<br>\nData Split for Machine Learning:<br>\nTo facilitate &nbsp;machine learning experiments, the audio data in this dataset (full-length recordings and preprocessed 1-sec clips) are pre-arranged into &ldquo;train&rdquo;, &ldquo;validation&rdquo;, and &ldquo;test&rdquo; folders. This split ensures that episodes from the same podcast show are always in the same subset (train, validation, or test), to prevent speaker leakage. We also ensured that each subset in this split remains gender balanced, same as the complete dataset.</p>\n\n<p>We strongly recommend using this split in your experiments. It will ensure your results are not inflated due to overfitting, and that they are comparable to the results published in the <a href=\"https://arxiv.org/abs/2203.15135\">FillerNet paper</a></p>\n\n<p>&nbsp;</p>\n\n<p><strong>AUDIO FILES:</strong></p>\n\n<p>1. Full-length podcast episodes (MP3)<br>\n199 audio files of the full-length podcast episode recordings in mp3 format, stereo channels, 44.1 kHz sample rate and 32 bit depth. Filename format: &nbsp;[show name]_[episode name].mp3.</p>\n\n<p>2. Pre-processed full-length podcast episodes (WAV)<br>\n199 audio files of the full-length podcast episode recordings in wav format, mono channel, 16 kHz sample rate and 32 bit depth. The files are split into train, validation and test partitions (folders), see Data Split for Machine Learning above. Filename format: &nbsp;[show name]_[episode name].wav</p>\n\n<p>3. Pre-processed WAV clips<br>\nPre-processed 1-second audio clips of the annotated events, where each clip is centered on the center of the event. For annotated events longer than 1 second, we truncate them from the center into 1-second. The clips are in the same format as the pre-processed full-length podcast episodes: wav format, mono channel, 16 kHz sample rate and 32 bit depth.</p>\n\n<p>The clips that have consolidated vocabulary labels (76,689) are split into &ldquo;train&rdquo;, &ldquo;validation&rdquo; and &ldquo;test&rdquo; partitions (folders), see Data Split for Machine Learning above. The remainder of the clips (9,114) are placed in an &ldquo;extra&rdquo; folder.&nbsp;</p>\n\n<p>Filename format: [pfID].wav where:</p>\n\n<p>[pfID] = the PodcastFillers ID of the audio clip (see metadata below)</p>\n\n<p>&nbsp;</p>\n\n<p><strong>METADATA:</strong></p>\n\n<p>1. Speech-to-text podcasts transcripts<br>\nSpeech transcript in JSON format for each podcast episode. Generated using the <a href=\"https://www.speechmatics.com/\">SpeechMatics STT</a>&nbsp;Filename format: [show name]_[episode name].json.&nbsp;</p>\n\n<p>Each word in the transcript is annotated as a dictionary:<br>\n{&ldquo;confidence&rdquo;:(float), &ldquo;duration&rdquo;:(int), &nbsp;&ldquo;offset&rdquo;:(int), &nbsp;&ldquo;text&rdquo;:(string)}<br>\nwhere &ldquo;confidence&rdquo; indicates the STT confidence in the prediction, &ldquo;duration&rdquo; (unit:microsecond or 1e-6 second) is the duration of the transcribed word, &ldquo;offset&rdquo; (unit:microsecond or 1e-6 second) is the start time of the transcribed word in the full-length recording.</p>\n\n<p>2. PodcastFillers.csv<br>\nThis is the dataset&rsquo;s main annotation file, and contains the annotations of all 85,803 manually annotated events. Each annotated event also corresponds to one pre-processed audio clip. For each annotated event / audio clip, we provide:</p>\n\n<p>clip_name: (str)<br>\nThe filename of the audio clip containing this event: [pfID].wav</p>\n\n<p>pfID: (str)<br>\nThe PodcastFillers ID of the clip/event, a unique identifier.</p>\n\n<p>fullvoc_label: (str)<br>\nThe full-vocabulary label for this audio event, one of &ldquo;Uh&rdquo;, &ldquo;Um&rdquo;, &ldquo;You know&rdquo;, &ldquo;Like&rdquo;, &ldquo;Other&rdquo;, &ldquo;Laughter&rdquo;, &ldquo;Breath&rdquo;, &ldquo;Agree&rdquo;, &ldquo;Words&rdquo;, &ldquo;Repetitions&rdquo;, &ldquo;Overlap&rdquo;, &ldquo;Music&rdquo; and &ldquo;Noise&rdquo;. See Annotations above for details.</p>\n\n<p>consolidated_label: (str)<br>\nConsolidated-vocabulary label used for training FillerNet, including &ldquo;Uh&rdquo;, &ldquo;Um&rdquo;, &ldquo;Laughter&rdquo;, &ldquo;Breath&rdquo;, &ldquo;Words&rdquo;, &ldquo;Music&rdquo; or &ldquo;None&rdquo;. &ldquo;None&rdquo; is assigned to events outside the consolidated vocabulary. See Annotations above for details.</p>\n\n<p>episode_split_subset: (str)&nbsp;<br>\nThe subset (train/validation/test) folder the episode this 1-second clip comes from belongs to. See Data Split for Machine Learning above for details.</p>\n\n<p>clip_split_subset: (str)<br>\nThe subset (train/validation/test/extra) folder this 1-second clip belongs to. See Data Split for Machine Learning above for details. Note that while every episode belongs to one of train/validation/test, the clips are sorted into these subsets plus one additional folder &ldquo;extra&rdquo;, which contains clips that are excluded from the consolidated vocabulary. See Annotations above for details.</p>\n\n<p>podcast_filename: (str)<br>\nThe filename of the full-length podcast episode where this event occurs, it takes the format of [show name]_[episode name]</p>\n\n<p>event_start_inepisode: (float)<br>\nThe start time of the event in the episode, unit: second.</p>\n\n<p>event_end_inepisode: (float)&nbsp;<br>\nThe end time of the event in the episode, unit: second.</p>\n\n<p>event_start_inclip: (float)&nbsp;<br>\nThe start time of the event in the 1-second clip, unit: second.</p>\n\n<p>event_end_inclip: (float)&nbsp;<br>\nThe end time of the event in the 1-second clip, unit: second.</p>\n\n<p>clip_start_inepisode: (float)&nbsp;<br>\nThe start time of the 1-sec clip in the episode, unit: second.</p>\n\n<p>clip_end_inspieosde: (float)&nbsp;<br>\nThe end time of the 1-sec clip in the episode, unit: second.</p>\n\n<p>duration (float): Duration of the event in the episode, unit: second. Note that it can be larger than 1.0 because some events are longer than 1 second.</p>\n\n<p>confidence (float): Confidence among crowd annotators, it indicates confidence in the range 0-1.</p>\n\n<p>agreement (int): Agreement among crowd annotators. It indicates the number of annotators.</p>\n\n<p>3. Per-episode csv files</p>\n\n<p>These files have the exact same format as PodcastFillers.csv, but only contain the audio events for a specific podcast episode. There&rsquo;s one file per episode. Filename format: &nbsp;[show name]_[episode name].csv&nbsp;</p>\n\n<p>4. VAD activation csv files</p>\n\n<p>Voice activity detection predictions using our pretained robust VAD model, the first column indicates time stamps (unit:second) and the second one indicates activations. Filename format: &nbsp;`{show name}_{episode name}.csv`</p>\n\n<p>5. Ground truth and prediction sed_eval txt files</p>\n\n<p>Ground truth and AVC-FillerNet predicted events using <a href=\"https://tut-arg.github.io/sed_eval/\">sed_eval</a>&nbsp;supported format:&nbsp;</p>\n\n<pre><code>{start_time} {end_time} event_label</code></pre>\n\n<p>Filename format: &nbsp;`{show name}_{episode name}.txt`</p>\n\n<p>* To unzip split files:</p>\n\n<pre><code>zip -FF PodcastFillers.zip --out PodcastFillers-full.zip\nunzip PodcastFillers-full.zip</code></pre>\n\n<p>&nbsp;</p>",
+    "languages": [
+      {
+        "id": "eng",
+        "title": {
+          "en": "English"
+        }
+      }
+    ],
+    "publication_date": "2022-07-12",
+    "publisher": "Zenodo",
+    "resource_type": {
+      "id": "dataset",
+      "title": {
+        "de": "Datensatz",
+        "en": "Dataset"
+      }
+    },
+    "rights": [
+      {
+        "description": {
+          "en": ""
+        },
+        "icon": "cc-by-nc-icon",
+        "id": "cc-by-nc-2.0",
+        "props": {
+          "scheme": "spdx",
+          "url": "https://creativecommons.org/licenses/by-nc/2.0/legalcode"
+        },
+        "title": {
+          "en": "Creative Commons Attribution Non Commercial 2.0 Generic"
+        }
+      }
+    ],
+    "subjects": [
+      {
+        "subject": "filler words"
+      },
+      {
+        "subject": "podcasts"
+      },
+      {
+        "subject": "disfluencies"
+      }
+    ],
+    "title": "PodcastFillers",
+    "version": "1.0.1"
+  },
+  "parent": {
+    "access": {
+      "owned_by": {
+        "user": "357515"
+      }
+    },
+    "communities": {},
+    "id": "6609214",
+    "pids": {
+      "doi": {
+        "client": "datacite",
+        "identifier": "10.5281/zenodo.6609214",
+        "provider": "datacite"
+      }
+    }
+  },
+  "pids": {
+    "doi": {
+      "client": "datacite",
+      "identifier": "10.5281/zenodo.7121457",
+      "provider": "datacite"
+    },
+    "oai": {
+      "identifier": "oai:zenodo.org:7121457",
+      "provider": "oai"
+    }
+  },
+  "revision_id": 3,
+  "stats": {
+    "all_versions": {
+      "data_volume": 34070553797388.0,
+      "downloads": 8647,
+      "unique_downloads": 5179,
+      "unique_views": 3904,
+      "views": 4373
+    },
+    "this_version": {
+      "data_volume": 25368024344717.0,
+      "downloads": 7253,
+      "unique_downloads": 4785,
+      "unique_views": 3205,
+      "views": 3599
+    }
+  },
+  "status": "published",
+  "swh": {},
+  "updated": "2022-10-09T01:22:58.189873+00:00",
+  "versions": {
+    "index": 2,
+    "is_latest": true
+  }
+}

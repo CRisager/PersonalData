@@ -12,7 +12,7 @@ from datetime import datetime
 
 # Configuration
 SAMPLE_RATE = 16000  # Whisper works best at 16kHz
-DURATION = 10  # Record for 10 seconds by default
+DURATION = 30  # Record for 30 seconds by default
 OUTPUT_DIR = Path("recordings")
 
 # Create output directory if it doesn't exist
@@ -122,7 +122,18 @@ def transcribe_audio(audio_path, model_size="base.en"):
     model = whisper.load_model(model_size)
     
     print("Transcribing audio...")
-    result = model.transcribe(str(audio_path))
+    # Load audio directly to avoid ffmpeg dependency
+    audio_data, sr = sf.read(str(audio_path))
+    # Convert to float32 (Whisper expects this format)
+    audio_data = audio_data.astype(np.float32)
+    # Resample to 16kHz if needed (Whisper expects 16kHz or will resample internally)
+    if sr != SAMPLE_RATE:
+        # Use scipy for resampling if needed
+        from scipy import signal
+        num_samples = int(len(audio_data) * SAMPLE_RATE / sr)
+        audio_data = signal.resample(audio_data, num_samples).astype(np.float32)
+    
+    result = model.transcribe(audio=audio_data, language="en")
     
     return result["text"]
 
