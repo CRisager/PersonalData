@@ -7,12 +7,25 @@ from pathlib import Path
 import argparse
 
 
-def _detect_pitch_librosa(audio_path, fmin=80, fmax=400):
+def _detect_pitch_librosa(
+    audio_path,
+    fmin=80,
+    fmax=400,
+    trim_silence=True,
+    trim_top_db=30,
+    trim_unvoiced_edges=True,
+):
     """Pitch detection with librosa.pyin."""
     import numpy as np
     import librosa
 
     y, sr = librosa.load(str(audio_path), sr=None)
+    if trim_silence:
+        y, _ = librosa.effects.trim(y, top_db=trim_top_db)
+
+    if len(y) == 0:
+        raise ValueError("Audio is empty after silence trimming.")
+
     f0, voiced_flag, _ = librosa.pyin(
         y,
         fmin=fmin,
@@ -20,40 +33,28 @@ def _detect_pitch_librosa(audio_path, fmin=80, fmax=400):
         sr=sr,
     )
     time = librosa.frames_to_time(np.arange(len(f0)), sr=sr)
+
+    if trim_unvoiced_edges:
+        voiced_idx = np.flatnonzero(voiced_flag)
+        if len(voiced_idx) > 0:
+            start = int(voiced_idx[0])
+            end = int(voiced_idx[-1]) + 1
+            time = time[start:end]
+            f0 = f0[start:end]
+            voiced_flag = voiced_flag[start:end]
+
     return time, f0, voiced_flag
 
 
-def _detect_pitch_crepe(audio_path, fmin=80, fmax=400):
-    """Pitch detection with torchcrepe (CREPE model)."""
-    import numpy as np
-    import librosa
-    import torch
-    import torchcrepe
-
-    target_sr = 16000
-    hop_length = 160  # 10 ms at 16 kHz
-
-    y, _ = librosa.load(str(audio_path), sr=target_sr, mono=True)
-    audio = torch.tensor(y, dtype=torch.float32).unsqueeze(0)
-
-    pitch = torchcrepe.predict(
-        audio,
-        target_sr,
-        hop_length,
-        fmin,
-        fmax,
-        model="full",
-        batch_size=512,
-        device="cpu",
-    )
-    f0 = pitch.squeeze(0).cpu().numpy()
-    voiced_flag = np.isfinite(f0) & (f0 > 0)
-    time = np.arange(len(f0), dtype=float) * (hop_length / target_sr)
-    f0[~voiced_flag] = np.nan
-    return time, f0, voiced_flag
-
-
-def detect_pitch(audio_path, fmin=80, fmax=400, backend="crepe"):
+def detect_pitch(
+    audio_path,
+    fmin=80,
+    fmax=400,
+    backend="librosa",
+    trim_silence=True,
+    trim_top_db=30,
+    trim_unvoiced_edges=True,
+):
     """
     Detects pitch (fundamental frequency) from an audio file using Librosa's YIN algorithm.
     
@@ -61,7 +62,10 @@ def detect_pitch(audio_path, fmin=80, fmax=400, backend="crepe"):
         audio_path: Path to audio file (.wav, .mp3, etc.)
         fmin: Minimum frequency to search for (default: 80 Hz - typical for male voices)
         fmax: Maximum frequency to search for (default: 400 Hz - typical for speech)
-        backend: Pitch backend ('crepe' or 'librosa')
+        backend: Pitch backend ('librosa')
+        trim_silence: Whether to trim leading/trailing silence before pitch extraction
+        trim_top_db: Silence threshold in dB for trimming (lower = less aggressive)
+        trim_unvoiced_edges: Whether to cut leading/trailing unvoiced frames after pitch detection
         
     Returns:
         Dictionary with:
@@ -83,20 +87,20 @@ def detect_pitch(audio_path, fmin=80, fmax=400, backend="crepe"):
 
     if backend == "librosa":
         try:
-            time, f0, voiced_flag = _detect_pitch_librosa(audio_path, fmin=fmin, fmax=fmax)
+            time, f0, voiced_flag = _detect_pitch_librosa(
+                audio_path,
+                fmin=fmin,
+                fmax=fmax,
+                trim_silence=trim_silence,
+                trim_top_db=trim_top_db,
+                trim_unvoiced_edges=trim_unvoiced_edges,
+            )
         except ImportError as exc:
             raise ImportError(
                 "Missing librosa backend dependencies. Install with: pip install librosa"
             ) from exc
-    elif backend == "crepe":
-        try:
-            time, f0, voiced_flag = _detect_pitch_crepe(audio_path, fmin=fmin, fmax=fmax)
-        except ImportError as exc:
-            raise ImportError(
-                "Missing CREPE backend dependencies. Install with: pip install torchcrepe torchaudio"
-            ) from exc
     else:
-        raise ValueError("Unsupported backend. Use 'crepe' or 'librosa'.")
+        raise ValueError("Unsupported backend. Use 'librosa'.")
     
     # Filter out unvoiced frames (voiced_flag == False)
     voiced_frequencies = f0[voiced_flag]
@@ -185,32 +189,31 @@ def save_pitch_plot(
     if np.sum(valid) == 0:
         raise ValueError("No voiced pitch values found to plot.")
 
-    smoothed = frequency.copy()
+    frame_idx = np.arange(len(frequency), dtype=float)
+    voiced_idx = frame_idx[valid]
+    voiced_freq = frequency[valid]
+
+    # Build a continuous contour by interpolating through unvoiced gaps.
+    continuous = np.interp(frame_idx, voiced_idx, voiced_freq)
+
+    smoothed = continuous.copy()
     if smooth_seconds > 0 and len(time) > 1:
         frame_step = float(np.median(np.diff(time)))
         window = int(round(smooth_seconds / frame_step))
         if window > 1:
-            kernel = np.ones(window, dtype=float)
-            values = np.where(valid, frequency, 0.0)
-            weights = valid.astype(float)
-            smooth_values = np.convolve(values, kernel, mode="same")
-            smooth_weights = np.convolve(weights, kernel, mode="same")
-            smoothed = smooth_values / np.maximum(smooth_weights, 1e-12)
-            smoothed[~valid] = np.nan
+            if window % 2 == 0:
+                window += 1
+            kernel = np.ones(window, dtype=float) / window
+            pad = window // 2
+            padded = np.pad(continuous, (pad, pad), mode="edge")
+            smoothed = np.convolve(padded, kernel, mode="valid")
 
     plt.figure(figsize=(10, 4.2))
     plt.plot(
         time,
-        frequency,
-        linewidth=1.0,
-        alpha=0.45,
-        label="Raw F0",
-    )
-    plt.plot(
-        time,
         smoothed,
-        linewidth=2.0,
-        label="Smoothed F0",
+        linewidth=2.2,
+        label="Pitch (interpolated + smoothed)",
     )
     plt.xlabel("Time (s)")
     plt.ylabel("Pitch (Hz)")
@@ -230,7 +233,10 @@ def main():
     parser.add_argument("audio_path", help="Path to audio file, e.g. recordings/recording_20260325_123456.wav")
     parser.add_argument("--fmin", type=float, default=80.0, help="Minimum frequency in Hz (default: 80)")
     parser.add_argument("--fmax", type=float, default=400.0, help="Maximum frequency in Hz (default: 400)")
-    parser.add_argument("--backend", choices=["crepe", "librosa"], default="crepe", help="Pitch backend to use")
+    parser.add_argument("--backend", choices=["librosa"], default="librosa", help="Pitch backend to use")
+    parser.add_argument("--no-trim-silence", action="store_true", help="Disable trimming of leading/trailing silence")
+    parser.add_argument("--trim-top-db", type=float, default=30.0, help="Silence threshold in dB for trim (default: 30)")
+    parser.add_argument("--no-trim-unvoiced-edges", action="store_true", help="Keep leading/trailing unvoiced frames")
     parser.add_argument("--plot-out", type=str, default=None, help="Optional output path for pitch plot PNG")
     parser.add_argument("--smooth-sec", type=float, default=0.2, help="Smoothing window in seconds (set 0 for raw only)")
     args = parser.parse_args()
@@ -240,7 +246,15 @@ def main():
         print(f"Error: audio file not found: {audio_path}")
         raise SystemExit(1)
 
-    pitch_data = detect_pitch(audio_path, fmin=args.fmin, fmax=args.fmax, backend=args.backend)
+    pitch_data = detect_pitch(
+        audio_path,
+        fmin=args.fmin,
+        fmax=args.fmax,
+        backend=args.backend,
+        trim_silence=not args.no_trim_silence,
+        trim_top_db=args.trim_top_db,
+        trim_unvoiced_edges=not args.no_trim_unvoiced_edges,
+    )
     print(format_pitch_stats(pitch_data))
 
     if args.plot_out:
@@ -255,3 +269,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Run by doing this in terminal:
+# python.exe pitch_detector.py recordings/recording_20260401_145518.wav --backend librosa

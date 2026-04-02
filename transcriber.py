@@ -14,6 +14,8 @@ from datetime import datetime
 SAMPLE_RATE = 16000  # Whisper works best at 16kHz
 DURATION = 30  # Record for 30 seconds by default
 OUTPUT_DIR = Path("recordings")
+TRIM_SILENCE = True
+TRIM_TOP_DB = 30  # Lower means less aggressive trimming
 
 # Create output directory if it doesn't exist
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -68,6 +70,40 @@ def save_audio(audio, filename=None, sample_rate=SAMPLE_RATE):
     sf.write(filepath, audio, sample_rate)
     print(f"Audio saved to {filepath}")
     return filepath
+
+
+def trim_audio_edges(audio, sample_rate=SAMPLE_RATE, top_db=TRIM_TOP_DB):
+    """
+    Trims leading and trailing silence using librosa's energy-based trimming.
+
+    Args:
+        audio: numpy array with audio data
+        sample_rate: sample rate in Hz
+        top_db: silence threshold in dB relative to signal reference
+
+    Returns:
+        (trimmed_audio, seconds_removed_start, seconds_removed_end)
+    """
+    try:
+        import librosa
+    except ImportError as exc:
+        raise ImportError(
+            "Missing librosa dependency. Install with: pip install librosa"
+        ) from exc
+
+    mono_audio = np.asarray(audio).squeeze()
+    if mono_audio.ndim != 1:
+        raise ValueError("Expected mono audio array for trimming.")
+
+    if len(mono_audio) == 0:
+        return mono_audio, 0.0, 0.0
+
+    trimmed, (start_idx, end_idx) = librosa.effects.trim(mono_audio, top_db=top_db)
+
+    removed_start = start_idx / float(sample_rate)
+    removed_end = (len(mono_audio) - end_idx) / float(sample_rate)
+
+    return trimmed.astype(np.float32), removed_start, removed_end
 
 
 def save_transcript(transcript, audio_path, timestamp):
@@ -152,6 +188,17 @@ def main():
         print("No audio recorded")
         return
 
+    if TRIM_SILENCE:
+        trimmed_audio, cut_start, cut_end = trim_audio_edges(audio, top_db=TRIM_TOP_DB)
+        if len(trimmed_audio) > 0:
+            audio = trimmed_audio
+            print(
+                f"Trimmed silence: start {cut_start:.2f}s, end {cut_end:.2f}s "
+                f"(kept {len(audio) / SAMPLE_RATE:.2f}s)"
+            )
+        else:
+            print("Silence trimming removed all audio; keeping original recording.")
+
     # Use one shared timestamp so audio and transcript filenames match.
     recording_time = datetime.now()
     
@@ -171,9 +218,9 @@ def main():
     
     # Save transcript with matching timestamp and a date/time headline.
     transcript_path = save_transcript(transcript, audio_path, recording_time)
-    print(f"\n✓ Transcript saved to {transcript_path}")
-    print(f"✓ Audio saved to {audio_path}")
-    print(f"\n📁 All files stored in: {OUTPUT_DIR.absolute()}")
+    print(f"\nTranscript saved to {transcript_path}")
+    print(f"Audio saved to {audio_path}")
+    print(f"\nAll files stored in: {OUTPUT_DIR.absolute()}")
 
 
 if __name__ == "__main__":
