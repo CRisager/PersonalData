@@ -1,0 +1,11 @@
+{
+  "transcript_path": "recordings\\transcript_20260408_135629.txt",
+  "dataset_path": "FillerWordData.json",
+  "total_words": 34,
+  "total_filler_words": 3,
+  "filler_percentage": 8.82,
+  "filler_word_counts": {
+    "uh": 2,
+    "um": 1
+  }
+}

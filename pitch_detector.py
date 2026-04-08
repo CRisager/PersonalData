@@ -7,6 +7,20 @@ from pathlib import Path
 import argparse
 
 
+PRAAT_SEMITONE_REFERENCE_HZ = 100.0
+
+
+def _hz_to_praat_semitones(frequencies, reference_hz=PRAAT_SEMITONE_REFERENCE_HZ):
+    """Convert Hertz values to Praat-style semitones relative to a reference frequency."""
+    import numpy as np
+
+    frequencies = np.asarray(frequencies, dtype=float)
+    semitones = np.full_like(frequencies, np.nan, dtype=float)
+    valid = np.isfinite(frequencies) & (frequencies > 0)
+    semitones[valid] = 12.0 * np.log2(frequencies[valid] / float(reference_hz))
+    return semitones
+
+
 def _detect_pitch_librosa(
     audio_path,
     fmin=80,
@@ -71,9 +85,16 @@ def detect_pitch(
         Dictionary with:
             - time: time in seconds for each frame
             - frequency: detected frequency in Hz for each frame
-            - mean_pitch: mean pitch in Hz (excluding unvoiced frames)
-            - min_pitch: minimum pitch in Hz
-            - max_pitch: maximum pitch in Hz
+                - pitch_semitones: detected pitch in Praat-style semitones relative to the file median
+            - mean_pitch: mean pitch in Hz (legacy)
+            - min_pitch: minimum pitch in Hz (legacy)
+            - max_pitch: maximum pitch in Hz (legacy)
+            - median_pitch: median pitch in Hz used as the semitone reference
+                - mean_pitch_semitones: mean pitch in Praat-style semitones relative to the file median
+                - min_pitch_semitones: minimum pitch in Praat-style semitones relative to the file median
+                - max_pitch_semitones: maximum pitch in Praat-style semitones relative to the file median
+            - median_pitch_semitones: median pitch in semitones, which should be near 0
+                - pitch_reference_hz: median voiced frequency used as the semitone reference
             - voiced_ratio: proportion of voiced frames (0-1)
     """
     try:
@@ -104,29 +125,47 @@ def detect_pitch(
     
     # Filter out unvoiced frames (voiced_flag == False)
     voiced_frequencies = f0[voiced_flag]
+    valid_frequencies = voiced_frequencies[np.isfinite(voiced_frequencies) & (voiced_frequencies > 0)]
+    if len(valid_frequencies) > 0:
+        pitch_reference_hz = float(np.median(valid_frequencies))
+    else:
+        pitch_reference_hz = PRAAT_SEMITONE_REFERENCE_HZ
+
+    pitch_semitones = _hz_to_praat_semitones(f0, reference_hz=pitch_reference_hz)
     
     # Calculate statistics
-    if len(voiced_frequencies) > 0:
-        # Remove NaN values if any exist
-        valid_frequencies = voiced_frequencies[~np.isnan(voiced_frequencies)]
-        if len(valid_frequencies) > 0:
-            mean_pitch = float(np.mean(valid_frequencies))
-            min_pitch = float(np.min(valid_frequencies))
-            max_pitch = float(np.max(valid_frequencies))
-        else:
-            mean_pitch = min_pitch = max_pitch = 0.0
+    if len(valid_frequencies) > 0:
+        median_pitch = float(np.median(valid_frequencies))
+        mean_pitch = float(np.mean(valid_frequencies))
+        min_pitch = float(np.min(valid_frequencies))
+        max_pitch = float(np.max(valid_frequencies))
+        valid_semitones = _hz_to_praat_semitones(valid_frequencies, reference_hz=pitch_reference_hz)
+        median_pitch_semitones = float(np.median(valid_semitones))
+        mean_pitch_semitones = float(np.mean(valid_semitones))
+        min_pitch_semitones = float(np.min(valid_semitones))
+        max_pitch_semitones = float(np.max(valid_semitones))
         voiced_ratio = float(np.sum(voiced_flag) / len(f0))
     else:
+        median_pitch = 0.0
         mean_pitch = min_pitch = max_pitch = 0.0
+        median_pitch_semitones = 0.0
+        mean_pitch_semitones = min_pitch_semitones = max_pitch_semitones = 0.0
         voiced_ratio = 0.0
     
     result = {
         "time": time,
         "frequency": f0,
+        "pitch_semitones": pitch_semitones,
         "voiced_flag": voiced_flag,
         "mean_pitch": mean_pitch,
         "min_pitch": min_pitch,
         "max_pitch": max_pitch,
+        "median_pitch": median_pitch,
+        "mean_pitch_semitones": mean_pitch_semitones,
+        "min_pitch_semitones": min_pitch_semitones,
+        "max_pitch_semitones": max_pitch_semitones,
+        "median_pitch_semitones": median_pitch_semitones,
+        "pitch_reference_hz": pitch_reference_hz,
         "voiced_ratio": voiced_ratio,
     }
     
@@ -143,11 +182,27 @@ def format_pitch_stats(pitch_data):
     Returns:
         Formatted string with pitch statistics
     """
+    reference_hz = pitch_data.get("pitch_reference_hz", PRAAT_SEMITONE_REFERENCE_HZ)
+    median_pitch = pitch_data.get("median_pitch")
+    median_pitch_semitones = pitch_data.get("median_pitch_semitones")
+    mean_pitch_semitones = pitch_data.get("mean_pitch_semitones")
+    min_pitch_semitones = pitch_data.get("min_pitch_semitones")
+    max_pitch_semitones = pitch_data.get("max_pitch_semitones")
+
+    if mean_pitch_semitones is None and "mean_pitch" in pitch_data:
+        mean_pitch_semitones = float(_hz_to_praat_semitones([pitch_data["mean_pitch"]])[0])
+    if min_pitch_semitones is None and "min_pitch" in pitch_data:
+        min_pitch_semitones = float(_hz_to_praat_semitones([pitch_data["min_pitch"]])[0])
+    if max_pitch_semitones is None and "max_pitch" in pitch_data:
+        max_pitch_semitones = float(_hz_to_praat_semitones([pitch_data["max_pitch"]])[0])
+
     output = "Pitch Analysis:\n"
     output += "-" * 50 + "\n"
-    output += f"Mean Pitch: {pitch_data['mean_pitch']:.2f} Hz\n"
-    output += f"Min Pitch:  {pitch_data['min_pitch']:.2f} Hz\n"
-    output += f"Max Pitch:  {pitch_data['max_pitch']:.2f} Hz\n"
+    output += f"Reference Hz: {reference_hz:.2f} (median voiced pitch)\n"
+    output += f"Median Pitch: {median_pitch:.2f} Hz / {median_pitch_semitones:.2f} st\n"
+    output += f"Mean Pitch: {mean_pitch_semitones:.2f} st\n"
+    output += f"Min Pitch:  {min_pitch_semitones:.2f} st\n"
+    output += f"Max Pitch:  {max_pitch_semitones:.2f} st\n"
     output += f"Voiced Ratio: {pitch_data['voiced_ratio']*100:.1f}%\n"
     
     return output
@@ -183,18 +238,20 @@ def save_pitch_plot(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     time = pitch_data["time"]
-    frequency = pitch_data["frequency"]
+    semitones = pitch_data.get("pitch_semitones")
+    if semitones is None:
+        semitones = _hz_to_praat_semitones(pitch_data["frequency"])
 
-    valid = ~np.isnan(frequency)
+    valid = np.isfinite(semitones)
     if np.sum(valid) == 0:
         raise ValueError("No voiced pitch values found to plot.")
 
-    frame_idx = np.arange(len(frequency), dtype=float)
+    frame_idx = np.arange(len(semitones), dtype=float)
     voiced_idx = frame_idx[valid]
-    voiced_freq = frequency[valid]
+    voiced_semitones = semitones[valid]
 
     # Build a continuous contour by interpolating through unvoiced gaps.
-    continuous = np.interp(frame_idx, voiced_idx, voiced_freq)
+    continuous = np.interp(frame_idx, voiced_idx, voiced_semitones)
 
     smoothed = continuous.copy()
     if smooth_seconds > 0 and len(time) > 1:
@@ -213,11 +270,12 @@ def save_pitch_plot(
         time,
         smoothed,
         linewidth=2.2,
-        label="Pitch (interpolated + smoothed)",
+        label="Pitch (semitones re median voiced Hz, interpolated + smoothed)",
     )
+    plt.axhline(0.0, color="0.35", linestyle="--", linewidth=1.0, alpha=0.8, label="Median reference (0 st)")
     plt.xlabel("Time (s)")
-    plt.ylabel("Pitch (Hz)")
-    plt.title(title or "Pitch Over Time")
+    plt.ylabel("Pitch (semitones re median voiced Hz)")
+    plt.title(title or "Pitch Over Time (Praat-style semitones)")
     plt.grid(True, alpha=0.3)
     plt.legend(loc="best")
     plt.tight_layout()
