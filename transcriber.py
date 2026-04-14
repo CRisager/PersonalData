@@ -13,12 +13,17 @@ from datetime import datetime
 # Configuration
 SAMPLE_RATE = 16000  # Whisper works best at 16kHz
 DURATION = 30  # Record for 30 seconds by default
-OUTPUT_DIR = Path("recordings")
+AUDIO_OUTPUT_DIR = Path("Sound_recordings")
+TRANSCRIPT_OUTPUT_DIR = Path("Transcripts")
+
+# Backward-compatible alias used by other modules for audio outputs.
+OUTPUT_DIR = AUDIO_OUTPUT_DIR
 TRIM_SILENCE = True
 TRIM_TOP_DB = 30  # Lower means less aggressive trimming
 
-# Create output directory if it doesn't exist
-OUTPUT_DIR.mkdir(exist_ok=True)
+# Create output directories if they don't exist
+AUDIO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+TRANSCRIPT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def record_audio(duration=DURATION, sample_rate=SAMPLE_RATE):
@@ -66,7 +71,7 @@ def save_audio(audio, filename=None, sample_rate=SAMPLE_RATE):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"recording_{timestamp}.wav"
     
-    filepath = OUTPUT_DIR / filename
+    filepath = AUDIO_OUTPUT_DIR / filename
     sf.write(filepath, audio, sample_rate)
     print(f"Audio saved to {filepath}")
     return filepath
@@ -120,7 +125,7 @@ def save_transcript(transcript, audio_path, timestamp):
     """
     timestamp_for_file = timestamp.strftime("%Y%m%d_%H%M%S")
     timestamp_for_header = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-    transcript_path = OUTPUT_DIR / f"transcript_{timestamp_for_file}.txt"
+    transcript_path = TRANSCRIPT_OUTPUT_DIR / f"transcript_{timestamp_for_file}.txt"
 
     with open(transcript_path, "w", encoding="utf-8") as f:
         f.write(f"Transcription - {timestamp_for_header}\n")
@@ -220,7 +225,8 @@ def main():
     transcript_path = save_transcript(transcript, audio_path, recording_time)
     print(f"\nTranscript saved to {transcript_path}")
     print(f"Audio saved to {audio_path}")
-    print(f"\nAll files stored in: {OUTPUT_DIR.absolute()}")
+    print(f"\nAudio files stored in: {AUDIO_OUTPUT_DIR.absolute()}")
+    print(f"Transcript files stored in: {TRANSCRIPT_OUTPUT_DIR.absolute()}")
 
 
 if __name__ == "__main__":

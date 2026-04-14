@@ -166,7 +166,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"transcript",
 		nargs="?",
-		default="recordings/transcript_20260401_143433.txt",
+		default="Transcripts/transcript_20260401_143433.txt",
 		help="Path to transcript .txt file",
 	)
 	parser.add_argument(
@@ -183,7 +183,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--output",
 		default=None,
-		help="Optional output file path. Defaults to recordings/filler_analysis_<timestamp>.<ext>",
+		help="Optional output file path. Defaults to Filler_analysis/filler_analysis_<timestamp>.<ext>",
 	)
 	return parser.parse_args()
 
@@ -224,7 +224,7 @@ def main() -> None:
 
 	results = analyze_transcript(transcript_path, dataset_path)
 	timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-	default_output = Path("recordings") / f"filler_analysis_{timestamp}.{args.output_format}"
+	default_output = Path("Filler_analysis") / f"filler_analysis_{timestamp}.{args.output_format}"
 	output_path = Path(args.output) if args.output else default_output
 
 	export_results(results, output_path, args.output_format)
@@ -244,4 +244,4 @@ if __name__ == "__main__":
 	main()
 
 # Run by doing this in terminal:
-# python.exe FillerWords.py recordings/transcript_20260401_143433.txt 
+# python.exe FillerWords.py Transcripts/transcript_20260401_143433.txt 
