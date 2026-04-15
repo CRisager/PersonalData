@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List
 
 
-DEFAULT_FILLERS = ["uh", "um", "you know", "like"]
+DEFAULT_FILLERS = ["uh", "um", "uhm", "ahem", "you know", "like", "I guess", "so", "right", "well", "What's it called", "I mean", "kind of", "sort of", "yeah", "I don't know"]
 DEFAULT_DATASET_PATH = Path(__file__).resolve().with_name("FillerWordData.json")
 
 
@@ -57,7 +57,7 @@ def _extract_from_description(description: str) -> List[str]:
 			if phrase:
 				found.add(phrase)
 
-	for label in ["uh", "um", "you know", "like"]:
+	for label in DEFAULT_FILLERS:
 		if re.search(rf"\b{re.escape(label)}\b", text, flags=re.IGNORECASE):
 			found.add(label)
 
@@ -76,6 +76,10 @@ def load_filler_words(dataset_path: Path) -> List[str]:
 		if phrase and phrase not in {"other", "none", "words", "repetitions"}:
 			if 1 <= len(phrase.split()) <= 3:
 				candidates.add(phrase)
+
+	# Always include built-in defaults, then add any dataset-specific fillers.
+	for default_filler in DEFAULT_FILLERS:
+		add_value(default_filler)
 
 	if isinstance(data, list):
 		for item in data:
@@ -108,9 +112,6 @@ def load_filler_words(dataset_path: Path) -> List[str]:
 		if isinstance(description, str):
 			for phrase in _extract_from_description(description):
 				add_value(phrase)
-
-	if not candidates:
-		candidates.update(DEFAULT_FILLERS)
 
 	return sorted(candidates)
 
