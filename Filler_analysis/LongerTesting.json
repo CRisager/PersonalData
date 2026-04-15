@@ -1,0 +1,15 @@
+{
+  "transcript_path": "Transcripts\\LongerTesting.txt",
+  "dataset_path": "C:\\Users\\cheli\\OneDrive\\Dokumenter\\GitHub\\PersonalData\\PersonalData\\backend\\FillerWordData.json",
+  "total_words": 109,
+  "total_filler_words": 9,
+  "filler_percentage": 8.26,
+  "filler_word_counts": {
+    "i guess": 1,
+    "i mean": 2,
+    "kind of": 1,
+    "like": 2,
+    "yeah": 1,
+    "you know": 2
+  }
+}

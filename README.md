@@ -18,6 +18,23 @@ python main.py --serve --port 8000
 
 Then open `http://127.0.0.1:8000` in your browser.
 
+## UI-only design mode
+
+When you want to tweak frontend UI without microphone access or backend processing, open with:
+
+```bash
+http://127.0.0.1:8000/?uiPreview=1
+```
+
+In this mode, recording and processing are mocked so you can click through Record -> Confirm -> Learn while styling.
+
+To jump directly to one screen while designing, add `previewScreen`:
+
+- Learn screen: `http://127.0.0.1:8000/?uiPreview=1&previewScreen=learn`
+- Confirm screen: `http://127.0.0.1:8000/?uiPreview=1&previewScreen=confirm`
+- Record screen: `http://127.0.0.1:8000/?uiPreview=1&previewScreen=record`
+- Idle screen: `http://127.0.0.1:8000/?uiPreview=1&previewScreen=idle`
+
 Optional:
 
 - Change host: `python main.py --serve --host 0.0.0.0 --port 8000`

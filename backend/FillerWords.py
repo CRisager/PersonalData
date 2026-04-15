@@ -12,7 +12,14 @@ from pathlib import Path
 from typing import Dict, Iterable, List
 
 
-DEFAULT_FILLERS = ["uh", "um", "uhm", "ahem", "you know", "like", "I guess", "so", "right", "well", "What's it called", "I mean", "kind of", "sort of", "yeah", "I don't know"]
+DEFAULT_FILLERS = ["uh", "um", "uhm", "ahem", "you know", "like", "I guess", 
+                   "so", "right", "well", "What's it called", "I mean", "kind of", 
+                   "sort of", "yeah", "I don't know", "Blah", "hmm", "er", "ah", 
+                   "mm", "huh", "uh-huh", "um-hum", "you see", "kinda", "sorta",
+                   "I think", "you know what I mean", "you know what I'm saying", 
+                   "literally", "basically", "actually", "seriously", "like I said",
+                   "I mean", "ok", "okay", "or something", "and stuff", "erm",
+                   "and things", "and all that", "and everything"]
 DEFAULT_DATASET_PATH = Path(__file__).resolve().with_name("FillerWordData.json")
 
 

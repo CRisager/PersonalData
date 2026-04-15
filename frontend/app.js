@@ -19,6 +19,7 @@ window.addEventListener("resize", fitPhoneToViewport);
 const idleView = document.getElementById("idleView");
 const recordingView = document.getElementById("recordingView");
 const confirmView = document.getElementById("confirmView");
+const learnView = document.getElementById("learnView");
 const pageTitle = document.getElementById("pageTitle");
 const startButton = document.getElementById("startButton");
 const pauseButton = document.getElementById("pauseButton");
@@ -35,10 +36,20 @@ const stepConfirm = document.getElementById("stepConfirm");
 const stepLearn = document.getElementById("stepLearn");
 const audioPreview = document.getElementById("audioPreview");
 const recordingName = document.getElementById("recordingName");
+const categorySelect = document.getElementById("categorySelect");
+const learnDonut = document.getElementById("learnDonut");
+const learnWordList = document.getElementById("learnWordList");
+const learnSummaryText = document.getElementById("learnSummaryText");
+const learnMessage = document.getElementById("learnMessage");
+const learnFillerLabel = document.getElementById("learnFillerLabel");
+const learnPreviousLabel = document.getElementById("learnPreviousLabel");
+const learnNextButton = document.getElementById("learnNextButton");
 const previewWaveform = document.getElementById("previewWaveform");
 const previewCtx = previewWaveform.getContext("2d");
 const waveformCanvas = document.getElementById("waveform");
 const canvasCtx = waveformCanvas.getContext("2d");
+const textMeasureCanvas = document.createElement("canvas");
+const textMeasureCtx = textMeasureCanvas.getContext("2d");
 
 let stream;
 let mediaRecorder;
@@ -63,14 +74,129 @@ const PEAK_CAPTURE_INTERVAL_MS = 45;
 const MAX_STORED_PEAKS = 50000;
 const WAVEFORM_BAR_SPACING = 3;
 const API_BASE_STORAGE_KEY = "speechApiBase";
+const FILLER_HISTORY_STORAGE_KEY = "fillerPercentageHistory";
+const HISTORY_DECAY = 0.15;
+const queryParams = new URLSearchParams(window.location.search);
+const UI_PREVIEW_MODE = queryParams.get("uiPreview") === "1"
+	|| queryParams.get("design") === "1"
+	|| window.self !== window.top;
+const PREVIEW_SCREEN = (queryParams.get("previewScreen") || queryParams.get("screen") || "").toLowerCase();
+
+function createSilentWavBlob(durationMs = 2200, sampleRate = 16000) {
+	const channels = 1;
+	const bytesPerSample = 2;
+	const sampleCount = Math.max(1, Math.floor((durationMs / 1000) * sampleRate));
+	const dataSize = sampleCount * bytesPerSample;
+	const buffer = new ArrayBuffer(44 + dataSize);
+	const view = new DataView(buffer);
+
+	function writeAscii(offset, text) {
+		for (let i = 0; i < text.length; i += 1) {
+			view.setUint8(offset + i, text.charCodeAt(i));
+		}
+	}
+
+	writeAscii(0, "RIFF");
+	view.setUint32(4, 36 + dataSize, true);
+	writeAscii(8, "WAVE");
+	writeAscii(12, "fmt ");
+	view.setUint32(16, 16, true);
+	view.setUint16(20, 1, true);
+	view.setUint16(22, channels, true);
+	view.setUint32(24, sampleRate, true);
+	view.setUint32(28, sampleRate * channels * bytesPerSample, true);
+	view.setUint16(32, channels * bytesPerSample, true);
+	view.setUint16(34, bytesPerSample * 8, true);
+	writeAscii(36, "data");
+	view.setUint32(40, dataSize, true);
+
+	return new Blob([buffer], { type: "audio/wav" });
+}
+
+function generatePreviewPeaks() {
+	const points = [];
+	for (let i = 0; i < 180; i += 1) {
+		const t = i / 8;
+		const base = 0.16 + Math.abs(Math.sin(t) * 0.4);
+		const variation = (Math.sin(i * 1.7) + 1) * 0.09;
+		points.push(Math.min(0.95, base + variation));
+	}
+	return points;
+}
+
+function buildPreviewResult() {
+	return {
+		wpm: 127.4,
+		filler_metrics: {
+			total_words: 181,
+			total_filler_words: 27,
+			filler_percentage: 14.9,
+			filler_word_counts: {
+				uhm: 8,
+				so: 7,
+				like: 6,
+				uh: 4,
+				well: 2,
+			},
+		},
+	};
+}
+
+function seedPreviewRecordingState() {
+	const fakeDurationMs = 2600;
+	setPreviewAudio(createSilentWavBlob(fakeDurationMs));
+	recordedDurationMs = fakeDurationMs;
+	recordedChunks = [];
+	waveformPeaks = generatePreviewPeaks();
+	lastPeakCaptureAt = 0;
+	renderPreviewWaveform();
+}
+
+function initializePreviewScreen() {
+	if (!UI_PREVIEW_MODE) {
+		return;
+	}
+
+	const target = ["idle", "record", "confirm", "learn"].includes(PREVIEW_SCREEN)
+		? PREVIEW_SCREEN
+		: "idle";
+
+	if (target === "idle") {
+		showIdleView();
+		showPreviewModeHint();
+		return;
+	}
+
+	seedPreviewRecordingState();
+
+	if (target === "record") {
+		recordingStartMs = Date.now();
+		elapsedBeforePauseMs = 0;
+		isPaused = false;
+		clearInterval(timerIntervalId);
+		timerIntervalId = setInterval(updateTimer, 200);
+		updateTimer();
+		showRecordingView();
+		drawWaveform();
+		showPreviewModeHint();
+		return;
+	}
+
+	showConfirmView();
+
+	if (target === "learn") {
+		showLearnView(buildPreviewResult());
+	}
+
+	showPreviewModeHint();
+}
 
 function normalizeApiBase(value) {
 	return String(value || "").trim().replace(/\/+$/, "");
 }
 
 function resolveApiBase() {
-	const params = new URLSearchParams(window.location.search);
-	const queryBase = normalizeApiBase(params.get("apiBase"));
+	const queryBase = normalizeApiBase(queryParams.get("apiBase"));
 	if (queryBase) {
 		localStorage.setItem(API_BASE_STORAGE_KEY, queryBase);
 		return queryBase;
@@ -93,6 +219,13 @@ const API_BASE = resolveApiBase();
 function buildApiUrl(path) {
 	const safePath = String(path || "").startsWith("/") ? path : `/${path}`;
 	return `${API_BASE}${safePath}`;
+}
+
+function showPreviewModeHint() {
+	if (!UI_PREVIEW_MODE) {
+		return;
+	}
+	setSaveStatus("UI preview mode active: microphone and backend processing are mocked.");
 }
 
 function setStep(stepName) {
@@ -384,12 +517,14 @@ function showRecordingView() {
 	idleView.hidden = true;
 	recordingView.hidden = false;
 	confirmView.hidden = true;
+	learnView.hidden = true;
 	pageTitle.textContent = "New recording";
 	setStep("record");
 	document.body.classList.add("is-recording");
 }
 
 function showIdleView() {
+	learnView.hidden = true;
 	confirmView.hidden = true;
 	recordingView.hidden = true;
 	idleView.hidden = false;
@@ -402,10 +537,242 @@ function showConfirmView() {
 	idleView.hidden = true;
 	recordingView.hidden = true;
 	confirmView.hidden = false;
+	learnView.hidden = true;
 	syncHeaderWithName();
 	renderPreviewWaveform();
 	previewTime.textContent = formatTime(recordedDurationMs);
 	setStep("confirm");
+	document.body.classList.remove("is-recording");
+}
+
+function loadFillerHistory() {
+	try {
+		const parsed = JSON.parse(localStorage.getItem(FILLER_HISTORY_STORAGE_KEY) || "[]");
+		if (!Array.isArray(parsed)) {
+			return [];
+		}
+		return parsed.filter((value) => typeof value === "number" && Number.isFinite(value));
+	} catch (_error) {
+		return [];
+	}
+}
+
+function storeFillerHistory(history) {
+	localStorage.setItem(FILLER_HISTORY_STORAGE_KEY, JSON.stringify(history));
+}
+
+function calculateRecencyWeightedAverage(values, decay = HISTORY_DECAY) {
+	if (!Array.isArray(values) || values.length === 0) {
+		return NaN;
+	}
+
+	const safeDecay = Number.isFinite(decay) && decay > 0 ? decay : 0.65;
+	let weightedSum = 0;
+	let totalWeight = 0;
+	let age = 0;
+
+	for (let i = values.length - 1; i >= 0; i -= 1) {
+		const value = Number(values[i]);
+		if (!Number.isFinite(value)) {
+			continue;
+		}
+
+		const weight = safeDecay ** age;
+		weightedSum += value * weight;
+		totalWeight += weight;
+		age += 1;
+	}
+
+	if (totalWeight <= 0) {
+		return NaN;
+	}
+
+	return weightedSum / totalWeight;
+}
+
+function sentenceCase(value) {
+	if (!value) {
+		return "";
+	}
+	const trimmed = String(value).trim();
+	if (!trimmed) {
+		return "";
+	}
+	return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function measureTextWidth(text, font = '400 14px "IBM Plex Mono"') {
+	if (!textMeasureCtx) {
+		return String(text || "").length * 8;
+	}
+
+	textMeasureCtx.font = font;
+	return textMeasureCtx.measureText(String(text || "")).width;
+}
+
+function getSortedFillerPairs(fillerCounts) {
+	if (!fillerCounts || typeof fillerCounts !== "object") {
+		return [];
+	}
+
+	return Object.entries(fillerCounts)
+		.filter(([, count]) => Number.isFinite(Number(count)) && Number(count) > 0)
+		.sort((a, b) => Number(b[1]) - Number(a[1]));
+}
+
+function buildLearnMessage(currentPercentage, previousAverage) {
+	if (!Number.isFinite(currentPercentage) || currentPercentage <= 0) {
+		return "No filler words detected this session. Great control!";
+	}
+
+	if (!Number.isFinite(previousAverage)) {
+		return `You used ${currentPercentage.toFixed(1)}% filler words this session.`;
+	}
+
+	if (currentPercentage < previousAverage) {
+		return "You used less than your normal amount of filler words. Keep going!";
+	}
+
+	if (currentPercentage > previousAverage) {
+		return "You used more filler words than your average. Keep practicing.";
+	}
+
+	return "You matched your previous filler-word average.";
+}
+
+function renderLearnWordList(sortedPairs) {
+	if (!sortedPairs.length) {
+		learnWordList.innerHTML = '<p class="learn-word-empty">No filler words were detected in this recording.</p>';
+		return;
+	}
+
+	const topFive = sortedPairs.slice(0, 5);
+	const maxBarWidth = 170;
+	const gapBetweenNameAndCount = 8;
+	const horizontalPadding = 12; // 8px left + 4px right
+	const longestLabelWidth = topFive.reduce((currentMax, [word]) => {
+		const labelWidth = measureTextWidth(sentenceCase(word));
+		return Math.max(currentMax, labelWidth);
+	}, 0);
+	const widestCountWidth = topFive.reduce((currentMax, [, count]) => {
+		const countWidth = measureTextWidth(String(Number(count)));
+		return Math.max(currentMax, countWidth);
+	}, 0);
+
+	const minTextBoxWidth = longestLabelWidth + 6;
+	const minBarWidth = minTextBoxWidth + widestCountWidth + gapBetweenNameAndCount + horizontalPadding;
+	const highestCount = Number(topFive[0][1]) || 1;
+
+	function getBarWidth(countValue) {
+		const count = Math.max(1, Number(countValue) || 1);
+		if (highestCount <= 1) {
+			return minBarWidth;
+		}
+
+		const ratio = (count - 1) / (highestCount - 1);
+		return minBarWidth + (ratio * (maxBarWidth - minBarWidth));
+	}
+
+	learnWordList.innerHTML = topFive
+		.map(([word, count]) => {
+			const barWidth = getBarWidth(count).toFixed(2);
+			const labelText = sentenceCase(word);
+			const finalWidth = Math.max(Number(barWidth), minBarWidth);
+			return `
+				<div class="learn-word-item" style="width:${finalWidth.toFixed(2)}px;" role="listitem" aria-label="${labelText} ${Number(count)}">
+					<span class="name">${labelText}</span>
+					<span class="count">${Number(count)}</span>
+				</div>
+			`;
+		})
+		.join("");
+}
+
+function positionLearnPercentageLabels(fillerPercentage, previousAveragePercentage) {
+	const size = learnDonut.clientWidth || 128.294;
+	const center = size / 2;
+	const radius = center;
+
+	function polarFromTopClockwise(degrees, radialDistance) {
+		const theta = (degrees * Math.PI) / 180;
+		return {
+			x: center + (Math.sin(theta) * radialDistance),
+			y: center - (Math.cos(theta) * radialDistance),
+		};
+	}
+
+	function clamp(value, min, max) {
+		return Math.max(min, Math.min(max, value));
+	}
+
+	if (learnFillerLabel.textContent) {
+		const fillerMidDegrees = (fillerPercentage / 100) * 180;
+		const fillerRadius = fillerPercentage < 10 ? radius * 0.76 : radius * 0.67;
+		const fillerPoint = polarFromTopClockwise(fillerMidDegrees, fillerRadius);
+		learnFillerLabel.style.left = `${clamp(fillerPoint.x, 14, size - 14)}px`;
+		learnFillerLabel.style.top = `${clamp(fillerPoint.y, 14, size - 14)}px`;
+		learnFillerLabel.style.display = "block";
+	} else {
+		learnFillerLabel.style.display = "none";
+	}
+
+	if (learnPreviousLabel.textContent) {
+		const previousDegrees = (previousAveragePercentage / 100) * 360;
+		const dottedLineLength = radius * 0.84;
+		const lineEnd = polarFromTopClockwise(previousDegrees, dottedLineLength);
+		const previousY = lineEnd.y + 11;
+		learnPreviousLabel.style.left = `${clamp(lineEnd.x, 14, size - 14)}px`;
+		learnPreviousLabel.style.top = `${clamp(previousY, 14, size - 10)}px`;
+		learnPreviousLabel.style.display = "block";
+	} else {
+		learnPreviousLabel.style.display = "none";
+	}
+}
+
+function showLearnView(result) {
+	const fillerMetrics = result && result.filler_metrics ? result.filler_metrics : {};
+	const fillerPercentageRaw = Number(fillerMetrics.filler_percentage);
+	const fillerPercentage = Number.isFinite(fillerPercentageRaw)
+		? Math.max(0, Math.min(100, fillerPercentageRaw))
+		: 0;
+	const nonFillerPercentage = Math.max(0, 100 - fillerPercentage);
+	const fillerAngle = `${(fillerPercentage / 100) * 360}deg`;
+	const sortedPairs = getSortedFillerPairs(fillerMetrics.filler_word_counts);
+
+	const history = loadFillerHistory();
+	const previousAverage = calculateRecencyWeightedAverage(history, HISTORY_DECAY);
+	storeFillerHistory([...history, fillerPercentage]);
+	const previousAverageClamped = Number.isFinite(previousAverage)
+		? Math.max(0, Math.min(100, previousAverage))
+		: 0;
+	const previousAngle = `${(previousAverageClamped / 100) * 360}deg`;
+
+	learnDonut.style.setProperty("--filler-angle", fillerAngle);
+	learnDonut.style.setProperty("--previous-angle", previousAngle);
+	learnDonut.setAttribute(
+		"aria-label",
+		`Filler words ${fillerPercentage.toFixed(1)} percent, previous average ${previousAverageClamped.toFixed(1)} percent, non-filler words ${nonFillerPercentage.toFixed(1)} percent`
+	);
+
+	learnFillerLabel.textContent = fillerPercentage >= 1 ? `${Math.round(fillerPercentage)}%` : "";
+	learnPreviousLabel.textContent = previousAverageClamped >= 1 ? `${Math.round(previousAverageClamped)}%` : "";
+	positionLearnPercentageLabels(fillerPercentage, previousAverageClamped);
+
+	learnSummaryText.textContent = Number.isFinite(previousAverage)
+		? `Below, you can see your filler-word percentage for this session, along with your previous average.\nSee your top 5 filler words and how often you said them`
+		: "Below, you can see your filler-word percentage for this session.\nSee your top 5 filler words and how often you said them";
+
+	renderLearnWordList(sortedPairs);
+	learnMessage.textContent = buildLearnMessage(fillerPercentage, previousAverage);
+
+	const categoryName = categorySelect.value ? categorySelect.value.trim() : "Class presentation";
+	pageTitle.textContent = categoryName || "Class presentation";
+
+	idleView.hidden = true;
+	recordingView.hidden = true;
+	confirmView.hidden = true;
+	learnView.hidden = false;
+	setStep("learn");
 	document.body.classList.remove("is-recording");
 }
 
@@ -433,10 +800,31 @@ function stopTracks() {
 async function startRecording() {
 	setSaveStatus("");
 
+	if (UI_PREVIEW_MODE) {
+		recordedChunks = [];
+		recordedDurationMs = 0;
+		setPreviewAudio(createSilentWavBlob(2600));
+		waveformPeaks = generatePreviewPeaks();
+		lastPeakCaptureAt = 0;
+		recordingStartMs = Date.now();
+		elapsedBeforePauseMs = 0;
+		isPaused = false;
+		clearInterval(timerIntervalId);
+		timerIntervalId = setInterval(updateTimer, 200);
+		updateTimer();
+		showRecordingView();
+		drawWaveform();
+		return;
+	}
+
 	try {
 		stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 	} catch (error) {
-		alert("Microphone access is required to record.");
+		if (UI_PREVIEW_MODE) {
+			setSaveStatus("Microphone unavailable in this preview. Use ?uiPreview=1 for design mode.", true);
+		} else {
+			alert("Microphone access is required to record.");
+		}
 		return;
 	}
 
@@ -477,6 +865,37 @@ async function startRecording() {
 }
 
 async function togglePause() {
+	if (UI_PREVIEW_MODE && recordingView.hidden === false) {
+		if (!isPaused) {
+			isPaused = true;
+			elapsedBeforePauseMs += Date.now() - recordingStartMs;
+			recordingStartMs = 0;
+			clearInterval(timerIntervalId);
+			pauseButton.setAttribute("aria-label", "Resume recording");
+			pauseButton.title = "Resume";
+			pauseButton.innerHTML = `
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M8 5.5L18 12L8 18.5a2 2 0 0 1-3-1.7V7.2a2 2 0 0 1 3-1.7z" fill="#ffffff"></path>
+				</svg>
+			`;
+			return;
+		}
+
+		isPaused = false;
+		recordingStartMs = Date.now();
+		clearInterval(timerIntervalId);
+		timerIntervalId = setInterval(updateTimer, 200);
+		pauseButton.setAttribute("aria-label", "Pause recording");
+		pauseButton.title = "Pause";
+		pauseButton.innerHTML = `
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<rect x="6" y="4" width="4.2" height="16" rx="2" fill="#ffffff"></rect>
+				<rect x="13.8" y="4" width="4.2" height="16" rx="2" fill="#ffffff"></rect>
+			</svg>
+		`;
+		return;
+	}
+
 	if (!stream) {
 		return;
 	}
@@ -528,6 +947,21 @@ async function togglePause() {
 }
 
 function stopRecording() {
+	if (UI_PREVIEW_MODE && !stream) {
+		recordedDurationMs = getFinalElapsedMs();
+		clearInterval(timerIntervalId);
+		cancelAnimationFrame(animationFrameId);
+		recordingStartMs = 0;
+		elapsedBeforePauseMs = 0;
+		isPaused = false;
+		recordingIndex += 1;
+		recordingName.value = `Recording_${recordingIndex}`;
+		showConfirmView();
+		resetUiAfterStop();
+		showPreviewModeHint();
+		return;
+	}
+
 	if (!stream) {
 		return;
 	}
@@ -562,15 +996,33 @@ function stopRecording() {
 }
 
 function clearPreviewAndReturnToIdle() {
+	clearInterval(timerIntervalId);
+	cancelAnimationFrame(animationFrameId);
+	recordingStartMs = 0;
+	elapsedBeforePauseMs = 0;
+	waveformPeaks = [];
 	setPreviewAudio(null);
 	recordedChunks = [];
 	recordedDurationMs = 0;
 	setSaveStatus("");
+	resetUiAfterStop();
 	showIdleView();
 }
 
 async function saveRecording() {
 	if (isSaving) {
+		return;
+	}
+
+	if (UI_PREVIEW_MODE) {
+		setSavingState(true);
+		setSaveStatus("Processing preview data...");
+		try {
+			showLearnView(buildPreviewResult());
+			setSaveStatus("");
+		} finally {
+			setSavingState(false);
+		}
 		return;
 	}
 
@@ -580,7 +1032,7 @@ async function saveRecording() {
 	}
 
 	setSavingState(true);
-	setSaveStatus("Uploading and processing recording...");
+	setSaveStatus("Processing recording...");
 
 	try {
 		const wavBlob = await convertBlobToWav(recordedAudioBlob);
@@ -588,7 +1040,7 @@ async function saveRecording() {
 		const formData = new FormData();
 		formData.append("audio", wavBlob, `${safeName}.wav`);
 		formData.append("recording_name", recordingName.value.trim() || "Recording");
-		formData.append("category", document.getElementById("categorySelect").value || "");
+		formData.append("category", categorySelect.value || "");
 
 		const response = await fetch(buildApiUrl("/api/process-recording"), {
 			method: "POST",
@@ -608,10 +1060,7 @@ async function saveRecording() {
 		}
 
 		const result = payload.result || {};
-		const wpmText = Number.isFinite(result.wpm) ? result.wpm.toFixed(2) : "n/a";
-		setStep("learn");
-		setSaveStatus(`Saved and processed. WPM: ${wpmText}`);
-		clearPreviewAndReturnToIdle();
+		showLearnView(result);
 	} catch (error) {
 		if (error instanceof TypeError && /fetch/i.test(error.message || "")) {
 			setSaveStatus(
@@ -645,6 +1094,7 @@ pauseButton.addEventListener("click", togglePause);
 stopButton.addEventListener("click", stopRecording);
 deleteButton.addEventListener("click", clearPreviewAndReturnToIdle);
 saveButton.addEventListener("click", saveRecording);
+learnNextButton.addEventListener("click", clearPreviewAndReturnToIdle);
 recordingName.addEventListener("input", syncHeaderWithName);
 editNameButton.addEventListener("click", () => recordingName.focus());
 previewPlayButton.addEventListener("click", togglePreviewPlayback);
@@ -659,3 +1109,4 @@ audioPreview.addEventListener("loadedmetadata", () => {
 
 drawIdleWaveformLine();
 renderPreviewWaveform();
+initializePreviewScreen();

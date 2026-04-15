@@ -7,6 +7,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
 	<link rel="stylesheet" href="frontend/styles.css" />
 </head>
 <body>
@@ -112,6 +113,45 @@
 							</button>
 						</div>
 						<p class="save-status" id="saveStatus" aria-live="polite"></p>
+					</div>
+
+					<div class="learn-view" id="learnView" hidden>
+						<div class="learn-progress" aria-label="Learning progress">
+							<div class="learn-progress-dot active">1</div>
+							<div class="learn-progress-dot">2</div>
+							<div class="learn-progress-dot">3</div>
+						</div>
+
+						<div class="learn-heading-row">
+							<h2 class="learn-heading">Filler words</h2>
+							<span class="learn-info" aria-hidden="true">i</span>
+						</div>
+						<p class="learn-subtext" id="learnSummaryText"></p>
+
+						<div class="learn-legend" aria-label="Chart legend">
+							<div class="learn-legend-item"><span class="swatch filler"></span>Filler words for this session</div>
+							<div class="learn-legend-item"><span class="swatch nonfiller"></span>Non-filler words</div>
+							<div class="learn-legend-item"><span class="swatch previous"></span>Previous filler word average</div>
+						</div>
+
+						<div class="learn-chart-wrap" id="learnChartWrap" aria-label="Filler-word ratio chart">
+							<div class="learn-donut" id="learnDonut" role="img" aria-label="Filler words ratio">
+								<span class="learn-pct-label filler" id="learnFillerLabel"></span>
+								<span class="learn-pct-label previous" id="learnPreviousLabel"></span>
+							</div>
+							<div class="learn-word-list" id="learnWordList"></div>
+						</div>
+
+						<p class="learn-message" id="learnMessage"></p>
+
+						<div class="learn-actions">
+							<button class="learn-next-btn" id="learnNextButton" aria-label="Start a new recording" title="Start a new recording">
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<line x1="5" y1="12" x2="19" y2="12" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" />
+									<path d="M13 6l6 6-6 6" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</button>
+						</div>
 					</div>
 				</section>
 

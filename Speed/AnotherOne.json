@@ -1,0 +1,10 @@
+{
+  "recording_name": "AnotherOne",
+  "category": "School presentation",
+  "audio_path": "Sound_recordings\\AnotherOne.wav",
+  "transcript_path": "Transcripts\\AnotherOne.txt",
+  "duration_seconds": 32.768,
+  "total_words": 73,
+  "wpm": 133.67,
+  "created_at": "2026-04-15T15:02:19"
+}
