@@ -13,6 +13,7 @@ from typing import Dict, Iterable, List
 
 
 DEFAULT_FILLERS = ["uh", "um", "you know", "like"]
+DEFAULT_DATASET_PATH = Path(__file__).resolve().with_name("FillerWordData.json")
 
 
 def normalize_phrase(value: str) -> str:
@@ -171,7 +172,7 @@ def parse_args() -> argparse.Namespace:
 	)
 	parser.add_argument(
 		"--dataset",
-		default="FillerWordData.json",
+		default=str(DEFAULT_DATASET_PATH),
 		help="Path to filler-word JSON dataset",
 	)
 	parser.add_argument(

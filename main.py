@@ -24,6 +24,8 @@ DEFAULT_TRIM_SILENCE = True
 DEFAULT_TRIM_TOP_DB = 30
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
+BACKEND_DIR = Path(__file__).resolve().parent / "backend"
+DEFAULT_DATASET_PATH = BACKEND_DIR / "FillerWordData.json"
 SPEED_OUTPUT_DIR = Path("Speed")
 SPEED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -53,7 +55,7 @@ def parse_args() -> argparse.Namespace:
 		help="Optional custom path for pitch plot (used only with --plot-pitch)",
 	)
 
-	parser.add_argument("--dataset", default="FillerWordData.json", help="Path to filler-word dataset JSON")
+	parser.add_argument("--dataset", default=str(DEFAULT_DATASET_PATH), help="Path to filler-word dataset JSON")
 	parser.add_argument(
 		"--filler-output-format",
 		choices=["json", "csv"],
@@ -89,10 +91,10 @@ def process_audio_array(
 	try:
 		import numpy as np
 
-		from FillerWords import analyze_transcript, export_results
-		from pitch_detector import detect_pitch, format_pitch_stats, save_pitch_plot
-		from speed import calculate_wpm, count_words, get_wav_duration_seconds
-		from transcriber import (
+		from backend.FillerWords import analyze_transcript, export_results
+		from backend.pitch_detector import detect_pitch, format_pitch_stats, save_pitch_plot
+		from backend.speed import calculate_wpm, count_words, get_wav_duration_seconds
+		from backend.transcriber import (
 			AUDIO_OUTPUT_DIR,
 			TRANSCRIPT_OUTPUT_DIR,
 			save_audio,
@@ -369,7 +371,7 @@ def main() -> None:
 		return
 
 	try:
-		from transcriber import record_audio
+		from backend.transcriber import record_audio
 	except ImportError as exc:
 		raise SystemExit(f"Could not import recording module: {exc}")
 
