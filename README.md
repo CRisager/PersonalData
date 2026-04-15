@@ -4,13 +4,43 @@
 
 The browser UI uses a Flask API for uploading and processing recordings, so `python -m http.server 8000` will only serve the page and will not handle the save/process action.
 
-Install the dependencies and start the local app with:
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start the local app:
 
 ```bash
 python main.py --serve --port 8000
 ```
 
 Then open `http://127.0.0.1:8000` in your browser.
+
+Optional:
+
+- Change host: `python main.py --serve --host 0.0.0.0 --port 8000`
+- Health check: `http://127.0.0.1:8000/api/health`
+
+## Output naming
+
+When you save a recording from the UI, the recording name is used as the filename stem for generated files.
+
+Example:
+
+- Input name: `Class Presentation 1`
+- Sanitized stem: `Class_Presentation_1`
+
+Generated outputs use that stem:
+
+- `Sound_recordings/Class_Presentation_1.wav`
+- `Transcripts/Class_Presentation_1.txt`
+- `Filler_analysis/Class_Presentation_1.json` (or `.csv`)
+- `Speed/Class_Presentation_1.json`
+- `Sound_recordings/Class_Presentation_1_pitch.png` (if pitch plotting is enabled)
+
+If a file with the same stem already exists, a numeric suffix is added automatically to avoid overwrite (for example `Class_Presentation_1_2`).
 
 ## Synthetic data for plots
 
