@@ -1,0 +1,10 @@
+{
+  "recording_name": "Test1",
+  "category": "School presentation",
+  "audio_path": "Sound_recordings\\Test1_20260415_095848.wav",
+  "transcript_path": "Transcripts\\transcript_20260415_095848.txt",
+  "duration_seconds": 29.696,
+  "total_words": 73,
+  "wpm": 147.49,
+  "created_at": "2026-04-15T09:58:48"
+}

@@ -1,5 +1,17 @@
 # PersonalData
 
+## Run locally
+
+The browser UI uses a Flask API for uploading and processing recordings, so `python -m http.server 8000` will only serve the page and will not handle the save/process action.
+
+Install the dependencies and start the local app with:
+
+```bash
+python main.py --serve --port 8000
+```
+
+Then open `http://127.0.0.1:8000` in your browser.
+
 ## Synthetic data for plots
 
 To generate fake speech-analysis data that matches the plots in this project, run:

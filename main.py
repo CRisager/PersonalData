@@ -94,6 +94,7 @@ def process_audio_array(
 		from speed import calculate_wpm, count_words, get_wav_duration_seconds
 		from transcriber import (
 			AUDIO_OUTPUT_DIR,
+			TRANSCRIPT_OUTPUT_DIR,
 			save_audio,
 			save_transcript,
 			transcribe_audio,
@@ -132,15 +133,35 @@ def process_audio_array(
 	# Use one timestamp so generated files are tied to the same run.
 	run_time = datetime.now()
 	timestamp = run_time.strftime("%Y%m%d_%H%M%S")
-	name_prefix = sanitize_filename_component(recording_name)
+	preferred_stem = sanitize_filename_component(recording_name, fallback=f"recording_{timestamp}")
+
+	def select_available_output_stem(stem: str) -> str:
+		"""Pick a shared filename stem that does not overwrite existing outputs."""
+		index = 1
+		while True:
+			candidate = stem if index == 1 else f"{stem}_{index}"
+			conflicts = [
+				AUDIO_OUTPUT_DIR / f"{candidate}.wav",
+				TRANSCRIPT_OUTPUT_DIR / f"{candidate}.txt",
+				Path("Filler_analysis") / f"{candidate}.{args.filler_output_format}",
+				SPEED_OUTPUT_DIR / f"{candidate}.json",
+			]
+			if args.plot_pitch and args.pitch_plot_output is None:
+				conflicts.append(AUDIO_OUTPUT_DIR / f"{candidate}_pitch.png")
+
+			if all(not path.exists() for path in conflicts):
+				return candidate
+			index += 1
+
+	output_stem = select_available_output_stem(preferred_stem)
 
 	# 2) Save audio
-	audio_filename = f"{name_prefix}_{timestamp}.wav"
+	audio_filename = f"{output_stem}.wav"
 	audio_path = save_audio(audio, filename=audio_filename, sample_rate=args.sample_rate)
 
 	# 3) Transcribe
 	transcript = transcribe_audio(audio_path, model_size=args.model)
-	transcript_path = save_transcript(transcript, audio_path, run_time)
+	transcript_path = save_transcript(transcript, audio_path, run_time, filename_stem=output_stem)
 
 	# 4) Pitch detection
 	pitch_data = detect_pitch(
@@ -155,7 +176,7 @@ def process_audio_array(
 
 	pitch_plot_path = None
 	if args.plot_pitch:
-		pitch_plot_path = Path(args.pitch_plot_output) if args.pitch_plot_output else AUDIO_OUTPUT_DIR / f"pitch_{timestamp}.png"
+		pitch_plot_path = Path(args.pitch_plot_output) if args.pitch_plot_output else AUDIO_OUTPUT_DIR / f"{output_stem}_pitch.png"
 		save_pitch_plot(
 			pitch_data,
 			pitch_plot_path,
@@ -174,14 +195,14 @@ def process_audio_array(
 	filler_output = (
 		Path(args.filler_output)
 		if args.filler_output
-		else Path("Filler_analysis") / f"filler_analysis_{timestamp}.{args.filler_output_format}"
+		else Path("Filler_analysis") / f"{output_stem}.{args.filler_output_format}"
 	)
 	export_results(filler_results, filler_output, args.filler_output_format)
 
 	# 7) Save speed metrics
-	speed_output = SPEED_OUTPUT_DIR / f"speed_{timestamp}.json"
+	speed_output = SPEED_OUTPUT_DIR / f"{output_stem}.json"
 	speed_metrics = {
-		"recording_name": recording_name or audio_path.stem,
+		"recording_name": recording_name or output_stem,
 		"category": category or "",
 		"audio_path": str(audio_path),
 		"transcript_path": str(transcript_path),
@@ -369,4 +390,4 @@ if __name__ == "__main__":
 	main()
 
 # Run by doing this in terminal:
-# python.exe main.py --duration 20 --model base.en --plot-pitch --filler-output-format json
+# python main.py --serve --port 8000

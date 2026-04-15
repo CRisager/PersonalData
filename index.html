@@ -1259,7 +1259,7 @@
 			} catch (error) {
 				if (error instanceof TypeError && /fetch/i.test(error.message || "")) {
 					setSaveStatus(
-						`Could not reach API at ${API_BASE}. Start server with \"python main.py --serve\" or open with ?apiBase=http://<host>:8000`,
+						`Could not reach API at ${API_BASE}. Start the local app with "python main.py --serve --port 8000" instead of "python -m http.server 8000", or open with ?apiBase=http://<host>:<port>`,
 						true
 					);
 					return;

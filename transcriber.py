@@ -3,7 +3,6 @@ Simple Whisper Transcription App
 Records audio from microphone and transcribes it to text
 """
 
-import sounddevice as sd
 import soundfile as sf
 import whisper
 import numpy as np
@@ -37,6 +36,13 @@ def record_audio(duration=DURATION, sample_rate=SAMPLE_RATE):
     Returns:
         numpy array with audio data
     """
+    try:
+        import sounddevice as sd
+    except ImportError as exc:
+        raise ImportError(
+            "Missing sounddevice dependency. Install with: pip install sounddevice"
+        ) from exc
+
     print(f"Recording for {duration} seconds... Press Ctrl+C to stop early")
     
     try:
@@ -111,7 +117,7 @@ def trim_audio_edges(audio, sample_rate=SAMPLE_RATE, top_db=TRIM_TOP_DB):
     return trimmed.astype(np.float32), removed_start, removed_end
 
 
-def save_transcript(transcript, audio_path, timestamp):
+def save_transcript(transcript, audio_path, timestamp, filename_stem=None):
     """
     Saves transcript text to a TXT file with a date/time headline.
 
@@ -119,13 +125,17 @@ def save_transcript(transcript, audio_path, timestamp):
         transcript: Transcribed text
         audio_path: Path to related audio recording
         timestamp: datetime object used for naming and metadata
+        filename_stem: Optional filename stem (without extension)
 
     Returns:
         Path to saved transcript file
     """
-    timestamp_for_file = timestamp.strftime("%Y%m%d_%H%M%S")
     timestamp_for_header = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-    transcript_path = TRANSCRIPT_OUTPUT_DIR / f"transcript_{timestamp_for_file}.txt"
+    if filename_stem:
+        transcript_path = TRANSCRIPT_OUTPUT_DIR / f"{filename_stem}.txt"
+    else:
+        timestamp_for_file = timestamp.strftime("%Y%m%d_%H%M%S")
+        transcript_path = TRANSCRIPT_OUTPUT_DIR / f"transcript_{timestamp_for_file}.txt"
 
     with open(transcript_path, "w", encoding="utf-8") as f:
         f.write(f"Transcription - {timestamp_for_header}\n")
