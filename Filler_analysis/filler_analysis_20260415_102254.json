@@ -1,0 +1,11 @@
+{
+  "transcript_path": "Transcripts\\transcript_20260415_102254.txt",
+  "dataset_path": "FillerWordData.json",
+  "total_words": 90,
+  "total_filler_words": 2,
+  "filler_percentage": 2.22,
+  "filler_word_counts": {
+    "like": 1,
+    "um": 1
+  }
+}
