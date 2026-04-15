@@ -27,17 +27,38 @@
 
 		body {
 			margin: 0;
-			min-height: 100vh;
+			height: 100dvh;
 			display: grid;
 			place-items: center;
 			background: #1f1f1f;
 			font-family: "Space Mono", "Courier New", Courier, monospace;
 			color: var(--ink);
+			overflow: hidden;
+		}
+
+		.phone-stage {
+			--phone-w: 404;
+			--phone-h: 873.7301635742188;
+			--viewport-pad: 16px;
+			--phone-scale: 1;
+			position: relative;
+			width: calc(var(--phone-w) * var(--phone-scale) * 1px);
+			height: calc(var(--phone-h) * var(--phone-scale) * 1px);
+		}
+
+		.phone-shell {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: calc(var(--phone-w) * 1px);
+			height: calc(var(--phone-h) * 1px);
+			transform-origin: top left;
+			transform: scale(var(--phone-scale));
 		}
 
 		.phone {
-			width: 404px;
-			height: 873.7301635742188px;
+			width: 100%;
+			height: 100%;
 			border: 1.603px solid var(--line);
 			border-radius: 48.095237731933594px;
 			background: var(--bg-phone);
@@ -482,65 +503,12 @@
 			height: 36.873016357421875px;
 		}
 
-		@media (max-width: 480px) {
-			.phone {
-				width: min(404px, 94vw);
-				height: auto;
-				aspect-ratio: 404 / 873.7301635742188;
-				border-radius: 42px;
-			}
-
-			.header {
-				height: 56px;
-				font-size: 21px;
-			}
-
-			.step {
-				font-size: 13px;
-			}
-
-			.prompt,
-			.recording-title {
-				font-size: 18px;
-			}
-
-			.confirm-title {
-				font-size: 18px;
-			}
-
-			.preview-time {
-				font-size: 13px;
-				min-width: 46px;
-			}
-
-			.name-input,
-			.category-select {
-				height: 54px;
-				font-size: 18px;
-			}
-
-			.category-select {
-				height: 40px;
-				font-size: 15px;
-			}
-
-			.category-label {
-				font-size: 13px;
-			}
-
-			.timer {
-				font-size: 46px;
-			}
-
-			.play-button,
-			.control-btn {
-				width: 52px;
-			}
-		}
 	</style>
 </head>
 <body>
-	<main class="phone" aria-label="New recording screen">
+	<div class="phone-stage" id="phoneStage">
+		<div class="phone-shell">
+			<main class="phone" aria-label="New recording screen">
 		<header class="header" id="pageTitle">New recording</header>
 
 		<section class="steps" aria-label="Workflow steps">
@@ -671,8 +639,28 @@
 				<path d="M3 8h6.5l1.7 2H21v8.3A1.7 1.7 0 0 1 19.3 20H4.7A1.7 1.7 0 0 1 3 18.3z" />
 			</svg>
 		</nav>
-	</main>
+			</main>
+		</div>
+	</div>
 	<script>
+		const phoneStage = document.getElementById("phoneStage");
+		const BASE_PHONE_WIDTH = 404;
+		const BASE_PHONE_HEIGHT = 873.7301635742188;
+		const VIEWPORT_PAD = 16;
+
+		function fitPhoneToViewport() {
+			const availableWidth = Math.max(window.innerWidth - VIEWPORT_PAD * 2, 1);
+			const availableHeight = Math.max(window.innerHeight - VIEWPORT_PAD * 2, 1);
+			const widthScale = availableWidth / BASE_PHONE_WIDTH;
+			const heightScale = availableHeight / BASE_PHONE_HEIGHT;
+			const scale = Math.min(1, widthScale, heightScale);
+
+			phoneStage.style.setProperty("--phone-scale", String(scale));
+		}
+
+		fitPhoneToViewport();
+		window.addEventListener("resize", fitPhoneToViewport);
+
 		const idleView = document.getElementById("idleView");
 		const recordingView = document.getElementById("recordingView");
 		const confirmView = document.getElementById("confirmView");
@@ -719,6 +707,38 @@
 		const PEAK_CAPTURE_INTERVAL_MS = 45;
 		const MAX_STORED_PEAKS = 50000;
 		const WAVEFORM_BAR_SPACING = 3;
+		const API_BASE_STORAGE_KEY = "speechApiBase";
+
+		function normalizeApiBase(value) {
+			return String(value || "").trim().replace(/\/+$/, "");
+		}
+
+		function resolveApiBase() {
+			const params = new URLSearchParams(window.location.search);
+			const queryBase = normalizeApiBase(params.get("apiBase"));
+			if (queryBase) {
+				localStorage.setItem(API_BASE_STORAGE_KEY, queryBase);
+				return queryBase;
+			}
+
+			const storedBase = normalizeApiBase(localStorage.getItem(API_BASE_STORAGE_KEY));
+			if (storedBase) {
+				return storedBase;
+			}
+
+			if (window.location.protocol === "file:") {
+				return "http://127.0.0.1:8000";
+			}
+
+			return window.location.origin;
+		}
+
+		const API_BASE = resolveApiBase();
+
+		function buildApiUrl(path) {
+			const safePath = String(path || "").startsWith("/") ? path : `/${path}`;
+			return `${API_BASE}${safePath}`;
+		}
 
 		function setStep(stepName) {
 			stepRecord.classList.toggle("active", stepName === "record");
@@ -1214,7 +1234,7 @@
 				formData.append("recording_name", recordingName.value.trim() || "Recording");
 				formData.append("category", document.getElementById("categorySelect").value || "");
 
-				const response = await fetch("/api/process-recording", {
+				const response = await fetch(buildApiUrl("/api/process-recording"), {
 					method: "POST",
 					body: formData,
 				});
@@ -1237,6 +1257,14 @@
 				setSaveStatus(`Saved and processed. WPM: ${wpmText}`);
 				clearPreviewAndReturnToIdle();
 			} catch (error) {
+				if (error instanceof TypeError && /fetch/i.test(error.message || "")) {
+					setSaveStatus(
+						`Could not reach API at ${API_BASE}. Start server with \"python main.py --serve\" or open with ?apiBase=http://<host>:8000`,
+						true
+					);
+					return;
+				}
+
 				setSaveStatus(error.message || "Could not save and process recording.", true);
 			} finally {
 				setSavingState(false);

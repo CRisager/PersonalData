@@ -281,6 +281,13 @@ def create_app(args: argparse.Namespace):
 
 	app = Flask(__name__, static_folder=".", static_url_path="")
 
+	@app.after_request
+	def add_cors_headers(response):
+		response.headers["Access-Control-Allow-Origin"] = "*"
+		response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+		response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+		return response
+
 	@app.get("/")
 	def index():
 		return send_from_directory(Path(".").resolve(), "index.html")
@@ -289,8 +296,11 @@ def create_app(args: argparse.Namespace):
 	def health():
 		return jsonify({"ok": True})
 
-	@app.post("/api/process-recording")
+	@app.route("/api/process-recording", methods=["POST", "OPTIONS"])
 	def process_recording():
+		if request.method == "OPTIONS":
+			return ("", 204)
+
 		uploaded = request.files.get("audio")
 		if uploaded is None or uploaded.filename is None:
 			return jsonify({"error": "Missing audio file in form-data field 'audio'."}), 400
