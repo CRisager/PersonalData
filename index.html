@@ -145,7 +145,87 @@
 						<p class="learn-message" id="learnMessage"></p>
 
 						<div class="learn-actions">
-							<button class="learn-next-btn" id="learnNextButton" aria-label="Start a new recording" title="Start a new recording">
+							<button class="learn-next-btn" id="learnNextButton" aria-label="Next step" title="Next step">
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<line x1="5" y1="12" x2="19" y2="12" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" />
+									<path d="M13 6l6 6-6 6" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</button>
+						</div>
+					</div>
+
+					<div class="learn-view-step-2" id="learnViewStep2" hidden>
+						<div class="learn-progress" aria-label="Learning progress">
+							<div class="learn-progress-dot">1</div>
+							<div class="learn-progress-dot active">2</div>
+							<div class="learn-progress-dot">3</div>
+						</div>
+
+						<div class="learn-heading-row">
+							<h2 class="learn-heading">Pace</h2>
+							<span class="learn-info" aria-hidden="true">i</span>
+						</div>
+						<p class="learn-subtext" id="learnPaceSubtext"></p>
+
+<div class="pace-legend-wrap" aria-label="Pace chart legend">
+						<div class="pace-legend-item"><span class="pace-legend-swatch current"></span>Pace for this session</div>
+						<div class="pace-legend-item"><span class="pace-legend-swatch recommended"></span>Recommended range</div>
+						<div class="pace-legend-item"><span class="pace-legend-swatch previous"></span>Previous average pace</div>
+					</div>
+
+					<div class="pace-gauge-wrap" id="paceGaugeWrap" aria-label="Pace gauge">
+						<div class="pace-gauge-container">
+							<svg class="pace-gauge-svg" viewBox="0 -40 546 340" preserveAspectRatio="xMidYMid meet" aria-label="White half-circle base gauge">
+								<!-- Radius: 273px. Thickness: 25% of radius = 68.25px. -->
+								<path
+									d="M 0 273 A 273 273 0 0 1 546 273 L 477.75 273 A 204.75 204.75 0 0 0 68.25 273 Z"
+									fill="#FFF"
+								/>
+								<!-- Overlay annulus segment: 65deg to 115deg -->
+								<path
+									id="paceRecommendedRangeArc"
+									d=""
+									fill="#DFF0EE"
+								/>
+								<polygon
+									id="paceCurrentTriangle"
+									points="257 273 289 273 273 0"
+									fill="#20AEA0"
+								/>
+								<circle cx="273" cy="273" r="16" fill="#20AEA0" />
+								<line
+									id="paceHistoricAverageLine"
+									x1="0"
+									y1="0"
+									x2="0"
+									y2="0"
+									stroke="#7f7f7f"
+									stroke-width="2"
+									stroke-dasharray="5 4"
+									stroke-linecap="round"
+								/>
+								<text id="paceBandLabelFast" class="pace-band-label">fast</text>
+								<text id="paceBandLabel150" class="pace-band-label">150</text>
+								<text id="paceBandLabel125" class="pace-band-label">125</text>
+								<text id="paceBandLabel100" class="pace-band-label">100</text>
+								<text id="paceBandLabelSlow" class="pace-band-label">slow</text>
+							</svg>
+						</div>
+						<div class="pace-value-display">
+							<div class="pace-value" id="paceValue">0</div>
+							<div class="pace-value-label">words/min</div>
+						</div>
+						</div>
+						<p class="pace-message" id="paceMessage"></p>
+
+						<div class="learn-actions-dual" id="learnActionsDual">
+							<button class="learn-nav-btn back" id="learnBackButton" aria-label="Previous step" title="Previous step">
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<line x1="5" y1="12" x2="19" y2="12" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" />
+									<path d="M11 6l-6 6 6 6" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</button>
+							<button class="learn-nav-btn forward" id="learnStep2NextButton" aria-label="Next step" title="Next step">
 								<svg viewBox="0 0 24 24" aria-hidden="true">
 									<line x1="5" y1="12" x2="19" y2="12" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" />
 									<path d="M13 6l6 6-6 6" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />

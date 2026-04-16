@@ -101,7 +101,7 @@ body {
 .step:nth-child(2) {
 	width: 149.1px;
 	margin-left: -22px;
-	clip-path: polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 12% 50%);
+	clip-path: polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%, 20% 50%);
 	padding-left: 16px;
 	padding-right: 10px;
 	z-index: 2;
@@ -110,7 +110,7 @@ body {
 .step:nth-child(3) {
 	flex: 1;
 	margin-left: -22px;
-	clip-path: polygon(12% 50%, 0 0, 100% 0, 100% 100%, 0 100%);
+	clip-path: polygon(20% 50%, 0 0, 100% 0, 100% 100%, 0 100%);
 	padding-left: 18px;
 	z-index: 3;
 }
@@ -132,7 +132,8 @@ body {
 .idle-view,
 .recording-view,
 .confirm-view,
-.learn-view {
+.learn-view,
+.learn-view-step-2 {
 	flex: 1;
 	width: 100%;
 	display: flex;
@@ -771,4 +772,196 @@ body {
 .record-icon {
 	width: 36.873016357421875px;
 	height: 36.873016357421875px;
+}
+
+.learn-view-step-2 {
+	flex: 1;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	padding-top: 13px;
+	gap: 0;
+}
+
+.pace-gauge-wrap {
+	width: min(100%, 336px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+	margin-top: 18px;
+}
+
+.pace-legend-wrap {
+	width: min(100%, 336px);
+	color: #666563;
+	font-family: "IBM Plex Mono";
+	font-size: 10px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: normal;
+	letter-spacing: -0.5px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	margin-bottom: 5px;
+}
+
+.pace-legend-item {
+	display: grid;
+	grid-template-columns: 12px auto;
+	column-gap: 6px;
+	align-items: center;
+}
+
+.pace-legend-item .pace-legend-swatch {
+	width: 9px;
+	height: 9px;
+	border-radius: 1px;
+	flex: none;
+	justify-self: start;
+}
+
+.pace-legend-item .pace-legend-swatch.current {
+	background: #1e8486;
+}
+
+.pace-legend-item .pace-legend-swatch.recommended {
+	background: #DFF0EE;
+	border: 1px solid #d0d0d0;
+}
+
+.pace-legend-item .pace-legend-swatch.previous {
+	width: 12px;
+	height: 0;
+	border-top: 2px dotted #1f8f93;
+	border-radius: 0;
+	background: transparent;
+}
+
+.pace-gauge-container {
+	position: relative;
+	width: 100%;
+	max-width: 280px;
+	height: auto;
+	overflow: visible;
+}
+
+.pace-gauge-svg {
+	width: 100%;
+	height: auto;
+	display: block;
+	overflow: visible;
+}
+
+.pace-band-label {
+	fill: #122a2c;
+	text-anchor: middle;
+	font-family: "IBM Plex Mono";
+	font-size: 24.768px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+}
+
+.pace-value-display {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+}
+
+.pace-value {
+	font-family: "IBM Plex Mono";
+	font-size: 28px;
+	font-weight: 600;
+	color: #1e8486;
+	line-height: 1;
+}
+
+.pace-value-label {
+	font-size: 12px;
+	color: #666563;
+	font-weight: 400;
+	font-family: "IBM Plex Mono";
+}
+
+.pace-range {
+	margin: 0;
+	width: 293px;
+	text-align: center;
+	font-family: "IBM Plex Mono";
+	font-size: 11px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: normal;
+	letter-spacing: -0.5px;
+	color: #666563;
+}
+
+.pace-message {
+	margin: 0;
+	margin-top: 12px;
+	max-width: 340px;
+	min-height: 60px;
+	text-align: center;
+	font-size: 14px;
+	line-height: 1.35;
+	font-weight: 400;
+	color: var(--teal-main);
+}
+
+.learn-actions-dual {
+	margin-top: auto;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-bottom: 29px;
+	gap: 12px;
+}
+
+.learn-nav-btn {
+	width: 64.13px;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	border: none;
+	background: #d0d0d0;
+	display: grid;
+	place-items: center;
+	cursor: pointer;
+	box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+	transition: background-color 0.2s ease;
+}
+
+.learn-nav-btn:hover:not(:disabled) {
+	background: #b8b8b8;
+}
+
+.learn-nav-btn.forward {
+	background: var(--teal-main);
+	margin-left: auto;
+}
+
+.learn-nav-btn.forward:hover:not(:disabled) {
+	background: var(--teal-dark);
+}
+
+.learn-nav-btn svg {
+	width: 42%;
+	height: 42%;
+}
+
+.learn-nav-btn svg line,
+.learn-nav-btn svg path {
+	stroke: #ffffff;
+}
+
+.learn-nav-btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
 }

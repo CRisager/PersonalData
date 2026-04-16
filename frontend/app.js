@@ -44,6 +44,20 @@ const learnMessage = document.getElementById("learnMessage");
 const learnFillerLabel = document.getElementById("learnFillerLabel");
 const learnPreviousLabel = document.getElementById("learnPreviousLabel");
 const learnNextButton = document.getElementById("learnNextButton");
+const learnViewStep2 = document.getElementById("learnViewStep2");
+const paceRecommendedRangeArc = document.getElementById("paceRecommendedRangeArc");
+const paceCurrentTriangle = document.getElementById("paceCurrentTriangle");
+const paceHistoricAverageLine = document.getElementById("paceHistoricAverageLine");
+const paceBandLabelFast = document.getElementById("paceBandLabelFast");
+const paceBandLabel150 = document.getElementById("paceBandLabel150");
+const paceBandLabel125 = document.getElementById("paceBandLabel125");
+const paceBandLabel100 = document.getElementById("paceBandLabel100");
+const paceBandLabelSlow = document.getElementById("paceBandLabelSlow");
+const paceValue = document.getElementById("paceValue");
+const paceMessage = document.getElementById("paceMessage");
+const learnPaceSubtext = document.getElementById("learnPaceSubtext");
+const learnBackButton = document.getElementById("learnBackButton");
+const learnStep2NextButton = document.getElementById("learnStep2NextButton");
 const previewWaveform = document.getElementById("previewWaveform");
 const previewCtx = previewWaveform.getContext("2d");
 const waveformCanvas = document.getElementById("waveform");
@@ -67,12 +81,28 @@ let recordedChunks = [];
 let recordedAudioBlob = null;
 let recordedAudioUrl = "";
 let recordedDurationMs = 0;
-let recordingIndex = 132;
+let recordingIndex = 1;
 let isSaving = false;
+let currentLearnStep = 1;
+let currentLearnResult = null;
 
 const PEAK_CAPTURE_INTERVAL_MS = 45;
 const MAX_STORED_PEAKS = 50000;
 const WAVEFORM_BAR_SPACING = 3;
+const Recommended_Speed_Range = { startDeg: 45, endDeg: 135 };
+const Historic_Average_Pace = 130;
+const PACE_BAND_LABEL_ELLIPSE = {
+	cx: 273,
+	cy: 273,
+	radiusX: 320,
+	radiusY: 300,
+};
+const PACE_GAUGE_GEOMETRY = {
+	cx: 273,
+	cy: 273,
+	outerRadius: 273,
+	innerRadius: 273 * 0.75,
+};
 const API_BASE_STORAGE_KEY = "speechApiBase";
 const FILLER_HISTORY_STORAGE_KEY = "fillerPercentageHistory";
 const HISTORY_DECAY = 0.85;
@@ -729,7 +759,140 @@ function positionLearnPercentageLabels(fillerPercentage, previousAveragePercenta
 	}
 }
 
+function polarToSvg(cx, cy, radius, angleDeg) {
+	const radians = (angleDeg * Math.PI) / 180;
+	return {
+		x: cx + radius * Math.cos(radians),
+		y: cy - radius * Math.sin(radians),
+	};
+}
+
+function buildAnnulusSegmentPath(cx, cy, outerRadius, innerRadius, startDeg, endDeg) {
+	const outerStart = polarToSvg(cx, cy, outerRadius, startDeg);
+	const outerEnd = polarToSvg(cx, cy, outerRadius, endDeg);
+	const innerStart = polarToSvg(cx, cy, innerRadius, startDeg);
+	const innerEnd = polarToSvg(cx, cy, innerRadius, endDeg);
+	const span = ((endDeg - startDeg) % 360 + 360) % 360;
+	const largeArcFlag = span > 180 ? 1 : 0;
+
+	return [
+		`M ${outerStart.x.toFixed(2)} ${outerStart.y.toFixed(2)}`,
+		`A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 0 ${outerEnd.x.toFixed(2)} ${outerEnd.y.toFixed(2)}`,
+		`L ${innerEnd.x.toFixed(2)} ${innerEnd.y.toFixed(2)}`,
+		`A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 1 ${innerStart.x.toFixed(2)} ${innerStart.y.toFixed(2)}`,
+		"Z",
+	].join(" ");
+}
+
+function renderRecommendedSpeedRange() {
+	if (!paceRecommendedRangeArc) {
+		return;
+	}
+
+	const path = buildAnnulusSegmentPath(
+		PACE_GAUGE_GEOMETRY.cx,
+		PACE_GAUGE_GEOMETRY.cy,
+		PACE_GAUGE_GEOMETRY.outerRadius,
+		PACE_GAUGE_GEOMETRY.innerRadius,
+		Recommended_Speed_Range.startDeg,
+		Recommended_Speed_Range.endDeg
+	);
+
+	paceRecommendedRangeArc.setAttribute("d", path);
+}
+
+function paceToGaugeAngle(paceWpm) {
+	const minPace = 100;
+	const maxPace = 150;
+	const clamped = Math.max(minPace, Math.min(maxPace, paceWpm));
+	const ratio = (clamped - minPace) / (maxPace - minPace);
+	return 180 - (ratio * 180);
+}
+
+function renderHistoricAverageLine(averagePaceWpm) {
+	if (!paceHistoricAverageLine) {
+		return;
+	}
+
+	const angle = paceToGaugeAngle(averagePaceWpm);
+	const start = polarToSvg(PACE_GAUGE_GEOMETRY.cx, PACE_GAUGE_GEOMETRY.cy, PACE_GAUGE_GEOMETRY.outerRadius, angle);
+	const end = polarToSvg(PACE_GAUGE_GEOMETRY.cx, PACE_GAUGE_GEOMETRY.cy, PACE_GAUGE_GEOMETRY.outerRadius - 64, angle);
+
+	paceHistoricAverageLine.setAttribute("x1", start.x.toFixed(2));
+	paceHistoricAverageLine.setAttribute("y1", start.y.toFixed(2));
+	paceHistoricAverageLine.setAttribute("x2", end.x.toFixed(2));
+	paceHistoricAverageLine.setAttribute("y2", end.y.toFixed(2));
+	paceHistoricAverageLine.setAttribute("stroke-dasharray", "2 5");
+}
+
+function renderCurrentPaceTriangle(currentPaceWpm) {
+	if (!paceCurrentTriangle) {
+		return;
+	}
+
+	const angle = paceToGaugeAngle(currentPaceWpm);
+	const rotationDeg = 90 - angle;
+	paceCurrentTriangle.setAttribute(
+		"transform",
+		`rotate(${rotationDeg.toFixed(2)} ${PACE_GAUGE_GEOMETRY.cx} ${PACE_GAUGE_GEOMETRY.cy})`
+	);
+}
+
+function renderPaceBandLabels() {
+	const labels = [
+		{ element: paceBandLabelFast, angle: 0, anchor: "middle", text: "fast" },
+		{ element: paceBandLabel150, angle: 45, anchor: "middle", text: "160" },
+		{ element: paceBandLabel125, angle: 90, anchor: "middle", text: "140" },
+		{ element: paceBandLabel100, angle: 135, anchor: "middle", text: "120" },
+		{ element: paceBandLabelSlow, angle: 180, anchor: "middle", text: "slow" },
+	];
+
+	for (const label of labels) {
+		if (!label.element) {
+			continue;
+		}
+
+		const radians = (label.angle * Math.PI) / 180;
+		const point = {
+			x: PACE_BAND_LABEL_ELLIPSE.cx + (PACE_BAND_LABEL_ELLIPSE.radiusX * Math.cos(radians)),
+			y: PACE_BAND_LABEL_ELLIPSE.cy - (PACE_BAND_LABEL_ELLIPSE.radiusY * Math.sin(radians)),
+		};
+
+		label.element.setAttribute("x", point.x.toFixed(2));
+		label.element.setAttribute("y", point.y.toFixed(2));
+		label.element.setAttribute("text-anchor", label.anchor);
+		if (label.text) {
+			label.element.textContent = label.text;
+		}
+	}
+}
+
 function showLearnView(result) {
+	currentLearnResult = result;
+	currentLearnStep = 1;
+	showLearnStep(1, result);
+}
+
+function showLearnStep(step, result) {
+	const recordingTitle = recordingName.value ? recordingName.value.trim() : "Recording";
+	pageTitle.textContent = recordingTitle || "Recording";
+
+	idleView.hidden = true;
+	recordingView.hidden = true;
+	confirmView.hidden = true;
+	document.body.classList.remove("is-recording");
+
+	if (step === 1) {
+		currentLearnStep = 1;
+		showLearnStep1(result);
+	} else if (step === 2) {
+		currentLearnStep = 2;
+		showLearnStep2(result);
+	}
+	setStep("learn");
+}
+
+function showLearnStep1(result) {
 	const fillerMetrics = result && result.filler_metrics ? result.filler_metrics : {};
 	const fillerPercentageRaw = Number(fillerMetrics.filler_percentage);
 	const fillerPercentage = Number.isFinite(fillerPercentageRaw)
@@ -765,15 +928,39 @@ function showLearnView(result) {
 	renderLearnWordList(sortedPairs);
 	learnMessage.textContent = buildLearnMessage(fillerPercentage, previousAverage);
 
-	const categoryName = categorySelect.value ? categorySelect.value.trim() : "Class presentation";
-	pageTitle.textContent = categoryName || "Class presentation";
-
-	idleView.hidden = true;
-	recordingView.hidden = true;
-	confirmView.hidden = true;
 	learnView.hidden = false;
-	setStep("learn");
-	document.body.classList.remove("is-recording");
+	learnViewStep2.hidden = true;
+}
+
+function showLearnStep2(result) {
+	const wpm = Number(result && result.wpm) || 0;
+	const validWpm = Number.isFinite(wpm) ? Math.max(0, Math.min(400, wpm)) : 0;
+	renderPaceBandLabels();
+	renderRecommendedSpeedRange();
+	renderCurrentPaceTriangle(validWpm);
+	renderHistoricAverageLine(Historic_Average_Pace);
+
+	paceValue.textContent = Math.round(validWpm);
+
+	// Build message based on pace
+	let paceMessageText = "";
+	if (validWpm < 100) {
+		paceMessageText = "Your pace is quite slow. Try to speak a bit faster for better engagement.";
+	} else if (validWpm < 120) {
+		paceMessageText = "Your pace is a bit slow. Consider increasing your speaking speed slightly.";
+	} else if (validWpm <= 150) {
+		paceMessageText = "Your pace was just right! Keep it up!";
+	} else if (validWpm <= 180) {
+		paceMessageText = "Your pace is a bit fast. Try to slow down slightly for clarity.";
+	} else {
+		paceMessageText = "Your pace is quite fast. Slow down to ensure your audience can follow.";
+	}
+	paceMessage.textContent = paceMessageText;
+
+	learnPaceSubtext.textContent = "Below, you can see your average pace (words per minute) for this session, compared to your previous sessions.";
+
+	learnView.hidden = true;
+	learnViewStep2.hidden = false;
 }
 
 function resetUiAfterStop() {
@@ -1094,7 +1281,9 @@ pauseButton.addEventListener("click", togglePause);
 stopButton.addEventListener("click", stopRecording);
 deleteButton.addEventListener("click", clearPreviewAndReturnToIdle);
 saveButton.addEventListener("click", saveRecording);
-learnNextButton.addEventListener("click", clearPreviewAndReturnToIdle);
+learnNextButton.addEventListener("click", () => showLearnStep(2, currentLearnResult));
+learnBackButton.addEventListener("click", () => showLearnStep(1, currentLearnResult));
+learnStep2NextButton.addEventListener("click", clearPreviewAndReturnToIdle);
 recordingName.addEventListener("input", syncHeaderWithName);
 editNameButton.addEventListener("click", () => recordingName.focus());
 previewPlayButton.addEventListener("click", togglePreviewPlayback);
