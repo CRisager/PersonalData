@@ -133,7 +133,8 @@ body {
 .recording-view,
 .confirm-view,
 .learn-view,
-.learn-view-step-2 {
+.learn-view-step-2,
+.learn-view-step-3 {
 	flex: 1;
 	width: 100%;
 	display: flex;
@@ -905,6 +906,122 @@ body {
 .pace-message {
 	margin: 0;
 	margin-top: 12px;
+	max-width: 340px;
+	min-height: 60px;
+	text-align: center;
+	font-size: 14px;
+	line-height: 1.35;
+	font-weight: 400;
+	color: var(--teal-main);
+}
+
+.pitch-legend-wrap {
+	width: min(100%, 336px);
+	color: #666563;
+	font-family: "IBM Plex Mono";
+	font-size: 10px;
+	font-style: normal;
+	font-weight: 300;
+	line-height: normal;
+	letter-spacing: -0.5px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	margin-top: 30px;
+	margin-bottom: 5px;
+}
+
+.pitch-legend-item {
+	display: grid;
+	grid-template-columns: 12px auto;
+	column-gap: 6px;
+	align-items: center;
+}
+
+.pitch-legend-item .pitch-legend-swatch {
+	width: 9px;
+	height: 9px;
+	border-radius: 1px;
+	flex: none;
+	justify-self: start;
+}
+
+.pitch-legend-item .pitch-legend-swatch.current {
+	background: #1e8486;
+}
+
+.pitch-legend-item .pitch-legend-swatch.band {
+	background: #dff0ee;
+	border: 1px solid #d0d0d0;
+}
+
+.pitch-legend-item .pitch-legend-swatch.previous {
+	width: 12px;
+	height: 0;
+	border-top: 2px dotted #666563;
+	border-radius: 0;
+	background: transparent;
+}
+
+.pitch-chart-wrap {
+	width: min(100%, 336px);
+	border-radius: 10px;
+	background: #ffffff;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+	overflow: hidden;
+	margin-top: 5px;
+}
+
+.pitch-chart-empty {
+	min-height: 208px;
+	display: grid;
+	place-items: center;
+	padding: 18px;
+	font-family: "IBM Plex Mono";
+	font-size: 12px;
+	font-weight: 400;
+	text-align: center;
+	color: #666563;
+}
+
+.pitch-chart-svg {
+	display: block;
+	width: 100%;
+	height: auto;
+	overflow: visible;
+	font-family: "IBM Plex Mono";
+}
+
+.pitch-axis-label {
+	fill: #666563;
+	font-size: 10px;
+	font-weight: 400;
+}
+
+.pitch-axis-title {
+	fill: #666563;
+	font-size: 13px;
+	font-weight: 400;
+}
+
+.pitch-axis-title-main {
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.pitch-axis-title-sub {
+	font-size: 10px;
+	font-weight: 400;
+}
+
+.pitch-axis-title-vertical {
+	writing-mode: tb;
+	glyph-orientation-vertical: 0;
+}
+
+.pitch-message {
+	margin: 0;
+	margin-top: 24px;
 	max-width: 340px;
 	min-height: 60px;
 	text-align: center;

@@ -45,6 +45,7 @@ const learnFillerLabel = document.getElementById("learnFillerLabel");
 const learnPreviousLabel = document.getElementById("learnPreviousLabel");
 const learnNextButton = document.getElementById("learnNextButton");
 const learnViewStep2 = document.getElementById("learnViewStep2");
+const learnViewStep3 = document.getElementById("learnViewStep3");
 const paceRecommendedRangeArc = document.getElementById("paceRecommendedRangeArc");
 const paceCurrentTriangle = document.getElementById("paceCurrentTriangle");
 const paceHistoricAverageLine = document.getElementById("paceHistoricAverageLine");
@@ -58,6 +59,11 @@ const paceMessage = document.getElementById("paceMessage");
 const learnPaceSubtext = document.getElementById("learnPaceSubtext");
 const learnBackButton = document.getElementById("learnBackButton");
 const learnStep2NextButton = document.getElementById("learnStep2NextButton");
+const learnPitchSubtext = document.getElementById("learnPitchSubtext");
+const learnPitchChart = document.getElementById("learnPitchChart");
+const learnPitchMessage = document.getElementById("learnPitchMessage");
+const learnPitchBackButton = document.getElementById("learnPitchBackButton");
+const learnPitchFinishButton = document.getElementById("learnPitchFinishButton");
 const previewWaveform = document.getElementById("previewWaveform");
 const previewCtx = previewWaveform.getContext("2d");
 const waveformCanvas = document.getElementById("waveform");
@@ -91,6 +97,8 @@ const MAX_STORED_PEAKS = 50000;
 const WAVEFORM_BAR_SPACING = 3;
 const Recommended_Speed_Range = { startDeg: 45, endDeg: 135 };
 const Historic_Average_Pace = 130;
+const PITCH_HISTORY_STORAGE_KEY = "pitchVariationHistory";
+const PITCH_HISTORY_DECAY = 0.82;
 const PACE_BAND_LABEL_ELLIPSE = {
 	cx: 273,
 	cy: 273,
@@ -155,6 +163,7 @@ function generatePreviewPeaks() {
 }
 
 function buildPreviewResult() {
+	const pitchSeries = generatePreviewPitchSeries();
 	return {
 		wpm: 127.4,
 		filler_metrics: {
@@ -169,7 +178,48 @@ function buildPreviewResult() {
 				well: 2,
 			},
 		},
+		pitch: {
+			mean_pitch: 132.8,
+			min_pitch: 94.2,
+			max_pitch: 236.4,
+			median_pitch: 131.1,
+			mean_pitch_semitones: 0.0,
+			min_pitch_semitones: -8.9,
+			max_pitch_semitones: 9.2,
+			median_pitch_semitones: 0.0,
+			pitch_reference_hz: 131.1,
+			voiced_ratio: 0.84,
+		},
+		pitch_series: pitchSeries,
 	};
+}
+
+function generatePreviewPitchSeries() {
+	const durationSeconds = 330;
+	const sampleCount = 420;
+	const referenceHz = 131.1;
+	const points = [];
+
+	for (let i = 0; i < sampleCount; i += 1) {
+		const ratio = sampleCount === 1 ? 0 : i / (sampleCount - 1);
+		const t = ratio * durationSeconds;
+		const variation = (
+			Math.sin(t / 24) * 2.9
+			+ Math.cos(t / 11) * 1.5
+			+ Math.sin(t / 5.7) * 0.7
+			+ Math.cos(t / 48) * 0.9
+		);
+		const isVoiced = (i % 29 !== 0) && (i % 43 !== 0) && (i % 67 < 61);
+
+		points.push({
+			time: Number(t.toFixed(3)),
+			pitch_hz: isVoiced ? Number((referenceHz * (2 ** (variation / 12))).toFixed(2)) : null,
+			pitch_semitones: isVoiced ? Number(variation.toFixed(3)) : null,
+			voiced: isVoiced,
+		});
+	}
+
+	return points;
 }
 
 function seedPreviewRecordingState() {
@@ -548,6 +598,9 @@ function showRecordingView() {
 	recordingView.hidden = false;
 	confirmView.hidden = true;
 	learnView.hidden = true;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = true;
+	}
 	pageTitle.textContent = "New recording";
 	setStep("record");
 	document.body.classList.add("is-recording");
@@ -555,6 +608,9 @@ function showRecordingView() {
 
 function showIdleView() {
 	learnView.hidden = true;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = true;
+	}
 	confirmView.hidden = true;
 	recordingView.hidden = true;
 	idleView.hidden = false;
@@ -568,6 +624,9 @@ function showConfirmView() {
 	recordingView.hidden = true;
 	confirmView.hidden = false;
 	learnView.hidden = true;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = true;
+	}
 	syncHeaderWithName();
 	renderPreviewWaveform();
 	previewTime.textContent = formatTime(recordedDurationMs);
@@ -589,6 +648,260 @@ function loadFillerHistory() {
 
 function storeFillerHistory(history) {
 	localStorage.setItem(FILLER_HISTORY_STORAGE_KEY, JSON.stringify(history));
+}
+
+function loadPitchVariationHistory() {
+	try {
+		const parsed = JSON.parse(localStorage.getItem(PITCH_HISTORY_STORAGE_KEY) || "[]");
+		if (!Array.isArray(parsed)) {
+			return [];
+		}
+		return parsed.filter((value) => typeof value === "number" && Number.isFinite(value) && value >= 0);
+	} catch (_error) {
+		return [];
+	}
+}
+
+function storePitchVariationHistory(history) {
+	localStorage.setItem(PITCH_HISTORY_STORAGE_KEY, JSON.stringify(history));
+}
+
+function quantile(sortedValues, q) {
+	if (!Array.isArray(sortedValues) || sortedValues.length === 0) {
+		return NaN;
+	}
+
+	const clampedQ = Math.max(0, Math.min(1, q));
+	const position = (sortedValues.length - 1) * clampedQ;
+	const lowerIndex = Math.floor(position);
+	const upperIndex = Math.ceil(position);
+	if (lowerIndex === upperIndex) {
+		return Number(sortedValues[lowerIndex]);
+	}
+
+	const lowerValue = Number(sortedValues[lowerIndex]);
+	const upperValue = Number(sortedValues[upperIndex]);
+	const fraction = position - lowerIndex;
+	return lowerValue + ((upperValue - lowerValue) * fraction);
+}
+
+function calculatePitchVariation(pitchSeries, pitchSummary = {}) {
+	const values = (Array.isArray(pitchSeries) ? pitchSeries : [])
+		.map((point) => Number(point && (point.pitch_semitones ?? point.pitch_st)))
+		.filter((value) => Number.isFinite(value));
+
+	if (values.length >= 3) {
+		const sorted = [...values].sort((a, b) => a - b);
+		const p10 = quantile(sorted, 0.1);
+		const p90 = quantile(sorted, 0.9);
+		if (Number.isFinite(p10) && Number.isFinite(p90)) {
+			return Math.max(0, (p90 - p10) / 2.0);
+		}
+	}
+
+	const minSt = Number(pitchSummary.min_pitch_semitones);
+	const maxSt = Number(pitchSummary.max_pitch_semitones);
+	if (Number.isFinite(minSt) && Number.isFinite(maxSt)) {
+		return Math.max(0, (maxSt - minSt) / 2.0);
+	}
+
+	return NaN;
+}
+
+function formatPitchAxisTime(seconds) {
+	const safeSeconds = Math.max(0, Number(seconds) || 0);
+	const minutes = Math.floor(safeSeconds / 60);
+	const secondsPart = Math.round(safeSeconds % 60);
+	return `${minutes}:${String(secondsPart).padStart(2, "0")}`;
+}
+
+function smoothValues(values, windowSize = 7) {
+	if (!Array.isArray(values) || values.length === 0) {
+		return [];
+	}
+
+	const size = Math.max(1, Math.floor(windowSize));
+	const radius = Math.floor(size / 2);
+	const result = [];
+
+	for (let index = 0; index < values.length; index += 1) {
+		let total = 0;
+		let count = 0;
+		for (let offset = -radius; offset <= radius; offset += 1) {
+			const sampleIndex = index + offset;
+			if (sampleIndex < 0 || sampleIndex >= values.length) {
+				continue;
+			}
+			const value = Number(values[sampleIndex]);
+			if (!Number.isFinite(value)) {
+				continue;
+			}
+			total += value;
+			count += 1;
+		}
+		result.push(count > 0 ? total / count : Number(values[index]) || 0);
+	}
+
+	return result;
+}
+
+function interpolateMissingPitchValues(points) {
+	const interpolated = [];
+	const finiteIndices = [];
+
+	for (let index = 0; index < points.length; index += 1) {
+		const value = Number(points[index].pitch);
+		if (Number.isFinite(value)) {
+			finiteIndices.push(index);
+		}
+	}
+
+	if (finiteIndices.length === 0) {
+		return points.map((point) => ({ ...point, pitch: 0 }));
+	}
+
+	for (let index = 0; index < points.length; index += 1) {
+		const current = points[index];
+		const value = Number(current.pitch);
+		if (Number.isFinite(value)) {
+			interpolated.push({ ...current, pitch: value });
+			continue;
+		}
+
+		let previousIndex = index - 1;
+		while (previousIndex >= 0 && !Number.isFinite(Number(points[previousIndex].pitch))) {
+			previousIndex -= 1;
+		}
+
+		let nextIndex = index + 1;
+		while (nextIndex < points.length && !Number.isFinite(Number(points[nextIndex].pitch))) {
+			nextIndex += 1;
+		}
+
+		let replacement = 0;
+		if (previousIndex >= 0 && nextIndex < points.length) {
+			const previousPoint = points[previousIndex];
+			const nextPoint = points[nextIndex];
+			const denominator = nextPoint.time - previousPoint.time;
+			if (denominator > 0) {
+				const ratio = (current.time - previousPoint.time) / denominator;
+				replacement = previousPoint.pitch + ((nextPoint.pitch - previousPoint.pitch) * ratio);
+			} else {
+				replacement = previousPoint.pitch;
+			}
+		} else if (previousIndex >= 0) {
+			replacement = points[previousIndex].pitch;
+		} else if (nextIndex < points.length) {
+			replacement = points[nextIndex].pitch;
+		}
+
+		interpolated.push({ ...current, pitch: replacement });
+	}
+
+	return interpolated;
+}
+
+function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation }) {
+	const points = Array.isArray(pitchSeries)
+		? pitchSeries
+			.map((point) => ({
+				time: Number(point && point.time),
+				pitch: Number(point && (point.pitch_semitones ?? point.pitch_st)),
+				voiced: Boolean(point && point.voiced),
+			}))
+			.filter((point) => Number.isFinite(point.time))
+		: [];
+
+	if (!points.length) {
+		return {
+			markup: '<div class="pitch-chart-empty">No pitch data available for this recording.</div>',
+			title: '',
+		};
+	}
+
+	const completePoints = interpolateMissingPitchValues(points);
+	const smoothedValues = smoothValues(completePoints.map((point) => point.pitch), 7);
+	const chartPoints = completePoints.map((point, index) => ({
+		time: point.time,
+		pitch: smoothedValues[index],
+	}));
+
+	const durationSeconds = Math.max(1, chartPoints[chartPoints.length - 1].time || 1);
+	const width = 560;
+	const height = 250;
+	const margin = { top: 12, right: 18, bottom: 50, left: 52 };
+	const plotWidth = width - margin.left - margin.right;
+	const plotHeight = height - margin.top - margin.bottom;
+	const yMin = -10;
+	const yMax = 10;
+
+	const xScale = (seconds) => margin.left + ((seconds / durationSeconds) * plotWidth);
+	const yScale = (value) => margin.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
+
+	const upperBandTop = yScale(5);
+	const upperBandBottom = yScale(4);
+	const lowerBandTop = yScale(-4);
+	const lowerBandBottom = yScale(-5);
+	const upperBandY = Math.min(upperBandTop, upperBandBottom);
+	const upperBandHeight = Math.abs(upperBandBottom - upperBandTop);
+	const lowerBandY = Math.min(lowerBandTop, lowerBandBottom);
+	const lowerBandHeight = Math.abs(lowerBandBottom - lowerBandTop);
+
+	const pathParts = [];
+	chartPoints.forEach((point, index) => {
+		const x = xScale(point.time);
+		const y = yScale(point.pitch);
+		pathParts.push(`${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`);
+	});
+
+	const xTickRatios = [0, 1 / 3, 2 / 3, 1];
+	const xTicks = xTickRatios.map((ratio) => {
+		const seconds = durationSeconds * ratio;
+		return { x: xScale(seconds), label: formatPitchAxisTime(seconds) };
+	});
+
+	const yTicks = [];
+	for (let tick = -10; tick <= 10; tick += 5) {
+		yTicks.push({ y: yScale(tick), label: `${tick > 0 ? "+" : ""}${tick}` });
+	}
+
+	let previousLineMarkup = "";
+	if (Number.isFinite(previousAverageVariation) && previousAverageVariation > 0) {
+		const previousPositive = yScale(previousAverageVariation);
+		const previousNegative = yScale(-previousAverageVariation);
+		previousLineMarkup = `
+			<line x1="${margin.left}" y1="${previousPositive.toFixed(2)}" x2="${(margin.left + plotWidth).toFixed(2)}" y2="${previousPositive.toFixed(2)}" stroke="#666563" stroke-width="1.5" stroke-dasharray="5 4" />
+			<line x1="${margin.left}" y1="${previousNegative.toFixed(2)}" x2="${(margin.left + plotWidth).toFixed(2)}" y2="${previousNegative.toFixed(2)}" stroke="#666563" stroke-width="1.5" stroke-dasharray="5 4" />
+		`;
+	}
+
+	const axisLabels = xTicks.map((tick) => `
+		<text x="${tick.x.toFixed(2)}" y="${(height - 18).toFixed(2)}" text-anchor="middle" class="pitch-axis-label">${tick.label}</text>
+	`).join("");
+	const yAxisLabels = yTicks.map((tick) => `
+		<text x="${(margin.left - 10).toFixed(2)}" y="${(tick.y + 4).toFixed(2)}" text-anchor="end" class="pitch-axis-label">${tick.label}</text>
+	`).join("");
+
+	return {
+		markup: `
+			<svg class="pitch-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Pitch variation line chart">
+				<rect x="0" y="0" width="${width}" height="${height}" rx="10" fill="#ffffff" />
+				<rect x="${margin.left}" y="${upperBandY.toFixed(2)}" width="${plotWidth}" height="${upperBandHeight.toFixed(2)}" fill="#dff0ee" opacity="0.9" />
+				<rect x="${margin.left}" y="${lowerBandY.toFixed(2)}" width="${plotWidth}" height="${lowerBandHeight.toFixed(2)}" fill="#dff0ee" opacity="0.9" />
+				${previousLineMarkup}
+				<path d="${pathParts.join(" ")}" fill="none" stroke="#1e8486" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+				${xTicks.map((tick) => `<line x1="${tick.x.toFixed(2)}" y1="${(margin.top + plotHeight).toFixed(2)}" x2="${tick.x.toFixed(2)}" y2="${(margin.top + plotHeight + 4).toFixed(2)}" stroke="#666563" stroke-width="1" />`).join("")}
+				${yTicks.map((tick) => `<line x1="${(margin.left - 4).toFixed(2)}" y1="${tick.y.toFixed(2)}" x2="${margin.left.toFixed(2)}" y2="${tick.y.toFixed(2)}" stroke="#666563" stroke-width="1" />`).join("")}
+				${axisLabels}
+				${yAxisLabels}
+				<text x="${(margin.left + plotWidth / 2).toFixed(2)}" y="${(height - 4).toFixed(2)}" text-anchor="middle" class="pitch-axis-title">Time (sec)</text>
+				<text x="16" y="${(margin.top + plotHeight / 2).toFixed(2)}" text-anchor="middle" class="pitch-axis-title" transform="rotate(-90 16 ${(margin.top + plotHeight / 2).toFixed(2)})">
+					<tspan class="pitch-axis-title-main">Pitch</tspan>
+					<tspan class="pitch-axis-title-sub"> (semitones re median Hz)</tspan>
+				</text>
+			</svg>
+		`,
+	};
 }
 
 function calculateRecencyWeightedAverage(values, decay = HISTORY_DECAY) {
@@ -803,7 +1116,7 @@ function renderRecommendedSpeedRange() {
 
 function paceToGaugeAngle(paceWpm) {
 	const minPace = 100;
-	const maxPace = 150;
+	const maxPace = 180;
 	const clamped = Math.max(minPace, Math.min(maxPace, paceWpm));
 	const ratio = (clamped - minPace) / (maxPace - minPace);
 	return 180 - (ratio * 180);
@@ -888,6 +1201,9 @@ function showLearnStep(step, result) {
 	} else if (step === 2) {
 		currentLearnStep = 2;
 		showLearnStep2(result);
+	} else if (step === 3) {
+		currentLearnStep = 3;
+		showLearnStep3(result);
 	}
 	setStep("learn");
 }
@@ -930,6 +1246,9 @@ function showLearnStep1(result) {
 
 	learnView.hidden = false;
 	learnViewStep2.hidden = true;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = true;
+	}
 }
 
 function showLearnStep2(result) {
@@ -961,6 +1280,44 @@ function showLearnStep2(result) {
 
 	learnView.hidden = true;
 	learnViewStep2.hidden = false;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = true;
+	}
+}
+
+function showLearnStep3(result) {
+	const pitchSummary = result && result.pitch ? result.pitch : {};
+	const pitchSeries = result && result.pitch_series ? result.pitch_series : [];
+	const currentVariation = calculatePitchVariation(pitchSeries, pitchSummary);
+	const history = loadPitchVariationHistory();
+	const previousAverage = calculateRecencyWeightedAverage(history, PITCH_HISTORY_DECAY);
+
+	if (Number.isFinite(currentVariation)) {
+		storePitchVariationHistory([...history, currentVariation]);
+	}
+
+	if (learnPitchSubtext) {
+		learnPitchSubtext.textContent = "Below, you can see your pitch variation and the recommended upper and lower band to reach.\nCompare with your average range from previous sessions.";
+	}
+
+	if (learnPitchChart) {
+		learnPitchChart.innerHTML = buildPitchVariationChartMarkup({
+			pitchSeries,
+			previousAverageVariation: Number.isFinite(previousAverage) ? previousAverage : NaN,
+		}).markup;
+	}
+
+	if (learnPitchMessage) {
+		learnPitchMessage.textContent = Number.isFinite(currentVariation)
+			? `Current pitch variation: ${currentVariation.toFixed(2)} semitones. Previous average range: ${Number.isFinite(previousAverage) ? previousAverage.toFixed(2) : "not available"} semitones.`
+			: "No pitch variation data was available for this recording.";
+	}
+
+	learnView.hidden = true;
+	learnViewStep2.hidden = true;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = false;
+	}
 }
 
 function resetUiAfterStop() {
@@ -1283,7 +1640,13 @@ deleteButton.addEventListener("click", clearPreviewAndReturnToIdle);
 saveButton.addEventListener("click", saveRecording);
 learnNextButton.addEventListener("click", () => showLearnStep(2, currentLearnResult));
 learnBackButton.addEventListener("click", () => showLearnStep(1, currentLearnResult));
-learnStep2NextButton.addEventListener("click", clearPreviewAndReturnToIdle);
+learnStep2NextButton.addEventListener("click", () => showLearnStep(3, currentLearnResult));
+if (learnPitchBackButton) {
+	learnPitchBackButton.addEventListener("click", () => showLearnStep(2, currentLearnResult));
+}
+if (learnPitchFinishButton) {
+	learnPitchFinishButton.addEventListener("click", clearPreviewAndReturnToIdle);
+}
 recordingName.addEventListener("input", syncHeaderWithName);
 editNameButton.addEventListener("click", () => recordingName.focus());
 previewPlayButton.addEventListener("click", togglePreviewPlayback);

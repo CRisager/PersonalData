@@ -220,8 +220,28 @@ def process_audio_array(
 		"min_pitch": round(float(pitch_data.get("min_pitch", 0.0)), 2),
 		"max_pitch": round(float(pitch_data.get("max_pitch", 0.0)), 2),
 		"median_pitch": round(float(pitch_data.get("median_pitch", 0.0)), 2),
+		"mean_pitch_semitones": round(float(pitch_data.get("mean_pitch_semitones", 0.0)), 2),
+		"min_pitch_semitones": round(float(pitch_data.get("min_pitch_semitones", 0.0)), 2),
+		"max_pitch_semitones": round(float(pitch_data.get("max_pitch_semitones", 0.0)), 2),
+		"median_pitch_semitones": round(float(pitch_data.get("median_pitch_semitones", 0.0)), 2),
+		"pitch_reference_hz": round(float(pitch_data.get("pitch_reference_hz", 0.0)), 2),
 		"voiced_ratio": round(float(pitch_data.get("voiced_ratio", 0.0)), 4),
 	}
+
+	pitch_series = [
+		{
+			"time": round(float(time_value), 3),
+			"pitch_hz": None if not np.isfinite(frequency_value) else round(float(frequency_value), 2),
+			"pitch_semitones": None if not np.isfinite(semitone_value) else round(float(semitone_value), 3),
+			"voiced": bool(voiced_value),
+		}
+		for time_value, frequency_value, semitone_value, voiced_value in zip(
+			pitch_data.get("time", []),
+			pitch_data.get("frequency", []),
+			pitch_data.get("pitch_semitones", []),
+			pitch_data.get("voiced_flag", []),
+		)
+	]
 
 	return {
 		"audio_path": str(audio_path),
@@ -232,6 +252,7 @@ def process_audio_array(
 		"transcript": transcript,
 		"wpm": round(wpm, 2),
 		"pitch": pitch_summary,
+		"pitch_series": pitch_series,
 		"filler_metrics": filler_results,
 		"pitch_text": format_pitch_stats(pitch_data).rstrip(),
 	}
