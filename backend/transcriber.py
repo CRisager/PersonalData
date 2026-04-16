@@ -25,6 +25,19 @@ AUDIO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 TRANSCRIPT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
+_WHISPER_MODEL_CACHE = {}
+
+
+def preload_whisper_model(model_size="base.en"):
+    """Load and cache a Whisper model for reuse across transcriptions."""
+    model = _WHISPER_MODEL_CACHE.get(model_size)
+    if model is None:
+        print(f"\nLoading Whisper model ({model_size})...")
+        model = whisper.load_model(model_size)
+        _WHISPER_MODEL_CACHE[model_size] = model
+    return model
+
+
 def record_audio(duration=DURATION, sample_rate=SAMPLE_RATE):
     """
     Records audio from the microphone.
@@ -169,8 +182,7 @@ def transcribe_audio(audio_path, model_size="base.en"):
     # Handle SSL certificate verification issues
     ssl._create_default_https_context = ssl._create_unverified_context
     
-    print(f"\nLoading Whisper model ({model_size})...")
-    model = whisper.load_model(model_size)
+    model = preload_whisper_model(model_size)
     
     print("Transcribing audio...")
     # Load audio directly to avoid ffmpeg dependency

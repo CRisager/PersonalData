@@ -365,6 +365,10 @@ def main() -> None:
 				"Flask is required for --serve mode. Install with: pip install flask"
 			) from exc
 
+		from backend.transcriber import preload_whisper_model
+
+		preload_whisper_model(args.model)
+
 		app = create_app(args)
 		print(f"Serving UI at http://{args.host}:{args.port}")
 		app.run(host=args.host, port=args.port, debug=False)

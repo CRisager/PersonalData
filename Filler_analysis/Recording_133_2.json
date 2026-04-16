@@ -1,0 +1,11 @@
+{
+  "transcript_path": "Transcripts\\Recording_133_2.txt",
+  "dataset_path": "C:\\Users\\cheli\\OneDrive\\Dokumenter\\GitHub\\PersonalData\\PersonalData\\backend\\FillerWordData.json",
+  "total_words": 12,
+  "total_filler_words": 2,
+  "filler_percentage": 16.67,
+  "filler_word_counts": {
+    "like": 1,
+    "so": 1
+  }
+}

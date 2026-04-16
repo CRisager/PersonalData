@@ -75,7 +75,7 @@ const MAX_STORED_PEAKS = 50000;
 const WAVEFORM_BAR_SPACING = 3;
 const API_BASE_STORAGE_KEY = "speechApiBase";
 const FILLER_HISTORY_STORAGE_KEY = "fillerPercentageHistory";
-const HISTORY_DECAY = 0.15;
+const HISTORY_DECAY = 0.85;
 const queryParams = new URLSearchParams(window.location.search);
 const UI_PREVIEW_MODE = queryParams.get("uiPreview") === "1"
 	|| queryParams.get("design") === "1"
@@ -566,7 +566,7 @@ function calculateRecencyWeightedAverage(values, decay = HISTORY_DECAY) {
 		return NaN;
 	}
 
-	const safeDecay = Number.isFinite(decay) && decay > 0 ? decay : 0.65;
+	const safeDecay = Number.isFinite(decay) && decay > 0 ? decay : 0.15;
 	let weightedSum = 0;
 	let totalWeight = 0;
 	let age = 0;
@@ -649,18 +649,18 @@ function renderLearnWordList(sortedPairs) {
 	const topFive = sortedPairs.slice(0, 5);
 	const maxBarWidth = 170;
 	const gapBetweenNameAndCount = 8;
-	const horizontalPadding = 12; // 8px left + 4px right
+	const horizontalPadding = 16; // 8px left + 8px right 
 	const longestLabelWidth = topFive.reduce((currentMax, [word]) => {
 		const labelWidth = measureTextWidth(sentenceCase(word));
 		return Math.max(currentMax, labelWidth);
 	}, 0);
-	const widestCountWidth = topFive.reduce((currentMax, [, count]) => {
+	const slimmestCountWidth = topFive.reduce((currentMax, [, count]) => {
 		const countWidth = measureTextWidth(String(Number(count)));
-		return Math.max(currentMax, countWidth);
-	}, 0);
+		return Math.min(currentMax, countWidth);
+	}, 100);
 
-	const minTextBoxWidth = longestLabelWidth + 6;
-	const minBarWidth = minTextBoxWidth + widestCountWidth + gapBetweenNameAndCount + horizontalPadding;
+	const minTextBoxWidth = longestLabelWidth + 8;
+	const minBarWidth = minTextBoxWidth + slimmestCountWidth + gapBetweenNameAndCount + horizontalPadding;
 	const highestCount = Number(topFive[0][1]) || 1;
 
 	function getBarWidth(countValue) {
@@ -718,10 +718,10 @@ function positionLearnPercentageLabels(fillerPercentage, previousAveragePercenta
 
 	if (learnPreviousLabel.textContent) {
 		const previousDegrees = (previousAveragePercentage / 100) * 360;
-		const dottedLineLength = radius * 0.84;
-		const lineEnd = polarFromTopClockwise(previousDegrees, dottedLineLength);
-		const previousY = lineEnd.y + 11;
-		learnPreviousLabel.style.left = `${clamp(lineEnd.x, 14, size - 14)}px`;
+		const dottedLineLength = radius;
+		const lineMidPoint = polarFromTopClockwise(previousDegrees, dottedLineLength * 0.52);
+		const previousY = lineMidPoint.y + 12;
+		learnPreviousLabel.style.left = `${clamp(lineMidPoint.x, 14, size - 14)}px`;
 		learnPreviousLabel.style.top = `${clamp(previousY, 14, size - 10)}px`;
 		learnPreviousLabel.style.display = "block";
 	} else {
