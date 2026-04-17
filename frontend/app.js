@@ -739,7 +739,7 @@ function smoothValues(values, windowSize = 7) {
 			total += value;
 			count += 1;
 		}
-		result.push(count > 0 ? total / count : Number(values[index]) || 0);
+		result.push(count > 0 ? total / count : NaN);
 	}
 
 	return result;
@@ -757,7 +757,7 @@ function interpolateMissingPitchValues(points) {
 	}
 
 	if (finiteIndices.length === 0) {
-		return points.map((point) => ({ ...point, pitch: 0 }));
+		return points.map((point) => ({ ...point, pitch: NaN }));
 	}
 
 	for (let index = 0; index < points.length; index += 1) {
@@ -778,7 +778,7 @@ function interpolateMissingPitchValues(points) {
 			nextIndex += 1;
 		}
 
-		let replacement = 0;
+		let replacement = NaN;
 		if (previousIndex >= 0 && nextIndex < points.length) {
 			const previousPoint = points[previousIndex];
 			const nextPoint = points[nextIndex];
@@ -789,10 +789,6 @@ function interpolateMissingPitchValues(points) {
 			} else {
 				replacement = previousPoint.pitch;
 			}
-		} else if (previousIndex >= 0) {
-			replacement = points[previousIndex].pitch;
-		} else if (nextIndex < points.length) {
-			replacement = points[nextIndex].pitch;
 		}
 
 		interpolated.push({ ...current, pitch: replacement });
@@ -826,6 +822,25 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 		pitch: smoothedValues[index],
 	}));
 
+	const lineSegments = [];
+	let currentSegment = [];
+	chartPoints.forEach((point) => {
+		if (!Number.isFinite(point.pitch)) {
+			if (currentSegment.length > 0) {
+				lineSegments.push(currentSegment.join(" "));
+				currentSegment = [];
+			}
+			return;
+		}
+
+		const x = xScale(point.time);
+		const y = yScale(point.pitch);
+		currentSegment.push(`${currentSegment.length === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`);
+	});
+	if (currentSegment.length > 0) {
+		lineSegments.push(currentSegment.join(" "));
+	}
+
 	const durationSeconds = Math.max(1, chartPoints[chartPoints.length - 1].time || 1);
 	const width = 560;
 	const height = 250;
@@ -839,8 +854,8 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 	const yScale = (value) => margin.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
 
 	const upperBandTop = yScale(5);
-	const upperBandBottom = yScale(4);
-	const lowerBandTop = yScale(-4);
+	const upperBandBottom = yScale(3);
+	const lowerBandTop = yScale(-3);
 	const lowerBandBottom = yScale(-5);
 	const upperBandY = Math.min(upperBandTop, upperBandBottom);
 	const upperBandHeight = Math.abs(upperBandBottom - upperBandTop);
@@ -885,11 +900,18 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 	return {
 		markup: `
 			<svg class="pitch-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Pitch variation line chart">
+				<defs>
+					<clipPath id="pitch-chart-clip">
+						<rect x="${margin.left}" y="${margin.top}" width="${plotWidth}" height="${plotHeight}" />
+					</clipPath>
+				</defs>
 				<rect x="0" y="0" width="${width}" height="${height}" rx="10" fill="#ffffff" />
-				<rect x="${margin.left}" y="${upperBandY.toFixed(2)}" width="${plotWidth}" height="${upperBandHeight.toFixed(2)}" fill="#dff0ee" opacity="0.9" />
-				<rect x="${margin.left}" y="${lowerBandY.toFixed(2)}" width="${plotWidth}" height="${lowerBandHeight.toFixed(2)}" fill="#dff0ee" opacity="0.9" />
-				${previousLineMarkup}
-				<path d="${pathParts.join(" ")}" fill="none" stroke="#1e8486" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+				<g clip-path="url(#pitch-chart-clip)">
+					<rect x="${margin.left}" y="${upperBandY.toFixed(2)}" width="${plotWidth}" height="${upperBandHeight.toFixed(2)}" fill="#dff0ee" opacity="0.9" />
+					<rect x="${margin.left}" y="${lowerBandY.toFixed(2)}" width="${plotWidth}" height="${lowerBandHeight.toFixed(2)}" fill="#dff0ee" opacity="0.9" />
+					${previousLineMarkup}
+					${lineSegments.map((segment) => `<path d="${segment}" fill="none" stroke="#1e8486" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`).join("")}
+				</g>
 				${xTicks.map((tick) => `<line x1="${tick.x.toFixed(2)}" y1="${(margin.top + plotHeight).toFixed(2)}" x2="${tick.x.toFixed(2)}" y2="${(margin.top + plotHeight + 4).toFixed(2)}" stroke="#666563" stroke-width="1" />`).join("")}
 				${yTicks.map((tick) => `<line x1="${(margin.left - 4).toFixed(2)}" y1="${tick.y.toFixed(2)}" x2="${margin.left.toFixed(2)}" y2="${tick.y.toFixed(2)}" stroke="#666563" stroke-width="1" />`).join("")}
 				${axisLabels}

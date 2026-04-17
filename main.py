@@ -28,6 +28,8 @@ BACKEND_DIR = Path(__file__).resolve().parent / "backend"
 DEFAULT_DATASET_PATH = BACKEND_DIR / "FillerWordData.json"
 SPEED_OUTPUT_DIR = Path("Speed")
 SPEED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+PITCH_OUTPUT_DIR = Path("Pitch")
+PITCH_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -100,7 +102,7 @@ def process_audio_array(
 			save_audio,
 			save_transcript,
 			transcribe_audio,
-			trim_audio_edges,
+			trim_saved_audio_file,
 		)
 	except ImportError as exc:
 		missing = str(exc)
@@ -115,22 +117,6 @@ def process_audio_array(
 		raise ValueError("Expected mono audio input.")
 	if len(audio) == 0:
 		raise ValueError("No audio provided.")
-
-	if trim_silence:
-		trimmed_audio, cut_start, cut_end = trim_audio_edges(
-			audio,
-			sample_rate=args.sample_rate,
-			top_db=args.trim_top_db,
-		)
-		if len(trimmed_audio) > 0:
-			audio = trimmed_audio
-			kept_seconds = len(audio) / float(args.sample_rate)
-			print(
-				f"Trimmed silence: start {cut_start:.2f}s, end {cut_end:.2f}s "
-				f"(kept {kept_seconds:.2f}s)"
-			)
-		else:
-			print("Silence trimming removed all audio; keeping original recording.")
 
 	# Use one timestamp so generated files are tied to the same run.
 	run_time = datetime.now()
@@ -147,6 +133,7 @@ def process_audio_array(
 				TRANSCRIPT_OUTPUT_DIR / f"{candidate}.txt",
 				Path("Filler_analysis") / f"{candidate}.{args.filler_output_format}",
 				SPEED_OUTPUT_DIR / f"{candidate}.json",
+				PITCH_OUTPUT_DIR / f"{candidate}.json",
 			]
 			if args.plot_pitch and args.pitch_plot_output is None:
 				conflicts.append(AUDIO_OUTPUT_DIR / f"{candidate}_pitch.png")
@@ -160,6 +147,17 @@ def process_audio_array(
 	# 2) Save audio
 	audio_filename = f"{output_stem}.wav"
 	audio_path = save_audio(audio, filename=audio_filename, sample_rate=args.sample_rate)
+
+	if trim_silence:
+		trim_info = trim_saved_audio_file(audio_path, top_db=args.trim_top_db)
+		if trim_info["trimmed"]:
+			print(
+				f"Trimmed saved audio: start {trim_info['start_seconds']:.2f}s, "
+				f"end {trim_info['end_seconds']:.2f}s "
+				f"(kept {trim_info['kept_seconds']:.2f}s)"
+			)
+		elif trim_info["removed_all"]:
+			print("Silence trimming would remove all audio; keeping saved recording unchanged.")
 
 	# 3) Transcribe
 	transcript = transcribe_audio(audio_path, model_size=args.model)
@@ -243,11 +241,32 @@ def process_audio_array(
 		)
 	]
 
+	pitch_output = PITCH_OUTPUT_DIR / f"{output_stem}.json"
+	pitch_export = {
+		"recording_name": recording_name or output_stem,
+		"category": category or "",
+		"audio_path": str(audio_path),
+		"transcript_path": str(transcript_path),
+		"pitch": pitch_summary,
+		"pitch_series": pitch_series,
+		"detector_settings": {
+			"backend": args.backend,
+			"fmin": float(args.fmin),
+			"fmax": float(args.fmax),
+			"trim_silence": bool(trim_silence),
+			"trim_top_db": float(args.trim_top_db),
+			"trim_unvoiced_edges": bool(not args.no_trim_unvoiced_edges),
+		},
+		"created_at": run_time.isoformat(timespec="seconds"),
+	}
+	pitch_output.write_text(json.dumps(pitch_export, indent=2), encoding="utf-8")
+
 	return {
 		"audio_path": str(audio_path),
 		"transcript_path": str(transcript_path),
 		"filler_output": str(filler_output),
 		"speed_output": str(speed_output),
+		"pitch_output": str(pitch_output),
 		"pitch_plot_path": str(pitch_plot_path) if pitch_plot_path else None,
 		"transcript": transcript,
 		"wpm": round(wpm, 2),
@@ -298,6 +317,7 @@ def print_summary(summary: dict[str, Any]) -> None:
 	print(f"Audio: {summary['audio_path']}")
 	print(f"Transcript file: {summary['transcript_path']}")
 	print(f"Speed metrics exported to: {summary['speed_output']}")
+	print(f"Pitch analysis exported to: {summary['pitch_output']}")
 	print(f"Filler analysis exported to: {summary['filler_output']}")
 	if summary["pitch_plot_path"] is not None:
 		print(f"Pitch plot saved to: {summary['pitch_plot_path']}")

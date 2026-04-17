@@ -130,6 +130,50 @@ def trim_audio_edges(audio, sample_rate=SAMPLE_RATE, top_db=TRIM_TOP_DB):
     return trimmed.astype(np.float32), removed_start, removed_end
 
 
+def trim_saved_audio_file(audio_path, top_db=TRIM_TOP_DB):
+    """Trim leading/trailing silence from an existing audio file and overwrite it."""
+    audio_array, sample_rate = sf.read(str(audio_path))
+    audio_array = np.asarray(audio_array, dtype=np.float32)
+    if audio_array.ndim > 1:
+        audio_array = np.mean(audio_array, axis=1)
+
+    if len(audio_array) == 0:
+        return {
+            "trimmed": False,
+            "removed_all": False,
+            "start_seconds": 0.0,
+            "end_seconds": 0.0,
+            "kept_seconds": 0.0,
+        }
+
+    trimmed_audio, cut_start, cut_end = trim_audio_edges(
+        audio_array,
+        sample_rate=sample_rate,
+        top_db=top_db,
+    )
+
+    if len(trimmed_audio) == 0:
+        return {
+            "trimmed": False,
+            "removed_all": True,
+            "start_seconds": float(cut_start),
+            "end_seconds": float(cut_end),
+            "kept_seconds": 0.0,
+        }
+
+    was_trimmed = len(trimmed_audio) < len(audio_array)
+    if was_trimmed:
+        sf.write(str(audio_path), trimmed_audio.astype(np.float32), sample_rate)
+
+    return {
+        "trimmed": was_trimmed,
+        "removed_all": False,
+        "start_seconds": float(cut_start),
+        "end_seconds": float(cut_end),
+        "kept_seconds": float(len(trimmed_audio) / float(sample_rate)),
+    }
+
+
 def save_transcript(transcript, audio_path, timestamp, filename_stem=None):
     """
     Saves transcript text to a TXT file with a date/time headline.

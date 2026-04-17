@@ -1,0 +1,8 @@
+{
+  "transcript_path": "Transcripts\\Recording_3_2.txt",
+  "dataset_path": "C:\\Users\\cheli\\OneDrive\\Dokumenter\\GitHub\\PersonalData\\PersonalData\\backend\\FillerWordData.json",
+  "total_words": 20,
+  "total_filler_words": 0,
+  "filler_percentage": 0.0,
+  "filler_word_counts": {}
+}
