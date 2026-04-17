@@ -1,0 +1,11 @@
+{
+  "transcript_path": "Transcripts\\YetAgain.txt",
+  "dataset_path": "C:\\Users\\cheli\\OneDrive\\Dokumenter\\GitHub\\PersonalData\\PersonalData\\backend\\FillerWordData.json",
+  "total_words": 30,
+  "total_filler_words": 2,
+  "filler_percentage": 6.67,
+  "filler_word_counts": {
+    "i guess": 1,
+    "yeah": 1
+  }
+}

@@ -10,13 +10,15 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Start the local app:
+Start the local app by copy pasting this into the terminal:
 
 ```bash
 python main.py --serve --port 8000
 ```
 
 Then open `http://127.0.0.1:8000` in your browser.
+
+
 
 ## UI-only design mode
 
