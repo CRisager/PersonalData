@@ -819,8 +819,20 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 	const smoothedValues = smoothValues(completePoints.map((point) => point.pitch), 7);
 	const chartPoints = completePoints.map((point, index) => ({
 		time: point.time,
-		pitch: smoothedValues[index],
+		pitch: Number.isFinite(smoothedValues[index]) ? smoothedValues[index] : null,
 	}));
+
+	const durationSeconds = Math.max(1, chartPoints[chartPoints.length - 1].time || 1);
+	const width = 560;
+	const height = 250;
+	const margin = { top: 12, right: 18, bottom: 50, left: 52 };
+	const plotWidth = width - margin.left - margin.right;
+	const plotHeight = height - margin.top - margin.bottom;
+	const yMin = -10;
+	const yMax = 10;
+
+	const xScale = (seconds) => margin.left + ((seconds / durationSeconds) * plotWidth);
+	const yScale = (value) => margin.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
 
 	const lineSegments = [];
 	let currentSegment = [];
@@ -840,18 +852,6 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 	if (currentSegment.length > 0) {
 		lineSegments.push(currentSegment.join(" "));
 	}
-
-	const durationSeconds = Math.max(1, chartPoints[chartPoints.length - 1].time || 1);
-	const width = 560;
-	const height = 250;
-	const margin = { top: 12, right: 18, bottom: 50, left: 52 };
-	const plotWidth = width - margin.left - margin.right;
-	const plotHeight = height - margin.top - margin.bottom;
-	const yMin = -10;
-	const yMax = 10;
-
-	const xScale = (seconds) => margin.left + ((seconds / durationSeconds) * plotWidth);
-	const yScale = (value) => margin.top + ((yMax - value) / (yMax - yMin)) * plotHeight;
 
 	const upperBandTop = yScale(5);
 	const upperBandBottom = yScale(3);
