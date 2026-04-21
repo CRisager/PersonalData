@@ -1,0 +1,8 @@
+{
+  "transcript_path": "Transcripts/Test_before_testing.txt",
+  "dataset_path": "/Users/andreabolvig/Documents/GitHub/PersonalData/backend/FillerWordData.json",
+  "total_words": 7,
+  "total_filler_words": 0,
+  "filler_percentage": 0.0,
+  "filler_word_counts": {}
+}
