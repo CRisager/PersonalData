@@ -97,6 +97,7 @@ const MAX_STORED_PEAKS = 50000;
 const WAVEFORM_BAR_SPACING = 3;
 const Recommended_Speed_Range = { startDeg: 45, endDeg: 135 };
 const Historic_Average_Pace = 130;
+const Fixed_avg = true;
 const PITCH_HISTORY_STORAGE_KEY = "pitchVariationHistory";
 const PITCH_HISTORY_DECAY = 0.82;
 const PACE_BAND_LABEL_ELLIPSE = {
@@ -881,13 +882,21 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 	}
 
 	let previousLineMarkup = "";
-	if (Number.isFinite(previousAverageVariation) && previousAverageVariation > 0) {
-		const previousPositive = yScale(previousAverageVariation);
-		const previousNegative = yScale(-previousAverageVariation);
-		previousLineMarkup = `
-			<line x1="${margin.left}" y1="${previousPositive.toFixed(2)}" x2="${(margin.left + plotWidth).toFixed(2)}" y2="${previousPositive.toFixed(2)}" stroke="#666563" stroke-width="1.5" stroke-dasharray="5 4" />
-			<line x1="${margin.left}" y1="${previousNegative.toFixed(2)}" x2="${(margin.left + plotWidth).toFixed(2)}" y2="${previousNegative.toFixed(2)}" stroke="#666563" stroke-width="1.5" stroke-dasharray="5 4" />
-		`;
+	const hasUpper = previousAverageVariation
+		&& Number.isFinite(previousAverageVariation.upper);
+	const hasLower = previousAverageVariation
+		&& Number.isFinite(previousAverageVariation.lower);
+	if (hasUpper || hasLower) {
+		const lineMarkup = [];
+		if (hasUpper) {
+			const previousUpper = yScale(previousAverageVariation.upper);
+			lineMarkup.push(`<line x1="${margin.left}" y1="${previousUpper.toFixed(2)}" x2="${(margin.left + plotWidth).toFixed(2)}" y2="${previousUpper.toFixed(2)}" stroke="#666563" stroke-width="1.5" stroke-dasharray="5 4" />`);
+		}
+		if (hasLower) {
+			const previousLower = yScale(previousAverageVariation.lower);
+			lineMarkup.push(`<line x1="${margin.left}" y1="${previousLower.toFixed(2)}" x2="${(margin.left + plotWidth).toFixed(2)}" y2="${previousLower.toFixed(2)}" stroke="#666563" stroke-width="1.5" stroke-dasharray="5 4" />`);
+		}
+		previousLineMarkup = lineMarkup.join("\n");
 	}
 
 	const axisLabels = xTicks.map((tick) => `
@@ -1313,6 +1322,12 @@ function showLearnStep3(result) {
 	const currentVariation = calculatePitchVariation(pitchSeries, pitchSummary);
 	const history = loadPitchVariationHistory();
 	const previousAverage = calculateRecencyWeightedAverage(history, PITCH_HISTORY_DECAY);
+	const previousAverageVariation = Fixed_avg
+		? { lower: -3, upper: 2 }
+		: {
+			lower: Number.isFinite(previousAverage) ? -previousAverage : NaN,
+			upper: Number.isFinite(previousAverage) ? previousAverage : NaN,
+		};
 
 	if (Number.isFinite(currentVariation)) {
 		storePitchVariationHistory([...history, currentVariation]);
@@ -1325,7 +1340,7 @@ function showLearnStep3(result) {
 	if (learnPitchChart) {
 		learnPitchChart.innerHTML = buildPitchVariationChartMarkup({
 			pitchSeries,
-			previousAverageVariation: Number.isFinite(previousAverage) ? previousAverage : NaN,
+			previousAverageVariation,
 		}).markup;
 	}
 
