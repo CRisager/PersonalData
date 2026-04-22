@@ -1,0 +1,10 @@
+{
+  "recording_name": "spain",
+  "category": "Private use",
+  "audio_path": "Sound_recordings\\spain.wav",
+  "transcript_path": "Transcripts\\spain.txt",
+  "duration_seconds": 67.744,
+  "total_words": 157,
+  "wpm": 139.05,
+  "created_at": "2026-04-21T11:42:43"
+}
