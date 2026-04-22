@@ -1,0 +1,107 @@
+{
+  "recording_name": "Test before testing",
+  "category": "Other",
+  "audio_path": "Sound_recordings/Test_before_testing.wav",
+  "transcript_path": "Transcripts/Test_before_testing.txt",
+  "pitch": {
+    "mean_pitch": 221.19,
+    "min_pitch": 152.77,
+    "max_pitch": 316.32,
+    "median_pitch": 160.93,
+    "mean_pitch_semitones": 4.52,
+    "min_pitch_semitones": -0.9,
+    "max_pitch_semitones": 11.7,
+    "median_pitch_semitones": 0.0,
+    "pitch_reference_hz": 160.93,
+    "voiced_ratio": 1.0
+  },
+  "pitch_series": [
+    {
+      "time": 2.336,
+      "pitch_hz": 152.77,
+      "pitch_semitones": -0.9,
+      "voiced": true
+    },
+    {
+      "time": 2.368,
+      "pitch_hz": 154.55,
+      "pitch_semitones": -0.7,
+      "voiced": true
+    },
+    {
+      "time": 2.4,
+      "pitch_hz": 154.55,
+      "pitch_semitones": -0.7,
+      "voiced": true
+    },
+    {
+      "time": 2.432,
+      "pitch_hz": 154.55,
+      "pitch_semitones": -0.7,
+      "voiced": true
+    },
+    {
+      "time": 2.464,
+      "pitch_hz": 155.45,
+      "pitch_semitones": -0.6,
+      "voiced": true
+    },
+    {
+      "time": 2.496,
+      "pitch_hz": 157.25,
+      "pitch_semitones": -0.4,
+      "voiced": true
+    },
+    {
+      "time": 2.528,
+      "pitch_hz": 160.93,
+      "pitch_semitones": 0.0,
+      "voiced": true
+    },
+    {
+      "time": 2.56,
+      "pitch_hz": 211.12,
+      "pitch_semitones": 4.7,
+      "voiced": true
+    },
+    {
+      "time": 2.592,
+      "pitch_hz": 316.32,
+      "pitch_semitones": 11.7,
+      "voiced": true
+    },
+    {
+      "time": 2.624,
+      "pitch_hz": 314.5,
+      "pitch_semitones": 11.6,
+      "voiced": true
+    },
+    {
+      "time": 2.656,
+      "pitch_hz": 314.5,
+      "pitch_semitones": 11.6,
+      "voiced": true
+    },
+    {
+      "time": 2.688,
+      "pitch_hz": 316.32,
+      "pitch_semitones": 11.7,
+      "voiced": true
+    },
+    {
+      "time": 2.72,
+      "pitch_hz": 312.69,
+      "pitch_semitones": 11.5,
+      "voiced": true
+    }
+  ],
+  "detector_settings": {
+    "backend": "librosa",
+    "fmin": 80.0,
+    "fmax": 400.0,
+    "trim_silence": true,
+    "trim_top_db": 30.0,
+    "trim_unvoiced_edges": true
+  },
+  "created_at": "2026-04-21T20:35:33"
+}
