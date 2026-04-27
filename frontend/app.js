@@ -37,12 +37,13 @@ const stepLearn = document.getElementById("stepLearn");
 const audioPreview = document.getElementById("audioPreview");
 const recordingName = document.getElementById("recordingName");
 const categorySelect = document.getElementById("categorySelect");
-const learnDonut = document.getElementById("learnDonut");
-const learnWordList = document.getElementById("learnWordList");
-const learnSummaryText = document.getElementById("learnSummaryText");
-const learnMessage = document.getElementById("learnMessage");
-const learnFillerLabel = document.getElementById("learnFillerLabel");
-const learnPreviousLabel = document.getElementById("learnPreviousLabel");
+const learnDonut = document.getElementById("learnJarContainer");
+const learnJarFill = document.getElementById("learnJarFill");
+const learnJarFillerText = document.getElementById("learnJarFillerText");
+const learnJarPreviousLine = document.getElementById("learnJarPreviousLine");
+const learnJarPreviousLabel = document.getElementById("learnJarPreviousLabel");
+const learnFillerLabel = learnJarFillerText;
+const learnPreviousLabel = learnJarPreviousLabel;
 const learnNextButton = document.getElementById("learnNextButton");
 const learnViewStep2 = document.getElementById("learnViewStep2");
 const learnViewStep3 = document.getElementById("learnViewStep3");
@@ -64,6 +65,10 @@ const learnPitchChart = document.getElementById("learnPitchChart");
 const learnPitchMessage = document.getElementById("learnPitchMessage");
 const learnPitchBackButton = document.getElementById("learnPitchBackButton");
 const learnPitchFinishButton = document.getElementById("learnPitchFinishButton");
+const learnInfoTriggers = Array.from(document.querySelectorAll(".learn-info-trigger"));
+const learnInfoOverlay = document.getElementById("learnInfoOverlay");
+const learnInfoPopupTitle = document.getElementById("learnInfoPopupTitle");
+const learnInfoPopupBody = document.getElementById("learnInfoPopupBody");
 const previewWaveform = document.getElementById("previewWaveform");
 const previewCtx = previewWaveform.getContext("2d");
 const waveformCanvas = document.getElementById("waveform");
@@ -87,7 +92,6 @@ let recordedChunks = [];
 let recordedAudioBlob = null;
 let recordedAudioUrl = "";
 let recordedDurationMs = 0;
-let recordingIndex = 1;
 let isSaving = false;
 let currentLearnStep = 1;
 let currentLearnResult = null;
@@ -120,6 +124,74 @@ const UI_PREVIEW_MODE = queryParams.get("uiPreview") === "1"
 	|| queryParams.get("design") === "1"
 	|| window.self !== window.top;
 const PREVIEW_SCREEN = (queryParams.get("previewScreen") || queryParams.get("screen") || "").toLowerCase();
+
+const LEARN_INFO_POPUP_CONTENT = {
+	filler: {
+		title: "Filler words",
+		bodyHtml: `
+			<p>Words like <span class="learn-info-popup-highlight">&ldquo;um&rdquo;</span>, <span class="learn-info-popup-highlight">&ldquo;uh&rdquo;</span>, and <span class="learn-info-popup-highlight">&ldquo;like&rdquo;</span> are completely normal, but using too many of them can weaken your message. They may make you sound less <span class="learn-info-popup-highlight">confident</span>, <span class="learn-info-popup-highlight">prepared</span>, and make it harder to <span class="learn-info-popup-highlight">follow</span>.</p>
+			<p>When speaking, clearer language helps your ideas land more effectively and keeps listeners focused on what you have to say.</p>
+			<p><span class="learn-info-popup-highlight">Reducing filler words</span> helps you come across as more:</p>
+			<ul class="learn-info-popup-list">
+				<li>Confident</li>
+				<li>Credible</li>
+				<li>Clear</li>
+				<li>Professional</li>
+				<li>Engaging</li>
+			</ul>
+		`,
+	},
+	pace: {
+		title: "Pace",
+		bodyHtml: `
+			<p>A good <span class="learn-info-popup-highlight">pace</span> shapes how your speech <span class="learn-info-popup-highlight">feels</span> to an audience.</p>
+			<p>If you speak too fast, listeners may <span class="learn-info-popup-highlight">miss key points</span> or feel <span class="learn-info-popup-highlight">overwhelmed</span>. If you speak too slowly, your message can <span class="learn-info-popup-highlight">lose energy</span> and momentum.</p>
+			<p>A well-paced delivery makes your speech <span class="learn-info-popup-highlight">easier to process</span> and helps your audience stay <span class="learn-info-popup-highlight">attentive</span> from start to finish.</p>
+			<p>A <span class="learn-info-popup-highlight">balanced speaking pace</span> helps you sound more:</p>
+			<ul class="learn-info-popup-list">
+				<li>Dynamic</li>
+				<li>Natural</li>
+				<li>Intentional</li>
+				<li>Engaging</li>
+			</ul>
+		`,
+	},
+	pitch: {
+		title: "Pitch variation",
+		bodyHtml: `
+			<p>Your voice's ups and downs greatly affect how your speech is <span class="learn-info-popup-highlight">perceived</span>.</p>
+			<p>Too little variation (<span class="learn-info-popup-highlight">close to 0</span>) can make you sound <span class="learn-info-popup-highlight">flat</span> or <span class="learn-info-popup-highlight">monotone</span>, while too much (<span class="learn-info-popup-highlight">above +/-5</span>) can sound <span class="learn-info-popup-highlight">exaggerated</span> or <span class="learn-info-popup-highlight">uncontrolled</span>.</p>
+			<p>A balanced variation helps <span class="learn-info-popup-highlight">emphasize important words</span>, convey <span class="learn-info-popup-highlight">emotions</span>, and give your speech a more pleasant <span class="learn-info-popup-highlight">rhythm</span>.</p>
+			<p>A good <span class="learn-info-popup-highlight">pitch variation</span> helps you sound more:</p>
+			<ul class="learn-info-popup-list">
+				<li>Expressive</li>
+				<li>Natural</li>
+				<li>Engaging</li>
+				<li>Warm</li>
+				<li>Dynamic</li>
+			</ul>
+		`,
+	},
+};
+
+function openLearnInfoPopup(topic) {
+	if (!learnInfoOverlay || !learnInfoPopupTitle || !learnInfoPopupBody) {
+		return;
+	}
+
+	const selectedContent = LEARN_INFO_POPUP_CONTENT[topic] || LEARN_INFO_POPUP_CONTENT.filler;
+	learnInfoPopupTitle.textContent = selectedContent.title;
+	learnInfoPopupBody.innerHTML = selectedContent.bodyHtml;
+	learnInfoOverlay.hidden = false;
+}
+
+function closeLearnInfoPopup() {
+	if (!learnInfoOverlay) {
+		return;
+	}
+
+	learnInfoOverlay.hidden = true;
+}
 
 function createSilentWavBlob(durationMs = 2200, sampleRate = 16000) {
 	const channels = 1;
@@ -353,6 +425,39 @@ function sanitizeFilename(value) {
 	const base = (value || "recording").trim();
 	const cleaned = base.replace(/[^A-Za-z0-9_-]+/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
 	return cleaned || "recording";
+}
+
+function isAutoGeneratedRecordingName(value) {
+	return /^Recording_\d+$/i.test(String(value || "").trim());
+}
+
+async function syncNextDefaultRecordingName({ force = false } = {}) {
+	if (UI_PREVIEW_MODE) {
+		return;
+	}
+
+	const currentName = recordingName.value.trim();
+	if (!force && currentName && !isAutoGeneratedRecordingName(currentName)) {
+		return;
+	}
+
+	try {
+		const response = await fetch(buildApiUrl("/api/next-recording-name"));
+		if (!response.ok) {
+			return;
+		}
+
+		const payload = await response.json();
+		const nextName = String(payload && payload.recording_name ? payload.recording_name : "").trim();
+		if (!nextName) {
+			return;
+		}
+
+		recordingName.value = nextName;
+		syncHeaderWithName();
+	} catch (_error) {
+		// Keep current value when backend is unreachable.
+	}
 }
 
 function audioBufferToWavBlob(audioBuffer) {
@@ -595,6 +700,7 @@ function drawWaveform() {
 }
 
 function showRecordingView() {
+	closeLearnInfoPopup();
 	idleView.hidden = true;
 	recordingView.hidden = false;
 	confirmView.hidden = true;
@@ -608,6 +714,7 @@ function showRecordingView() {
 }
 
 function showIdleView() {
+	closeLearnInfoPopup();
 	learnView.hidden = true;
 	if (learnViewStep3) {
 		learnViewStep3.hidden = true;
@@ -621,6 +728,7 @@ function showIdleView() {
 }
 
 function showConfirmView() {
+	closeLearnInfoPopup();
 	idleView.hidden = true;
 	recordingView.hidden = true;
 	confirmView.hidden = false;
@@ -629,6 +737,7 @@ function showConfirmView() {
 		learnViewStep3.hidden = true;
 	}
 	syncHeaderWithName();
+	void syncNextDefaultRecordingName();
 	renderPreviewWaveform();
 	previewTime.textContent = formatTime(recordedDurationMs);
 	setStep("confirm");
@@ -707,6 +816,37 @@ function calculatePitchVariation(pitchSeries, pitchSummary = {}) {
 	}
 
 	return NaN;
+}
+
+function getPitchVariationLearnMessage(pitchSeries, pitchSummary = {}) {
+	const values = (Array.isArray(pitchSeries) ? pitchSeries : [])
+		.map((point) => Number(point && (point.pitch_semitones ?? point.pitch_st)))
+		.filter((value) => Number.isFinite(value));
+
+	const summaryMin = Number(pitchSummary.min_pitch_semitones);
+	const summaryMax = Number(pitchSummary.max_pitch_semitones);
+	const observedMin = Number.isFinite(summaryMin)
+		? summaryMin
+		: (values.length > 0 ? Math.min(...values) : NaN);
+	const observedMax = Number.isFinite(summaryMax)
+		? summaryMax
+		: (values.length > 0 ? Math.max(...values) : NaN);
+
+	const exceedsRecommendedBand = (Number.isFinite(observedMax) && observedMax > 5)
+		|| (Number.isFinite(observedMin) && observedMin < -5);
+	if (exceedsRecommendedBand) {
+		return "Careful! You exceed the recommended variation, which can make your voice sound exaggerated or uncontrolled.";
+	}
+
+	const reachesRecommendedBand = values.some((value) => (
+		(value >= 3 && value <= 5)
+		|| (value <= -3 && value >= -5)
+	));
+	if (!reachesRecommendedBand) {
+		return "Careful your voice doesn't become too monotone. Remember to e.g. go up on questions and down on statements.";
+	}
+
+	return "Good job! Keep variating between the upper and lower recommended band to sound perfectly engaging.";
 }
 
 function formatPitchAxisTime(seconds) {
@@ -928,7 +1068,7 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 				<text x="${(margin.left + plotWidth / 2).toFixed(2)}" y="${(height - 4).toFixed(2)}" text-anchor="middle" class="pitch-axis-title">Time (sec)</text>
 				<text x="16" y="${(margin.top + plotHeight / 2).toFixed(2)}" text-anchor="middle" class="pitch-axis-title" transform="rotate(-90 16 ${(margin.top + plotHeight / 2).toFixed(2)})">
 					<tspan class="pitch-axis-title-main">Pitch</tspan>
-					<tspan class="pitch-axis-title-sub"> (semitones re median Hz)</tspan>
+					<tspan class="pitch-axis-title-sub"> (semitones)</tspan>
 				</text>
 			</svg>
 		`,
@@ -1062,44 +1202,78 @@ function renderLearnWordList(sortedPairs) {
 		.join("");
 }
 
-function positionLearnPercentageLabels(fillerPercentage, previousAveragePercentage) {
-	const size = learnDonut.clientWidth || 128.294;
-	const center = size / 2;
-	const radius = center;
+function renderLearnJar(fillerPercentage, previousAveragePercentage) {
+	const JAR_WIDTH = 77;
+	const JAR_HEIGHT = 160;
+	const JAR_VIEWBOX_WIDTH = 100;
+	const JAR_VIEWBOX_HEIGHT = 180;
+	const JAR_CORNER_RADIUS = 20;
 
-	function polarFromTopClockwise(degrees, radialDistance) {
-		const theta = (degrees * Math.PI) / 180;
-		return {
-			x: center + (Math.sin(theta) * radialDistance),
-			y: center - (Math.cos(theta) * radialDistance),
-		};
+	// Calculate scale factors for viewBox to actual pixel dimensions
+	const scaleX = JAR_WIDTH / JAR_VIEWBOX_WIDTH;
+	const scaleY = JAR_HEIGHT / JAR_VIEWBOX_HEIGHT;
+
+	// Clamp percentage to 0-100
+	const clampedFillerPct = Math.max(0, Math.min(100, fillerPercentage));
+	const clampedPreviousPct = Math.max(0, Math.min(100, previousAveragePercentage));
+
+	// Calculate fill height in viewBox coordinates
+	// If less than 10%, use 10% height minimum for readability
+	const displayFillerPct = Math.max(10, clampedFillerPct);
+	const fillHeightViewBox = (displayFillerPct / 100) * JAR_VIEWBOX_HEIGHT;
+	const fillY = JAR_VIEWBOX_HEIGHT - fillHeightViewBox;
+	const fillRadius = Math.min(JAR_CORNER_RADIUS, fillHeightViewBox / 2, JAR_VIEWBOX_WIDTH / 2);
+
+	// Update filler area height
+	if (learnJarFill) {
+		const roundedBottomFillPath = [
+			`M 0 ${fillY.toFixed(2)}`,
+			`H 100`,
+			`V ${(JAR_VIEWBOX_HEIGHT - fillRadius).toFixed(2)}`,
+			`A ${fillRadius.toFixed(2)} ${fillRadius.toFixed(2)} 0 0 1 ${(100 - fillRadius).toFixed(2)} ${JAR_VIEWBOX_HEIGHT.toFixed(2)}`,
+			`H ${fillRadius.toFixed(2)}`,
+			`A ${fillRadius.toFixed(2)} ${fillRadius.toFixed(2)} 0 0 1 0 ${(JAR_VIEWBOX_HEIGHT - fillRadius).toFixed(2)}`,
+			"Z",
+		].join(" ");
+		learnJarFill.setAttribute("d", roundedBottomFillPath);
 	}
 
-	function clamp(value, min, max) {
-		return Math.max(min, Math.min(max, value));
+	// Update current percentage text
+	if (learnJarFillerText) {
+		learnJarFillerText.textContent = `${Math.round(clampedFillerPct)}%`;
+		// Center text vertically in the red fill area (or minimum 10% area)
+		const textYViewBox = JAR_VIEWBOX_HEIGHT - (fillHeightViewBox / 2);
+		learnJarFillerText.setAttribute("y", textYViewBox.toFixed(2));
 	}
 
-	if (learnFillerLabel.textContent) {
-		const fillerMidDegrees = (fillerPercentage / 100) * 180;
-		const fillerRadius = fillerPercentage < 10 ? radius * 0.76 : radius * 0.67;
-		const fillerPoint = polarFromTopClockwise(fillerMidDegrees, fillerRadius);
-		learnFillerLabel.style.left = `${clamp(fillerPoint.x, 14, size - 14)}px`;
-		learnFillerLabel.style.top = `${clamp(fillerPoint.y, 14, size - 14)}px`;
-		learnFillerLabel.style.display = "block";
+	// Update previous average line and label
+	if (Number.isFinite(clampedPreviousPct) && clampedPreviousPct > 0) {
+		// Line at y-coordinate representing the previous average percentage
+		const lineYViewBox = JAR_VIEWBOX_HEIGHT - ((clampedPreviousPct / 100) * JAR_VIEWBOX_HEIGHT);
+
+		if (learnJarPreviousLine) {
+			learnJarPreviousLine.setAttribute("y1", lineYViewBox.toFixed(2));
+			learnJarPreviousLine.setAttribute("y2", lineYViewBox.toFixed(2));
+			learnJarPreviousLine.style.display = "block";
+		}
+
+		// Label text positioned to the left of jar at the same y-height
+		if (learnJarPreviousLabel) {
+			learnJarPreviousLabel.textContent = `${Math.round(clampedPreviousPct)}%`;
+			// Convert viewBox y-coordinate to pixel coordinate
+			const labelPixelY = lineYViewBox * scaleY;
+			learnJarPreviousLabel.style.top = `${labelPixelY.toFixed(2)}px`;
+			learnJarPreviousLabel.style.transform = "translate(-100%, -50%)";
+			learnJarPreviousLabel.style.display = "block";
+		}
 	} else {
-		learnFillerLabel.style.display = "none";
-	}
-
-	if (learnPreviousLabel.textContent) {
-		const previousDegrees = (previousAveragePercentage / 100) * 360;
-		const dottedLineLength = radius;
-		const lineMidPoint = polarFromTopClockwise(previousDegrees, dottedLineLength * 0.52);
-		const previousY = lineMidPoint.y + 12;
-		learnPreviousLabel.style.left = `${clamp(lineMidPoint.x, 14, size - 14)}px`;
-		learnPreviousLabel.style.top = `${clamp(previousY, 14, size - 10)}px`;
-		learnPreviousLabel.style.display = "block";
-	} else {
-		learnPreviousLabel.style.display = "none";
+		// Hide previous average elements if no data
+		if (learnJarPreviousLine) {
+			learnJarPreviousLine.style.display = "none";
+		}
+		if (learnJarPreviousLabel) {
+			learnJarPreviousLabel.style.display = "none";
+		}
 	}
 }
 
@@ -1218,6 +1392,7 @@ function showLearnView(result) {
 }
 
 function showLearnStep(step, result) {
+	closeLearnInfoPopup();
 	const recordingTitle = recordingName.value ? recordingName.value.trim() : "Recording";
 	pageTitle.textContent = recordingTitle || "Recording";
 
@@ -1246,7 +1421,6 @@ function showLearnStep1(result) {
 		? Math.max(0, Math.min(100, fillerPercentageRaw))
 		: 0;
 	const nonFillerPercentage = Math.max(0, 100 - fillerPercentage);
-	const fillerAngle = `${(fillerPercentage / 100) * 360}deg`;
 	const sortedPairs = getSortedFillerPairs(fillerMetrics.filler_word_counts);
 
 	const history = loadFillerHistory();
@@ -1255,18 +1429,13 @@ function showLearnStep1(result) {
 	const previousAverageClamped = Number.isFinite(previousAverage)
 		? Math.max(0, Math.min(100, previousAverage))
 		: 0;
-	const previousAngle = `${(previousAverageClamped / 100) * 360}deg`;
 
-	learnDonut.style.setProperty("--filler-angle", fillerAngle);
-	learnDonut.style.setProperty("--previous-angle", previousAngle);
 	learnDonut.setAttribute(
 		"aria-label",
 		`Filler words ${fillerPercentage.toFixed(1)} percent, previous average ${previousAverageClamped.toFixed(1)} percent, non-filler words ${nonFillerPercentage.toFixed(1)} percent`
 	);
 
-	learnFillerLabel.textContent = fillerPercentage >= 1 ? `${Math.round(fillerPercentage)}%` : "";
-	learnPreviousLabel.textContent = previousAverageClamped >= 1 ? `${Math.round(previousAverageClamped)}%` : "";
-	positionLearnPercentageLabels(fillerPercentage, previousAverageClamped);
+	renderLearnJar(fillerPercentage, previousAverageClamped);
 
 	learnSummaryText.textContent = Number.isFinite(previousAverage)
 		? `Below, you can see your filler-word percentage for this session, along with your previous average.\nSee your top 5 filler words and how often you said them`
@@ -1346,7 +1515,7 @@ function showLearnStep3(result) {
 
 	if (learnPitchMessage) {
 		learnPitchMessage.textContent = Number.isFinite(currentVariation)
-			? `Current pitch variation: ${currentVariation.toFixed(2)} semitones. Previous average range: ${Number.isFinite(previousAverage) ? previousAverage.toFixed(2) : "not available"} semitones.`
+			? getPitchVariationLearnMessage(pitchSeries, pitchSummary)
 			: "No pitch variation data was available for this recording.";
 	}
 
@@ -1535,8 +1704,7 @@ function stopRecording() {
 		recordingStartMs = 0;
 		elapsedBeforePauseMs = 0;
 		isPaused = false;
-		recordingIndex += 1;
-		recordingName.value = `Recording_${recordingIndex}`;
+		recordingName.value = "";
 		showConfirmView();
 		resetUiAfterStop();
 		showPreviewModeHint();
@@ -1569,8 +1737,7 @@ function stopRecording() {
 	recordingStartMs = 0;
 	elapsedBeforePauseMs = 0;
 	isPaused = false;
-	recordingIndex += 1;
-	recordingName.value = `Recording_${recordingIndex}`;
+	recordingName.value = "";
 
 	showConfirmView();
 	resetUiAfterStop();
@@ -1670,6 +1837,33 @@ function togglePreviewPlayback() {
 	audioPreview.pause();
 }
 
+for (const trigger of learnInfoTriggers) {
+	trigger.addEventListener("click", () => {
+		const topic = trigger.dataset.infoTopic || "filler";
+		openLearnInfoPopup(topic);
+	});
+
+	trigger.addEventListener("keydown", (event) => {
+		if (event.key !== "Enter" && event.key !== " ") {
+			return;
+		}
+
+		event.preventDefault();
+		const topic = trigger.dataset.infoTopic || "filler";
+		openLearnInfoPopup(topic);
+	});
+}
+
+if (learnInfoOverlay) {
+	learnInfoOverlay.addEventListener("click", closeLearnInfoPopup);
+}
+
+document.addEventListener("keydown", (event) => {
+	if (event.key === "Escape" && learnInfoOverlay && !learnInfoOverlay.hidden) {
+		closeLearnInfoPopup();
+	}
+});
+
 startButton.addEventListener("click", startRecording);
 pauseButton.addEventListener("click", togglePause);
 stopButton.addEventListener("click", stopRecording);
@@ -1685,7 +1879,20 @@ if (learnPitchFinishButton) {
 	learnPitchFinishButton.addEventListener("click", clearPreviewAndReturnToIdle);
 }
 recordingName.addEventListener("input", syncHeaderWithName);
-editNameButton.addEventListener("click", () => recordingName.focus());
+recordingName.addEventListener("focus", () => {
+	if (isAutoGeneratedRecordingName(recordingName.value)) {
+		recordingName.select();
+	}
+});
+recordingName.addEventListener("click", () => {
+	if (isAutoGeneratedRecordingName(recordingName.value)) {
+		recordingName.select();
+	}
+});
+editNameButton.addEventListener("click", () => {
+	recordingName.focus();
+	recordingName.select();
+});
 previewPlayButton.addEventListener("click", togglePreviewPlayback);
 audioPreview.addEventListener("play", () => updatePreviewPlayButton(true));
 audioPreview.addEventListener("pause", () => updatePreviewPlayButton(false));
@@ -1699,3 +1906,33 @@ audioPreview.addEventListener("loadedmetadata", () => {
 drawIdleWaveformLine();
 renderPreviewWaveform();
 initializePreviewScreen();
+void syncNextDefaultRecordingName({ force: true });
+// Bottom nav: divide into 5 equal zones and handle navigation clicks
+(function setupBottomNavZones() {
+	const bottomNav = document.querySelector('.bottom-nav');
+	if (!bottomNav) return;
+
+	const isInsightsPage = window.location.pathname.includes('insights.html');
+
+	bottomNav.addEventListener('click', (ev) => {
+		const rect = bottomNav.getBoundingClientRect();
+		const x = ev.clientX - rect.left;
+		if (rect.width <= 0) return;
+		const zone = Math.floor((x / rect.width) * 5);
+
+		// zone indexes: 0..4 (left to right)
+		if (zone === 1) {
+			// second icon (record) -> go back to recording page/view
+			if (isInsightsPage) {
+				window.location.href = '../index.html';
+			} else {
+				showRecordingView();
+			}
+		} else if (zone === 3) {
+			// second from right (folder/insights) -> open Insights page
+			if (!isInsightsPage) {
+				window.location.href = 'frontend/insights.html';
+			}
+		}
+	});
+})();

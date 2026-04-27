@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Personal Data - Insights</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="styles.css" />
+	<style>
+		/* On insights page, the record icon is grayed out and insights icon is highlighted */
+		.bottom-nav .record-icon {
+			stroke: #27636d;
+			fill: none;
+		}
+
+		.bottom-nav .record-icon circle:last-child {
+			fill: #27636d;
+		}
+
+		/* Highlight the insights/folder icon */
+		.bottom-nav .icon.folder {
+			stroke: #26ada5;
+			fill: #26ada5;
+		}
+
+		.bottom-nav .icon.folder path {
+			stroke: #ffffff;
+			fill: none;
+		}
+	</style>
+</head>
+<body>
+	<div class="phone-stage" id="phoneStage">
+		<div class="phone-shell">
+			<main class="phone" aria-label="Insights screen">
+				<header class="header" id="pageTitle">Insights</header>
+
+				<section class="steps" aria-label="Workflow steps">
+					<div class="step active" id="stepRecord">Record</div>
+					<div class="step" id="stepConfirm">Confirm</div>
+					<div class="step" id="stepLearn">Learn</div>
+				</section>
+
+				<section class="content">
+					<div class="idle-view">
+						<p class="prompt">Insights</p>
+						<p style="color: #666563; font-size: 14px; line-height: 1.5;">View your speech analysis and trends here.</p>
+					</div>
+				</section>
+
+				<nav class="bottom-nav" aria-label="Primary navigation">
+					<svg class="icon profile" viewBox="0 0 24 24" aria-hidden="true">
+						<circle cx="12" cy="8" r="3.7" />
+						<path d="M4 19c1.9-2.8 4.8-4.2 8-4.2s6.1 1.4 8 4.2" />
+						<circle cx="12" cy="12" r="10" />
+					</svg>
+
+					<svg class="record-icon" viewBox="0 0 36 36" aria-hidden="true">
+						<circle cx="18" cy="18" r="15.2" fill="#ffffff" stroke="#27636d" stroke-width="3" />
+						<circle cx="18" cy="18" r="9.2" fill="#27636d" stroke="none" />
+					</svg>
+
+					<svg class="icon home" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M3.2 10.2L12 3.3l8.8 6.9V21H3.2z" />
+					</svg>
+
+					<svg class="icon search" viewBox="0 0 24 24" aria-hidden="true">
+						<circle cx="10.5" cy="10.5" r="7" />
+						<line x1="16" y1="16" x2="21" y2="21" />
+						<line x1="7.8" y1="11" x2="7.8" y2="13.5" />
+						<line x1="10.5" y1="8" x2="10.5" y2="13.5" />
+						<line x1="13.2" y1="9.8" x2="13.2" y2="13.5" />
+					</svg>
+
+					<svg class="icon folder" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M3 8h6.5l1.7 2H21v8.3A1.7 1.7 0 0 1 19.3 20H4.7A1.7 1.7 0 0 1 3 18.3z" />
+					</svg>
+				</nav>
+			</main>
+		</div>
+	</div>
+	<script src="app.js"></script>
+</body>
+</html>

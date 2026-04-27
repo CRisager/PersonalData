@@ -30,6 +30,8 @@ SPEED_OUTPUT_DIR = Path("Speed")
 SPEED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 PITCH_OUTPUT_DIR = Path("Pitch")
 PITCH_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+SOUND_RECORDINGS_DIR = Path("Sound_recordings")
+SOUND_RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -80,6 +82,16 @@ def sanitize_filename_component(value: str | None, fallback: str = "recording") 
 	return cleaned or fallback
 
 
+def count_saved_recordings() -> int:
+	"""Count persisted recording audio files in Sound_recordings."""
+	return sum(1 for path in SOUND_RECORDINGS_DIR.glob("*.wav") if path.is_file())
+
+
+def build_next_default_recording_name() -> str:
+	"""Build display name Recording_X where X is count(saved)+1."""
+	return f"Recording_{count_saved_recordings() + 1}"
+
+
 def process_audio_array(
 	audio,
 	*,
@@ -121,7 +133,10 @@ def process_audio_array(
 	# Use one timestamp so generated files are tied to the same run.
 	run_time = datetime.now()
 	timestamp = run_time.strftime("%Y%m%d_%H%M%S")
-	preferred_stem = sanitize_filename_component(recording_name, fallback=f"recording_{timestamp}")
+	default_display_name = build_next_default_recording_name()
+	display_name = recording_name or default_display_name
+	safe_display_name = sanitize_filename_component(display_name, fallback=default_display_name)
+	preferred_stem = f"{safe_display_name}_{timestamp}"
 
 	def select_available_output_stem(stem: str) -> str:
 		"""Pick a shared filename stem that does not overwrite existing outputs."""
@@ -202,7 +217,7 @@ def process_audio_array(
 	# 7) Save speed metrics
 	speed_output = SPEED_OUTPUT_DIR / f"{output_stem}.json"
 	speed_metrics = {
-		"recording_name": recording_name or output_stem,
+		"recording_name": display_name,
 		"category": category or "",
 		"audio_path": str(audio_path),
 		"transcript_path": str(transcript_path),
@@ -243,7 +258,7 @@ def process_audio_array(
 
 	pitch_output = PITCH_OUTPUT_DIR / f"{output_stem}.json"
 	pitch_export = {
-		"recording_name": recording_name or output_stem,
+		"recording_name": display_name,
 		"category": category or "",
 		"audio_path": str(audio_path),
 		"transcript_path": str(transcript_path),
@@ -359,6 +374,14 @@ def create_app(args: argparse.Namespace):
 	@app.get("/api/health")
 	def health():
 		return jsonify({"ok": True})
+
+	@app.get("/api/next-recording-name")
+	def next_recording_name():
+		return jsonify({
+			"ok": True,
+			"recording_name": build_next_default_recording_name(),
+			"index": count_saved_recordings() + 1,
+		})
 
 	@app.route("/api/process-recording", methods=["POST", "OPTIONS"])
 	def process_recording():

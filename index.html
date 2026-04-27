@@ -50,7 +50,7 @@
 							</button>
 							<button class="control-btn" id="stopButton" aria-label="Stop recording" title="Stop">
 								<svg viewBox="0 0 24 24" aria-hidden="true">
-									<rect x="6" y="6" width="12" height="12" rx="2.3" fill="#ffffff"></rect>
+									<path d="M5 12.5l5 5 9-10" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
 								</svg>
 							</button>
 						</div>
@@ -94,7 +94,6 @@
 								<option value="School presentation" selected>School presentation</option>
 								<option value="Private use">Private use</option>
 								<option value="Other">Other</option>
-								<option value="Create new category">Create new category</option>
 							</select>
 						</div>
 
@@ -122,11 +121,13 @@
 							<div class="learn-progress-dot">3</div>
 						</div>
 
-						<div class="learn-heading-row">
-							<h2 class="learn-heading">Filler words</h2>
-							<span class="learn-info" aria-hidden="true">i</span>
+						<div class="learn-info-trigger" data-info-topic="filler" role="button" tabindex="0" aria-label="Open filler words explanation">
+							<div class="learn-heading-row">
+								<h2 class="learn-heading">Filler words</h2>
+								<span class="learn-info" aria-hidden="true">i</span>
+							</div>
+							<p class="learn-subtext" id="learnSummaryText"></p>
 						</div>
-						<p class="learn-subtext" id="learnSummaryText"></p>
 
 						<div class="learn-legend" aria-label="Chart legend">
 							<div class="learn-legend-item"><span class="swatch filler"></span>Filler words for this session</div>
@@ -135,12 +136,21 @@
 						</div>
 
 						<div class="learn-chart-wrap" id="learnChartWrap" aria-label="Filler-word ratio chart">
-							<div class="learn-donut" id="learnDonut" role="img" aria-label="Filler words ratio">
-								<span class="learn-pct-label filler" id="learnFillerLabel"></span>
-								<span class="learn-pct-label previous" id="learnPreviousLabel"></span>
-							</div>
-							<div class="learn-word-list" id="learnWordList"></div>
+						<div class="learn-jar-container" id="learnJarContainer" role="img" aria-label="Filler words ratio jar">
+							<svg class="learn-jar-svg" viewBox="0 0 100 180" preserveAspectRatio="none" width="77" height="160">
+								<!-- Non-filler background -->
+								<rect class="learn-jar-bg" x="0" y="0" width="100" height="180" rx="20" fill="#20AEA0"></rect>
+								<!-- Filler fill area -->
+								<path class="learn-jar-fill" id="learnJarFill" fill="#f26d6d"></path>
+								<!-- Previous average line -->
+								<line class="learn-jar-previous-line" id="learnJarPreviousLine" x1="0" y1="0" x2="100" y2="0" stroke="#666563" stroke-width="2" stroke-dasharray="5 4" style="display: none;"></line>
+								<!-- Current percentage text (z-index via SVG order) -->
+								<text class="learn-jar-pct-text" id="learnJarFillerText" x="50" y="90" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="IBM Plex Mono, Space Mono, Courier New, Courier, monospace" font-size="16" font-weight="400"></text>
+							</svg>
+							<span class="learn-jar-previous-label" id="learnJarPreviousLabel" style="display: none;"></span>
 						</div>
+						<div class="learn-word-list" id="learnWordList"></div>
+					</div>
 
 						<p class="learn-message" id="learnMessage"></p>
 
@@ -161,11 +171,13 @@
 							<div class="learn-progress-dot">3</div>
 						</div>
 
-						<div class="learn-heading-row">
-							<h2 class="learn-heading">Pace</h2>
-							<span class="learn-info" aria-hidden="true">i</span>
+						<div class="learn-info-trigger" data-info-topic="pace" role="button" tabindex="0" aria-label="Open pace explanation">
+							<div class="learn-heading-row">
+								<h2 class="learn-heading">Pace</h2>
+								<span class="learn-info" aria-hidden="true">i</span>
+							</div>
+							<p class="learn-subtext" id="learnPaceSubtext"></p>
 						</div>
-						<p class="learn-subtext" id="learnPaceSubtext"></p>
 
 <div class="pace-legend-wrap" aria-label="Pace chart legend">
 						<div class="pace-legend-item"><span class="pace-legend-swatch current"></span>Pace for this session</div>
@@ -241,11 +253,13 @@
 							<div class="learn-progress-dot active">3</div>
 						</div>
 
-						<div class="learn-heading-row">
-							<h2 class="learn-heading">Pitch variation</h2>
-							<span class="learn-info" aria-hidden="true">i</span>
+						<div class="learn-info-trigger" data-info-topic="pitch" role="button" tabindex="0" aria-label="Open pitch variation explanation">
+							<div class="learn-heading-row">
+								<h2 class="learn-heading">Pitch variation</h2>
+								<span class="learn-info" aria-hidden="true">i</span>
+							</div>
+							<p class="learn-subtext" id="learnPitchSubtext"></p>
 						</div>
-						<p class="learn-subtext" id="learnPitchSubtext"></p>
 
 						<div class="pitch-legend-wrap" aria-label="Pitch chart legend">
 							<div class="pitch-legend-item"><span class="pitch-legend-swatch current"></span>Pitch variation for this session</div>
@@ -301,6 +315,16 @@
 						<path d="M3 8h6.5l1.7 2H21v8.3A1.7 1.7 0 0 1 19.3 20H4.7A1.7 1.7 0 0 1 3 18.3z" />
 					</svg>
 				</nav>
+
+				<div class="learn-info-overlay" id="learnInfoOverlay" hidden>
+					<div class="learn-info-popup" id="learnInfoPopup" role="dialog" aria-modal="true" aria-labelledby="learnInfoPopupTitle">
+						<div class="learn-info-popup-head">
+							<h3 class="learn-info-popup-title" id="learnInfoPopupTitle"></h3>
+							<span class="learn-info-popup-close" aria-hidden="true">&#215;</span>
+						</div>
+						<div class="learn-info-popup-body" id="learnInfoPopupBody"></div>
+					</div>
+				</div>
 			</main>
 		</div>
 	</div>
