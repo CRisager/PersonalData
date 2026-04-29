@@ -54,10 +54,10 @@ Example:
 Generated outputs use that stem:
 
 - `Sound_recordings/Class_Presentation_1.wav`
-- `Transcripts/Class_Presentation_1.txt`
-- `Filler_analysis/Class_Presentation_1.json` (or `.csv`)
-- `Speed/Class_Presentation_1.json`
+- `sound_analysis/Class_Presentation_1.json`
 - `Sound_recordings/Class_Presentation_1_pitch.png` (if pitch plotting is enabled)
+
+The `sound_analysis/*.json` file is the single source of truth for each recording and contains transcript text, filler metrics, pitch summary/series, speed metrics, and metadata.
 
 If a file with the same stem already exists, a numeric suffix is added automatically to avoid overwrite (for example `Class_Presentation_1_2`).
 

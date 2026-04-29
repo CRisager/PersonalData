@@ -1,0 +1,546 @@
+(function () {
+	const API_BASE_STORAGE_KEY = "speechApiBase";
+	const INSIGHTS_CACHE_STORAGE_KEY = "insightsDataCache";
+	const COUNT_OPTIONS = [
+		{ label: "Last 5", value: 5 },
+		{ label: "Last 10", value: 10, selected: true },
+		{ label: "Last 15", value: 15 },
+		{ label: "Last 20", value: 20 },
+		{ label: "All recordings", value: "all" },
+	];
+
+	const PLOT_DEFINITIONS = {
+		pace: {
+			key: "pace",
+			title: "Words per minute over time",
+			subtitle: "Compare speaking pace across recent recordings.",
+			yAxisTitle: "Words per minute",
+			kind: "line",
+			getValue: (recording) => Number(recording.wpm),
+			formatValue: (value) => `${value.toFixed(1)} WPM`,
+		},
+		fillerTrend: {
+			key: "fillerTrend",
+			title: "Filler words over time",
+			subtitle: "Compare filler-word percentage across recordings.",
+			yAxisTitle: "Filler words (%)",
+			kind: "line",
+			getValue: (recording) => Number(recording.filler_percentage),
+			formatValue: (value) => `${value.toFixed(1)}%`,
+		},
+		pitch: {
+			key: "pitch",
+			title: "Pitch range over time",
+			subtitle: "Compare pitch variation across recordings.",
+			yAxisTitle: "Pitch variation (semitones)",
+			kind: "line",
+			getValue: (recording) => Number(recording.pitch_range),
+			formatValue: (value) => `${value.toFixed(1)} st`,
+		},
+		fillerRecording: {
+			key: "fillerRecording",
+			title: "Filler words per recording",
+			subtitle: "Compare filler-word percentage within individual recordings.",
+			yAxisTitle: "Filler words (%)",
+			kind: "bar",
+			getValue: (recording) => Number(recording.filler_percentage),
+			formatValue: (value) => `${value.toFixed(1)}%`,
+		},
+	};
+
+	const OVERVIEW_PLOTS = [
+		PLOT_DEFINITIONS.pace,
+		PLOT_DEFINITIONS.fillerTrend,
+		PLOT_DEFINITIONS.pitch,
+		PLOT_DEFINITIONS.fillerRecording,
+	];
+
+	const phoneStage = document.getElementById("phoneStage");
+	const BASE_PHONE_WIDTH = 404;
+	const BASE_PHONE_HEIGHT = 873.7301635742188;
+	const VIEWPORT_PAD = 16;
+
+	function fitPhoneToViewport() {
+		if (!phoneStage) {
+			return;
+		}
+
+		const availableWidth = Math.max(window.innerWidth - VIEWPORT_PAD * 2, 1);
+		const availableHeight = Math.max(window.innerHeight - VIEWPORT_PAD * 2, 1);
+		const widthScale = availableWidth / BASE_PHONE_WIDTH;
+		const heightScale = availableHeight / BASE_PHONE_HEIGHT;
+		const scale = Math.min(1, widthScale, heightScale);
+
+		phoneStage.style.setProperty("--phone-scale", String(scale));
+	}
+
+	fitPhoneToViewport();
+	window.addEventListener("resize", fitPhoneToViewport);
+
+	function normalizeApiBase(value) {
+		return String(value || "").trim().replace(/\/+$/, "");
+	}
+
+	function resolveApiBase() {
+		const storedBase = normalizeApiBase(localStorage.getItem(API_BASE_STORAGE_KEY));
+		if (storedBase) {
+			return storedBase;
+		}
+
+		if (window.location.protocol === "file:") {
+			return "http://127.0.0.1:8000";
+		}
+
+		return window.location.origin;
+	}
+
+	const API_BASE = resolveApiBase();
+
+	function buildApiUrl(path) {
+		const safePath = String(path || "").startsWith("/") ? path : `/${path}`;
+		return `${API_BASE}${safePath}`;
+	}
+
+	function formatRecordingLabel(value) {
+		if (!value) {
+			return "Unknown date";
+		}
+
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) {
+			return String(value);
+		}
+
+		return new Intl.DateTimeFormat("en", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+		}).format(date);
+	}
+
+	function parseCountSelection(value) {
+		if (value === "all") {
+			return "all";
+		}
+
+		const count = Number(value);
+		if (Number.isFinite(count) && count > 0) {
+			return Math.floor(count);
+		}
+
+		return 10;
+	}
+
+	function getVisibleRecordings(recordings, countValue) {
+		if (!Array.isArray(recordings) || recordings.length === 0) {
+			return [];
+		}
+
+		const selection = parseCountSelection(countValue);
+		if (selection === "all") {
+			return recordings;
+		}
+
+		return recordings.slice(Math.max(0, recordings.length - selection));
+	}
+
+	function loadCachedInsightsData() {
+		try {
+			const parsed = JSON.parse(sessionStorage.getItem(INSIGHTS_CACHE_STORAGE_KEY) || "[]");
+			return Array.isArray(parsed) ? parsed : [];
+		} catch (_error) {
+			return [];
+		}
+	}
+
+	function saveCachedInsightsData(recordings) {
+		try {
+			sessionStorage.setItem(INSIGHTS_CACHE_STORAGE_KEY, JSON.stringify(Array.isArray(recordings) ? recordings : []));
+		} catch (_error) {
+			// Ignore storage limits or disabled storage.
+		}
+	}
+
+	async function loadStaticInsightsData() {
+		const response = await fetch(buildApiUrl("/frontend/insights-data.json"));
+		if (!response.ok) {
+			throw new Error("Unable to load insights data.");
+		}
+
+		const payload = await response.json();
+		return Array.isArray(payload.recordings) ? payload.recordings : [];
+	}
+
+	async function loadInsightsData() {
+		try {
+			const response = await fetch(buildApiUrl("/api/insights-data"));
+			if (!response.ok) {
+				throw new Error("Unable to load insights data.");
+			}
+
+			const payload = await response.json();
+			const recordings = Array.isArray(payload.recordings) ? payload.recordings : [];
+			saveCachedInsightsData(recordings);
+			return recordings;
+		} catch (error) {
+			try {
+				const staticRecordings = await loadStaticInsightsData();
+				saveCachedInsightsData(staticRecordings);
+				return staticRecordings;
+			} catch (_staticError) {
+				// Fall through to session cache.
+			}
+
+			const cachedRecordings = loadCachedInsightsData();
+			if (cachedRecordings.length > 0) {
+				return cachedRecordings;
+			}
+
+			throw error;
+		}
+	}
+
+	function createCountSelect(selectedValue) {
+		const select = document.createElement("select");
+		select.className = "insight-count-select";
+		for (const option of COUNT_OPTIONS) {
+			const item = document.createElement("option");
+			item.value = String(option.value);
+			item.textContent = option.label;
+			if (String(option.value) === String(selectedValue)) {
+				item.selected = true;
+			}
+			select.appendChild(item);
+		}
+		return select;
+	}
+
+	function buildLineTrace(definition, recordings) {
+		const subset = getVisibleRecordings(recordings, definition.selectedCount);
+		return {
+			type: "scatter",
+			mode: "lines+markers",
+			x: subset.map((recording) => formatRecordingLabel(recording.created_at)),
+			y: subset.map((recording) => definition.getValue(recording)),
+			customdata: subset.map((recording) => recording.recording_name),
+			line: {
+				color: "#1e8486",
+				width: 2.5,
+			},
+			marker: {
+				color: "#21afa2",
+				size: 6,
+			},
+			hovertemplate: `%{customdata}<br>%{x}<br>${definition.yAxisTitle}: %{y:.1f}<extra></extra>`,
+		};
+	}
+
+	function buildBarTrace(definition, recordings) {
+		const subset = getVisibleRecordings(recordings, definition.selectedCount);
+		return {
+			type: "bar",
+			x: subset.map((recording) => recording.recording_name),
+			y: subset.map((recording) => definition.getValue(recording)),
+			marker: {
+				color: "#21afa2",
+			},
+			text: subset.map((recording) => definition.formatValue(definition.getValue(recording))),
+			textposition: "outside",
+			hovertemplate: "%{x}<br>%{y:.1f}<extra></extra>",
+		};
+	}
+
+	function buildLayout(definition, isPreview) {
+		const titleFontSize = isPreview ? 12 : 14;
+		const tickFontSize = isPreview ? 8 : 10;
+		const margin = isPreview
+			? { l: 42, r: 12, t: 8, b: 34 }
+			: { l: 52, r: 20, t: 16, b: 50 };
+
+		return {
+			margin,
+			paper_bgcolor: "rgba(255,255,255,0)",
+			plot_bgcolor: "#ffffff",
+			showlegend: false,
+			font: {
+				family: '"IBM Plex Mono", "Space Mono", Courier, monospace',
+				color: "#666563",
+				size: tickFontSize,
+			},
+			xaxis: {
+				automargin: true,
+				title: isPreview ? "" : { text: "Recording", font: { size: titleFontSize, color: "#666563" } },
+				tickfont: { size: tickFontSize, color: "#666563" },
+				gridcolor: "#ececec",
+				zeroline: false,
+			},
+			yaxis: {
+				automargin: true,
+				title: isPreview ? "" : { text: definition.yAxisTitle, font: { size: titleFontSize, color: "#666563" } },
+				tickfont: { size: tickFontSize, color: "#666563" },
+				gridcolor: "#ececec",
+				zeroline: false,
+			},
+			transition: {
+				duration: 180,
+				easing: "cubic-in-out",
+			},
+		};
+	}
+
+	function renderPlotInto(container, definition, recordings, selectedCount, isPreview) {
+		if (!container) {
+			return;
+		}
+
+		if (!Array.isArray(recordings) || recordings.length === 0) {
+			container.innerHTML = '<div class="dashboard-empty">No recordings found yet.</div>';
+			return;
+		}
+
+		definition.selectedCount = selectedCount;
+		const trace = definition.kind === "bar"
+			? buildBarTrace(definition, recordings)
+			: buildLineTrace(definition, recordings);
+
+		const visibleRecordings = getVisibleRecordings(recordings, selectedCount);
+		const layout = buildLayout(definition, isPreview);
+		layout.height = isPreview ? 170 : 360;
+		layout.width = undefined;
+		layout.xaxis.tickangle = isPreview ? -20 : 0;
+		layout.xaxis.nticks = isPreview ? 4 : undefined;
+		layout.yaxis.nticks = isPreview ? 3 : undefined;
+		layout.yaxis.range = isPreview && visibleRecordings.length > 0
+			? [0, Math.max(1, Math.max(...visibleRecordings.map((recording) => Number(definition.getValue(recording)) || 0)) * 1.15)]
+			: undefined;
+
+		Plotly.react(container, [trace], layout, {
+			displayModeBar: false,
+			responsive: true,
+		});
+	}
+
+	function createCard(definition, recordings, initialSelection) {
+		const card = document.createElement("section");
+		card.className = "insight-card";
+		card.tabIndex = 0;
+		card.setAttribute("role", "button");
+		card.setAttribute("aria-label", `${definition.title} details`);
+
+		const header = document.createElement("div");
+		header.className = "insight-card-header";
+
+		const titleWrap = document.createElement("div");
+		titleWrap.className = "insight-card-title-wrap";
+
+		const title = document.createElement("h2");
+		title.className = "insight-card-title";
+		title.textContent = definition.title;
+
+		const subtitle = document.createElement("p");
+		subtitle.className = "insight-card-subtitle";
+		subtitle.textContent = definition.subtitle;
+
+		titleWrap.append(title, subtitle);
+
+		const controls = document.createElement("div");
+		controls.className = "insight-card-controls";
+		const select = createCountSelect(initialSelection);
+		controls.appendChild(select);
+
+		header.append(titleWrap, controls);
+
+		const chart = document.createElement("div");
+		chart.className = "insight-card-chart";
+
+		card.append(header, chart);
+
+		const rerender = () => {
+			renderPlotInto(chart, definition, recordings, select.value, true);
+		};
+
+		select.addEventListener("click", (event) => event.stopPropagation());
+		select.addEventListener("change", (event) => {
+			event.stopPropagation();
+			rerender();
+		});
+
+		card.addEventListener("click", () => {
+			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(select.value)}`;
+		});
+		card.addEventListener("keydown", (event) => {
+			if (event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+
+			event.preventDefault();
+			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(select.value)}`;
+		});
+
+		rerender();
+		return card;
+	}
+
+	function setNavState(viewName) {
+		const recordIcon = document.querySelector(".bottom-nav .record-icon");
+		const searchIcon = document.querySelector(".bottom-nav .icon.search");
+		const bottomNav = document.querySelector(".bottom-nav");
+
+		if (recordIcon) {
+			recordIcon.style.cursor = "pointer";
+			recordIcon.addEventListener("click", (event) => {
+				event.stopPropagation();
+				window.location.href = "../index.html";
+			});
+		}
+
+		if (searchIcon) {
+			searchIcon.style.cursor = "pointer";
+			searchIcon.addEventListener("click", (event) => {
+				event.stopPropagation();
+				if (viewName === "detail") {
+					window.location.href = "insights.html";
+				}
+			});
+		}
+
+		if (bottomNav && viewName === "overview") {
+			bottomNav.setAttribute("aria-label", "Primary navigation");
+		}
+	}
+
+	function applyActiveNavStyles(viewName) {
+		document.body.dataset.view = viewName;
+	}
+
+	function getPageContext() {
+		const params = new URLSearchParams(window.location.search);
+		const plot = String(params.get("plot") || "pace");
+		const count = params.get("count") || "10";
+		const view = document.body.dataset.view || "overview";
+		return { plot, count, view };
+	}
+
+	function selectPlotDefinition(plotKey) {
+		return PLOT_DEFINITIONS[plotKey] || PLOT_DEFINITIONS.pace;
+	}
+
+	async function initializeOverview(recordings) {
+		const app = document.getElementById("insightsApp");
+		if (!app) {
+			return;
+		}
+
+		app.innerHTML = "";
+		for (const definition of OVERVIEW_PLOTS) {
+			app.appendChild(createCard(definition, recordings, 10));
+		}
+	}
+
+	function buildDetailShell(recordings, definition, selectedCount) {
+		const app = document.getElementById("plotApp");
+		const pageTitle = document.getElementById("pageTitle");
+		const backButton = document.getElementById("plotBackButton");
+		if (!app || !pageTitle) {
+			return;
+		}
+
+		document.title = `Personal Data - ${definition.title}`;
+		if (backButton) {
+			backButton.addEventListener("click", () => {
+				window.location.href = "insights.html";
+			});
+		}
+
+		app.innerHTML = "";
+
+		const panel = document.createElement("section");
+		panel.className = "plot-panel";
+
+		const toolbar = document.createElement("div");
+		toolbar.className = "plot-toolbar";
+
+		const titleWrap = document.createElement("div");
+		titleWrap.className = "plot-toolbar-title-wrap";
+
+		const title = document.createElement("h2");
+		title.className = "plot-toolbar-title";
+		title.textContent = definition.title;
+
+		const subtitle = document.createElement("p");
+		subtitle.className = "plot-toolbar-subtitle";
+		subtitle.textContent = definition.subtitle;
+
+		titleWrap.append(title, subtitle);
+
+		const intro = document.createElement("p");
+		intro.className = "plot-intro";
+		intro.textContent = "Use the dropdown to adjust how much data you want to see. \n Hover over the plot to see specifics regarding each data point.";
+
+		const controls = document.createElement("div");
+		controls.className = "plot-toolbar-controls";
+		const select = createCountSelect(selectedCount);
+		controls.appendChild(select);
+
+		toolbar.append(titleWrap, controls);
+
+		const chartWrap = document.createElement("div");
+		chartWrap.className = "plot-chart-wrap";
+
+		panel.append(toolbar, chartWrap);
+
+		const detailStack = document.createElement("div");
+		detailStack.className = "plot-detail-stack";
+		detailStack.append(intro, panel);
+
+		app.appendChild(detailStack);
+
+		const rerender = () => {
+			renderPlotInto(chartWrap, definition, recordings, select.value, false);
+		};
+
+		select.addEventListener("change", rerender);
+		select.addEventListener("click", (event) => event.stopPropagation());
+		rerender();
+	}
+
+	function initializeLoadingState(viewName) {
+		const app = document.getElementById(viewName === "detail" ? "plotApp" : "insightsApp");
+		if (app) {
+			app.innerHTML = '<div class="dashboard-loading">Loading insights...</div>';
+		}
+	}
+
+	function initializeErrorState(viewName, message) {
+		const app = document.getElementById(viewName === "detail" ? "plotApp" : "insightsApp");
+		if (app) {
+			app.innerHTML = `<div class="dashboard-error">${message}</div>`;
+		}
+	}
+
+	async function start() {
+		const context = getPageContext();
+		applyActiveNavStyles(context.view);
+		setNavState(context.view);
+		initializeLoadingState(context.view);
+
+		try {
+			const recordings = await loadInsightsData();
+			if (context.view === "detail") {
+				const definition = selectPlotDefinition(context.plot);
+				buildDetailShell(recordings, definition, context.count);
+			} else {
+				await initializeOverview(recordings);
+			}
+		} catch (error) {
+			initializeErrorState(context.view, error.message || "Unable to load insights.");
+		}
+	}
+
+	if (typeof Plotly === "undefined") {
+		initializeErrorState(document.body.dataset.view || "overview", "Plotly could not be loaded.");
+		return;
+	}
+
+	start();
+})();

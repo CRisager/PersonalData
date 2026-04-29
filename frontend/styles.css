@@ -69,6 +69,40 @@ body {
 	background: #ececec;
 }
 
+.plot-header {
+	grid-template-columns: 44px 1fr 44px;
+	place-items: center;
+	padding: 0 10px;
+}
+
+.plot-back-btn {
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	display: grid;
+	place-items: center;
+	justify-self: start;
+}
+
+.plot-back-btn svg {
+	width: 24px;
+	height: 24px;
+}
+
+.plot-header-title {
+	grid-column: 2;
+	justify-self: center;
+	font-size: 22.44444465637207px;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	color: #122a2c;
+	white-space: nowrap;
+	text-align: center;
+}
+
 .steps {
 	height: 64px;
 	display: flex;
@@ -1250,4 +1284,207 @@ body {
 .learn-nav-btn:disabled {
 	opacity: 0.55;
 	cursor: not-allowed;
+}
+
+.insights-content,
+.plot-content {
+	padding: 14px 12px 16px;
+	overflow: hidden;
+	align-items: stretch;
+}
+
+.insights-app,
+.plot-app {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	overflow-y: auto;
+	padding-bottom: 10px;
+	-webkit-overflow-scrolling: touch;
+}
+
+.plot-detail-stack {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-height: 0;
+}
+
+.dashboard-loading,
+.dashboard-error {
+	width: min(100%, 380px);
+	min-height: 140px;
+	display: grid;
+	place-items: center;
+	padding: 18px;
+	border-radius: 20px;
+	background: #ffffff;
+	color: #666563;
+	text-align: center;
+	font-family: "IBM Plex Mono";
+	font-size: 13px;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.insight-card {
+	width: min(100%, 380px);
+	height: 250px;
+	border: none;
+	border-radius: 20px;
+	background: #ffffff;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+	padding: 14px 14px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	cursor: pointer;
+	transition: transform 0.18s ease, box-shadow 0.18s ease;
+	outline: none;
+}
+
+.insight-card:hover,
+.insight-card:focus-visible {
+	transform: translateY(-1px);
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.insight-card-header,
+.plot-toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.insight-card-title-wrap,
+.plot-toolbar-title-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.insight-card-title,
+.plot-toolbar-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--teal-dark);
+	line-height: 1.15;
+}
+
+.insight-card-subtitle,
+.plot-toolbar-subtitle {
+	margin: 0;
+	font-size: 10px;
+	line-height: 1.3;
+	color: var(--muted);
+}
+
+.insight-card-controls,
+.plot-toolbar-controls {
+	flex: none;
+	display: flex;
+	align-items: flex-start;
+}
+
+.insight-count-select {
+	appearance: none;
+	border: 1px solid var(--teal-bright);
+	border-radius: 8px;
+	background: #ffffff;
+	color: var(--teal-dark);
+	font-family: "IBM Plex Mono", monospace;
+	font-size: 10px;
+	line-height: 1;
+	padding: 6px 24px 6px 8px;
+	background-image: linear-gradient(45deg, transparent 50%, var(--teal-bright) 50%), linear-gradient(135deg, var(--teal-bright) 50%, transparent 50%);
+	background-position: calc(100% - 12px) 50%, calc(100% - 7px) 50%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.insight-card-chart {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	border-radius: 12px;
+	overflow: hidden;
+	background: #ffffff;
+}
+
+.insight-card-chart .plotly,
+.plot-chart-wrap .plotly {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.plot-panel {
+	width: min(100%, 380px);
+	min-height: 0;
+	height: 100%;
+	border-radius: 20px;
+	background: #ffffff;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+	padding: 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.plot-intro {
+	margin: 0;
+	width: min(100%, 380px);
+	padding: 0 8px;
+	text-align: center;
+	font-family: "IBM Plex Mono", "Space Mono", "Courier New", Courier, monospace;
+	font-size: 13px;
+	line-height: 1.45;
+	color: #666563;
+}
+
+.plot-chart-wrap {
+	flex: 1;
+	min-height: 0;
+	border-radius: 12px;
+	background: #ffffff;
+	overflow: hidden;
+}
+
+body[data-view="overview"] .bottom-nav .icon.search,
+body[data-view="detail"] .bottom-nav .icon.search {
+	stroke: #26ada5;
+	fill: #ffffff;
+}
+
+body[data-view="overview"] .bottom-nav .icon.search path,
+body[data-view="detail"] .bottom-nav .icon.search path {
+	stroke: #26ada5;
+	fill: none;
+}
+
+body[data-view="overview"] .bottom-nav .record-icon,
+body[data-view="detail"] .bottom-nav .record-icon {
+	cursor: pointer;
+}
+
+@media (max-width: 430px) {
+	.insight-card,
+	.plot-panel {
+		width: calc(100vw - 24px);
+	}
+
+	.plot-panel {
+		height: auto;
+		min-height: 0;
+	}
 }

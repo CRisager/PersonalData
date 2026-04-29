@@ -26,12 +26,15 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
 BACKEND_DIR = Path(__file__).resolve().parent / "backend"
 DEFAULT_DATASET_PATH = BACKEND_DIR / "FillerWordData.json"
-SPEED_OUTPUT_DIR = Path("Speed")
-SPEED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-PITCH_OUTPUT_DIR = Path("Pitch")
-PITCH_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 SOUND_RECORDINGS_DIR = Path("Sound_recordings")
 SOUND_RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
+SOUND_ANALYSIS_DIR = Path("sound_analysis")
+SOUND_ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Legacy output locations are still read as fallback for existing historical data.
+LEGACY_SPEED_OUTPUT_DIR = Path("Speed")
+LEGACY_PITCH_OUTPUT_DIR = Path("Pitch")
+LEGACY_FILLER_OUTPUT_DIR = Path("Filler_analysis")
 
 
 def parse_args() -> argparse.Namespace:
@@ -92,6 +95,100 @@ def build_next_default_recording_name() -> str:
 	return f"Recording_{count_saved_recordings() + 1}"
 
 
+def _load_json_file(path: Path) -> dict[str, Any]:
+	try:
+		return json.loads(path.read_text(encoding="utf-8"))
+	except Exception:
+		return {}
+
+
+def _parse_iso_datetime(value: str | None) -> datetime | None:
+	if not value:
+		return None
+	try:
+		return datetime.fromisoformat(value)
+	except ValueError:
+		return None
+
+
+def build_insights_recordings() -> list[dict[str, Any]]:
+	"""Collect merged recording metrics for the insights dashboard."""
+	recordings: list[dict[str, Any]] = []
+	analysis_files = sorted(SOUND_ANALYSIS_DIR.glob("*.json"))
+	for analysis_path in analysis_files:
+		analysis_data = _load_json_file(analysis_path)
+		if not analysis_data:
+			continue
+
+		speed_data = analysis_data.get("speed") if isinstance(analysis_data.get("speed"), dict) else {}
+		filler_data = analysis_data.get("filler") if isinstance(analysis_data.get("filler"), dict) else {}
+		pitch_data = analysis_data.get("pitch") if isinstance(analysis_data.get("pitch"), dict) else {}
+		pitch_summary = pitch_data.get("summary") if isinstance(pitch_data.get("summary"), dict) else {}
+
+		min_pitch_st = pitch_summary.get("min_pitch_semitones")
+		max_pitch_st = pitch_summary.get("max_pitch_semitones")
+		pitch_range = None
+		if isinstance(min_pitch_st, (int, float)) and isinstance(max_pitch_st, (int, float)):
+			pitch_range = max(0.0, (float(max_pitch_st) - float(min_pitch_st)) / 2.0)
+
+		created_at = str(analysis_data.get("created_at") or "").strip()
+		recordings.append({
+			"recording_name": str(analysis_data.get("recording_name") or analysis_path.stem),
+			"created_at": created_at,
+			"created_at_sort": _parse_iso_datetime(created_at).isoformat() if _parse_iso_datetime(created_at) else analysis_path.stem,
+			"duration_seconds": speed_data.get("duration_seconds"),
+			"wpm": speed_data.get("wpm"),
+			"total_words": speed_data.get("total_words"),
+			"filler_percentage": filler_data.get("filler_percentage"),
+			"total_filler_words": filler_data.get("total_filler_words"),
+			"pitch_range": pitch_range,
+			"pitch_mean_semitones": pitch_summary.get("mean_pitch_semitones"),
+			"pitch_min_semitones": min_pitch_st,
+			"pitch_max_semitones": max_pitch_st,
+		})
+
+	if not recordings:
+		for speed_path in sorted(LEGACY_SPEED_OUTPUT_DIR.glob("*.json")):
+			speed_data = _load_json_file(speed_path)
+			if not speed_data:
+				continue
+
+			stem = speed_path.stem
+			filler_path = LEGACY_FILLER_OUTPUT_DIR / f"{stem}.json"
+			pitch_path = LEGACY_PITCH_OUTPUT_DIR / f"{stem}.json"
+			filler_data = _load_json_file(filler_path) if filler_path.exists() else {}
+			pitch_data = _load_json_file(pitch_path) if pitch_path.exists() else {}
+			pitch_summary = pitch_data.get("pitch") if isinstance(pitch_data.get("pitch"), dict) else {}
+
+			min_pitch_st = pitch_summary.get("min_pitch_semitones")
+			max_pitch_st = pitch_summary.get("max_pitch_semitones")
+			pitch_range = None
+			if isinstance(min_pitch_st, (int, float)) and isinstance(max_pitch_st, (int, float)):
+				pitch_range = max(0.0, (float(max_pitch_st) - float(min_pitch_st)) / 2.0)
+
+			created_at = str(speed_data.get("created_at") or "").strip()
+			recordings.append({
+				"recording_name": str(speed_data.get("recording_name") or stem),
+				"created_at": created_at,
+				"created_at_sort": _parse_iso_datetime(created_at).isoformat() if _parse_iso_datetime(created_at) else stem,
+				"duration_seconds": speed_data.get("duration_seconds"),
+				"wpm": speed_data.get("wpm"),
+				"total_words": speed_data.get("total_words"),
+				"filler_percentage": filler_data.get("filler_percentage"),
+				"total_filler_words": filler_data.get("total_filler_words"),
+				"pitch_range": pitch_range,
+				"pitch_mean_semitones": pitch_summary.get("mean_pitch_semitones"),
+				"pitch_min_semitones": min_pitch_st,
+				"pitch_max_semitones": max_pitch_st,
+			})
+
+	recordings.sort(key=lambda item: (str(item.get("created_at_sort") or ""), str(item.get("recording_name") or "")))
+	for entry in recordings:
+		entry.pop("created_at_sort", None)
+
+	return recordings
+
+
 def process_audio_array(
 	audio,
 	*,
@@ -105,14 +202,12 @@ def process_audio_array(
 	try:
 		import numpy as np
 
-		from backend.FillerWords import analyze_transcript, export_results
+		from backend.FillerWords import analyze_text
 		from backend.pitch_detector import detect_pitch, format_pitch_stats, save_pitch_plot
 		from backend.speed import calculate_wpm, count_words, get_wav_duration_seconds
 		from backend.transcriber import (
 			AUDIO_OUTPUT_DIR,
-			TRANSCRIPT_OUTPUT_DIR,
 			save_audio,
-			save_transcript,
 			transcribe_audio,
 			trim_saved_audio_file,
 		)
@@ -145,10 +240,7 @@ def process_audio_array(
 			candidate = stem if index == 1 else f"{stem}_{index}"
 			conflicts = [
 				AUDIO_OUTPUT_DIR / f"{candidate}.wav",
-				TRANSCRIPT_OUTPUT_DIR / f"{candidate}.txt",
-				Path("Filler_analysis") / f"{candidate}.{args.filler_output_format}",
-				SPEED_OUTPUT_DIR / f"{candidate}.json",
-				PITCH_OUTPUT_DIR / f"{candidate}.json",
+				SOUND_ANALYSIS_DIR / f"{candidate}.json",
 			]
 			if args.plot_pitch and args.pitch_plot_output is None:
 				conflicts.append(AUDIO_OUTPUT_DIR / f"{candidate}_pitch.png")
@@ -176,7 +268,6 @@ def process_audio_array(
 
 	# 3) Transcribe
 	transcript = transcribe_audio(audio_path, model_size=args.model)
-	transcript_path = save_transcript(transcript, audio_path, run_time, filename_stem=output_stem)
 
 	# 4) Pitch detection
 	pitch_data = detect_pitch(
@@ -206,27 +297,15 @@ def process_audio_array(
 
 	# 6) Filler words
 	dataset_path = Path(args.dataset)
-	filler_results = analyze_transcript(transcript_path, dataset_path)
-	filler_output = (
-		Path(args.filler_output)
-		if args.filler_output
-		else Path("Filler_analysis") / f"{output_stem}.{args.filler_output_format}"
-	)
-	export_results(filler_results, filler_output, args.filler_output_format)
+	filler_results = analyze_text(transcript, dataset_path)
 
-	# 7) Save speed metrics
-	speed_output = SPEED_OUTPUT_DIR / f"{output_stem}.json"
+	# 7) Save a single consolidated analysis file for this recording.
+	created_at = run_time.isoformat(timespec="seconds")
 	speed_metrics = {
-		"recording_name": display_name,
-		"category": category or "",
-		"audio_path": str(audio_path),
-		"transcript_path": str(transcript_path),
 		"duration_seconds": round(duration_seconds, 3),
 		"total_words": total_words,
 		"wpm": round(wpm, 2),
-		"created_at": run_time.isoformat(timespec="seconds"),
 	}
-	speed_output.write_text(json.dumps(speed_metrics, indent=2), encoding="utf-8")
 
 	pitch_summary = {
 		"mean_pitch": round(float(pitch_data.get("mean_pitch", 0.0)), 2),
@@ -256,38 +335,49 @@ def process_audio_array(
 		)
 	]
 
-	pitch_output = PITCH_OUTPUT_DIR / f"{output_stem}.json"
-	pitch_export = {
+	analysis_output = SOUND_ANALYSIS_DIR / f"{output_stem}.json"
+	analysis_export = {
 		"recording_name": display_name,
 		"category": category or "",
-		"audio_path": str(audio_path),
-		"transcript_path": str(transcript_path),
-		"pitch": pitch_summary,
-		"pitch_series": pitch_series,
-		"detector_settings": {
-			"backend": args.backend,
-			"fmin": float(args.fmin),
-			"fmax": float(args.fmax),
-			"trim_silence": bool(trim_silence),
-			"trim_top_db": float(args.trim_top_db),
-			"trim_unvoiced_edges": bool(not args.no_trim_unvoiced_edges),
+		"created_at": created_at,
+		"audio": {
+			"path": str(audio_path),
+			"sample_rate": int(args.sample_rate),
 		},
-		"created_at": run_time.isoformat(timespec="seconds"),
+		"transcript": {
+			"text": transcript,
+		},
+		"speed": speed_metrics,
+		"filler": filler_results,
+		"pitch": {
+			"summary": pitch_summary,
+			"series": pitch_series,
+			"detector_settings": {
+				"backend": args.backend,
+				"fmin": float(args.fmin),
+				"fmax": float(args.fmax),
+				"trim_silence": bool(trim_silence),
+				"trim_top_db": float(args.trim_top_db),
+				"trim_unvoiced_edges": bool(not args.no_trim_unvoiced_edges),
+			},
+		},
+		"artifacts": {
+			"pitch_plot_path": str(pitch_plot_path) if pitch_plot_path else None,
+		},
 	}
-	pitch_output.write_text(json.dumps(pitch_export, indent=2), encoding="utf-8")
+	analysis_output.write_text(json.dumps(analysis_export, ensure_ascii=False, indent=2), encoding="utf-8")
 
 	return {
 		"audio_path": str(audio_path),
-		"transcript_path": str(transcript_path),
-		"filler_output": str(filler_output),
-		"speed_output": str(speed_output),
-		"pitch_output": str(pitch_output),
-		"pitch_plot_path": str(pitch_plot_path) if pitch_plot_path else None,
+		"analysis_path": str(analysis_output),
 		"transcript": transcript,
+		"transcript_text": transcript,
+		"pitch_plot_path": str(pitch_plot_path) if pitch_plot_path else None,
 		"wpm": round(wpm, 2),
 		"pitch": pitch_summary,
 		"pitch_series": pitch_series,
 		"filler_metrics": filler_results,
+		"speed_metrics": speed_metrics,
 		"pitch_text": format_pitch_stats(pitch_data).rstrip(),
 	}
 
@@ -330,10 +420,7 @@ def print_summary(summary: dict[str, Any]) -> None:
 	print("PIPELINE SUMMARY")
 	print("=" * 60)
 	print(f"Audio: {summary['audio_path']}")
-	print(f"Transcript file: {summary['transcript_path']}")
-	print(f"Speed metrics exported to: {summary['speed_output']}")
-	print(f"Pitch analysis exported to: {summary['pitch_output']}")
-	print(f"Filler analysis exported to: {summary['filler_output']}")
+	print(f"Consolidated analysis exported to: {summary['analysis_path']}")
 	if summary["pitch_plot_path"] is not None:
 		print(f"Pitch plot saved to: {summary['pitch_plot_path']}")
 
@@ -383,6 +470,13 @@ def create_app(args: argparse.Namespace):
 			"index": count_saved_recordings() + 1,
 		})
 
+	@app.get("/api/insights-data")
+	def insights_data():
+		return jsonify({
+			"ok": True,
+			"recordings": build_insights_recordings(),
+		})
+
 	@app.route("/api/process-recording", methods=["POST", "OPTIONS"])
 	def process_recording():
 		if request.method == "OPTIONS":
@@ -429,9 +523,14 @@ def main() -> None:
 				"Flask is required for --serve mode. Install with: pip install flask"
 			) from exc
 
-		from backend.transcriber import preload_whisper_model
+		try:
+			from backend.transcriber import preload_whisper_model
+		except ImportError as exc:
+			preload_whisper_model = None
+			print(f"Warning: skipping Whisper preload because a recording dependency is missing: {exc}")
 
-		preload_whisper_model(args.model)
+		if preload_whisper_model is not None:
+			preload_whisper_model(args.model)
 
 		app = create_app(args)
 		print(f"Serving UI at http://{args.host}:{args.port}")

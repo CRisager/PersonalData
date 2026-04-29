@@ -146,11 +146,8 @@ def count_filler_usage(transcript_text: str, filler_words: Iterable[str]) -> Dic
 	return {word: amount for word, amount in counts.items() if amount > 0}
 
 
-def analyze_transcript(transcript_path: Path, dataset_path: Path) -> Dict[str, object]:
-	"""Analyze one transcript and return filler metrics."""
-	transcript_raw = transcript_path.read_text(encoding="utf-8")
-	transcript_text = extract_transcript_text(transcript_raw)
-
+def analyze_text(transcript_text: str, dataset_path: Path) -> Dict[str, object]:
+	"""Analyze transcript text and return filler metrics."""
 	all_words = extract_words(transcript_text)
 	total_words = len(all_words)
 
@@ -161,12 +158,22 @@ def analyze_transcript(transcript_path: Path, dataset_path: Path) -> Dict[str, o
 	filler_percentage = (total_fillers / total_words * 100.0) if total_words else 0.0
 
 	return {
-		"transcript_path": str(transcript_path),
 		"dataset_path": str(dataset_path),
 		"total_words": total_words,
 		"total_filler_words": total_fillers,
 		"filler_percentage": round(filler_percentage, 2),
 		"filler_word_counts": dict(sorted(filler_counts.items())),
+	}
+
+
+def analyze_transcript(transcript_path: Path, dataset_path: Path) -> Dict[str, object]:
+	"""Analyze one transcript and return filler metrics."""
+	transcript_raw = transcript_path.read_text(encoding="utf-8")
+	transcript_text = extract_transcript_text(transcript_raw)
+	results = analyze_text(transcript_text, dataset_path)
+	return {
+		"transcript_path": str(transcript_path),
+		**results,
 	}
 
 
