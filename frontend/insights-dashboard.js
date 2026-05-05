@@ -2,8 +2,8 @@
 	const API_BASE_STORAGE_KEY = "speechApiBase";
 	const INSIGHTS_CACHE_STORAGE_KEY = "insightsDataCache";
 	const COUNT_OPTIONS = [
-		{ label: "Last 5", value: 5 },
-		{ label: "Last 10", value: 10, selected: true },
+		{ label: "Last 5", value: 5, selected: true },
+		{ label: "Last 10", value: 10 },
 		{ label: "Last 15", value: 15 },
 		{ label: "Last 20", value: 20 },
 		{ label: "All recordings", value: "all" },
@@ -195,6 +195,30 @@
 		return recordings.slice(Math.max(0, recordings.length - selection));
 	}
 
+	function sortRecordingsByDate(recordings) {
+		return [...recordings].sort((left, right) => {
+			const leftDate = getRecordingDate(left);
+			const rightDate = getRecordingDate(right);
+
+			if (leftDate && rightDate) {
+				const dateDelta = leftDate.getTime() - rightDate.getTime();
+				if (dateDelta !== 0) {
+					return dateDelta;
+				}
+			}
+
+			if (leftDate && !rightDate) {
+				return -1;
+			}
+
+			if (!leftDate && rightDate) {
+				return 1;
+			}
+
+			return String(left.recording_name || "").localeCompare(String(right.recording_name || ""));
+		});
+	}
+
 	function loadCachedInsightsData() {
 		try {
 			const parsed = JSON.parse(sessionStorage.getItem(INSIGHTS_CACHE_STORAGE_KEY) || "[]");
@@ -267,7 +291,7 @@
 	}
 
 	function buildLineTrace(definition, recordings) {
-		const subset = getVisibleRecordings(recordings, definition.selectedCount);
+		const subset = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
 		return {
 			type: "scatter",
 			mode: "lines+markers",
@@ -290,7 +314,7 @@
 	}
 
 	function buildBarTrace(definition, recordings) {
-		const subset = getVisibleRecordings(recordings, definition.selectedCount);
+		const subset = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
 		const xLabels = subset.map((recording, index) => formatRecordingWithDateLabel(recording, index));
 		return {
 			type: "bar",
@@ -364,26 +388,36 @@
 			: buildLineTrace(definition, recordings);
 
 		const visibleRecordings = getVisibleRecordings(recordings, selectedCount);
+		const visibleRecordingsByDate = sortRecordingsByDate(visibleRecordings);
 		const layout = buildLayout(definition, isPreview);
+		const containerWidth = Math.max(Math.floor(container.getBoundingClientRect().width || container.clientWidth || 0), 1);
 		layout.height = isPreview ? 170 : 360;
-		layout.width = undefined;
+		layout.width = isPreview ? containerWidth : undefined;
+		layout.autosize = true;
 		layout.xaxis.tickangle = isPreview ? -20 : 0;
 		layout.xaxis.nticks = isPreview ? 4 : undefined;
 		layout.xaxis.autorange = true;
 		layout.xaxis.range = undefined;
 		layout.yaxis.nticks = isPreview ? 3 : undefined;
-		layout.yaxis.range = isPreview && visibleRecordings.length > 0
-			? [0, Math.max(1, Math.max(...visibleRecordings.map((recording) => Number(definition.getValue(recording)) || 0)) * 1.15)]
-			: undefined;
+		if (isPreview && visibleRecordingsByDate.length > 0) {
+			const visibleValues = visibleRecordingsByDate.map((recording) => Number(definition.getValue(recording)) || 0);
+			const minValue = Math.min(...visibleValues);
+			const maxValue = Math.max(...visibleValues);
+			const valueSpan = Math.max(1, maxValue - minValue);
+			const valuePad = Math.max(1, valueSpan * 0.18);
+			layout.yaxis.range = [Math.min(0, minValue - valuePad), maxValue + valuePad];
+		} else {
+			layout.yaxis.range = undefined;
+		}
 
 		if (definition.kind === "line") {
 			layout.xaxis.type = "date";
 			layout.xaxis.tickformat = isPreview ? "%b %d" : "%b %d, %Y";
-			if (visibleRecordings.length > 0) {
-				const firstX = new Date(toChartDateValue(visibleRecordings[0], 0)).getTime();
-				const lastX = new Date(toChartDateValue(visibleRecordings[visibleRecordings.length - 1], visibleRecordings.length - 1)).getTime();
+			if (visibleRecordingsByDate.length > 0) {
+				const firstX = new Date(toChartDateValue(visibleRecordingsByDate[0], 0)).getTime();
+				const lastX = new Date(toChartDateValue(visibleRecordingsByDate[visibleRecordingsByDate.length - 1], visibleRecordingsByDate.length - 1)).getTime();
 				const span = Math.max(1, lastX - firstX);
-				const pad = Math.max(60 * 1000, Math.round(span * 0.06));
+				const pad = Math.max(isPreview ? 30 * 60 * 1000 : 60 * 1000, Math.round(span * (isPreview ? 0.18 : 0.06)));
 				layout.xaxis.range = [new Date(firstX - pad).toISOString(), new Date(lastX + pad).toISOString()];
 			}
 		}
@@ -394,10 +428,18 @@
 			layout.yaxis.fixedrange = true;
 		}
 
+		trace.cliponaxis = false;
+
 		Plotly.react(container, [trace], layout, {
 			displayModeBar: false,
 			responsive: true,
 		});
+
+		if (isPreview) {
+			window.requestAnimationFrame(() => {
+				Plotly.Plots.resize(container);
+			});
+		}
 	}
 
 	function createCard(definition, recordings, initialSelection) {
@@ -439,6 +481,12 @@
 			renderPlotInto(chart, definition, recordings, select.value, true);
 		};
 
+		const scheduleInitialRerender = () => {
+			window.requestAnimationFrame(() => {
+				window.requestAnimationFrame(rerender);
+			});
+		};
+
 		select.addEventListener("click", (event) => event.stopPropagation());
 		select.addEventListener("change", (event) => {
 			event.stopPropagation();
@@ -457,7 +505,7 @@
 			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(select.value)}`;
 		});
 
-		rerender();
+		scheduleInitialRerender();
 		return card;
 	}
 
@@ -516,7 +564,7 @@
 
 		app.innerHTML = "";
 		for (const definition of OVERVIEW_PLOTS) {
-			app.appendChild(createCard(definition, recordings, 10));
+			app.appendChild(createCard(definition, recordings, 5));
 		}
 	}
 
