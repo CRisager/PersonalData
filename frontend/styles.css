@@ -1300,9 +1300,10 @@ body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 	gap: 14px;
 	overflow-y: auto;
+	padding-top: 4px;
 	padding-bottom: 10px;
 	-webkit-overflow-scrolling: touch;
 }

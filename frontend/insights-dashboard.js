@@ -118,6 +118,57 @@
 		}).format(date);
 	}
 
+	function extractDateFromRecordingName(recordingName) {
+		const match = String(recordingName || "").match(/(\d{8})_(\d{6})$/);
+		if (!match) {
+			return null;
+		}
+
+		const datePart = match[1];
+		const timePart = match[2];
+		const isoValue = `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}T${timePart.slice(0, 2)}:${timePart.slice(2, 4)}:${timePart.slice(4, 6)}`;
+		const parsed = new Date(isoValue);
+		return Number.isNaN(parsed.getTime()) ? null : parsed;
+	}
+
+	function getRecordingDate(recording) {
+		const fromName = extractDateFromRecordingName(recording.recording_name);
+		if (fromName) {
+			return fromName;
+		}
+
+		const fromCreatedAt = new Date(recording.created_at);
+		if (!Number.isNaN(fromCreatedAt.getTime())) {
+			return fromCreatedAt;
+		}
+
+		return null;
+	}
+
+	function toChartDateValue(recording, fallbackIndex) {
+		const date = getRecordingDate(recording);
+		if (!date) {
+			return new Date(Date.UTC(2000, 0, 1 + fallbackIndex)).toISOString();
+		}
+
+		return date.toISOString();
+	}
+
+	function formatRecordingWithDateLabel(recording, fallbackIndex) {
+		const date = getRecordingDate(recording);
+		const timeLabel = !date || Number.isNaN(date.getTime())
+			? `#${fallbackIndex + 1}`
+			: new Intl.DateTimeFormat("en", {
+				month: "short",
+				day: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: false,
+			}).format(date);
+
+		return `${recording.recording_name} - ${timeLabel}`;
+	}
+
 	function parseCountSelection(value) {
 		if (value === "all") {
 			return "all";
@@ -220,9 +271,12 @@
 		return {
 			type: "scatter",
 			mode: "lines+markers",
-			x: subset.map((recording) => formatRecordingLabel(recording.created_at)),
+			x: subset.map((recording, index) => toChartDateValue(recording, index)),
 			y: subset.map((recording) => definition.getValue(recording)),
-			customdata: subset.map((recording) => recording.recording_name),
+			customdata: subset.map((recording, index) => ({
+				recordingName: recording.recording_name,
+				label: formatRecordingLabel(toChartDateValue(recording, index)),
+			})),
 			line: {
 				color: "#1e8486",
 				width: 2.5,
@@ -231,22 +285,28 @@
 				color: "#21afa2",
 				size: 6,
 			},
-			hovertemplate: `%{customdata}<br>%{x}<br>${definition.yAxisTitle}: %{y:.1f}<extra></extra>`,
+			hovertemplate: `%{customdata.recordingName}<br>%{customdata.label}<br>${definition.yAxisTitle}: %{y:.1f}<extra></extra>`,
 		};
 	}
 
 	function buildBarTrace(definition, recordings) {
 		const subset = getVisibleRecordings(recordings, definition.selectedCount);
+		const xLabels = subset.map((recording, index) => formatRecordingWithDateLabel(recording, index));
 		return {
 			type: "bar",
-			x: subset.map((recording) => recording.recording_name),
+			x: xLabels,
 			y: subset.map((recording) => definition.getValue(recording)),
+			customdata: subset.map((recording, index) => ({
+				recordingName: recording.recording_name,
+				label: formatRecordingLabel(toChartDateValue(recording, index)),
+				fullLabel: xLabels[index],
+			})),
 			marker: {
 				color: "#21afa2",
 			},
 			text: subset.map((recording) => definition.formatValue(definition.getValue(recording))),
 			textposition: "outside",
-			hovertemplate: "%{x}<br>%{y:.1f}<extra></extra>",
+			hovertemplate: "%{customdata.recordingName}<br>%{customdata.label}<br>%{y:.1f}<extra></extra>",
 		};
 	}
 
@@ -309,10 +369,30 @@
 		layout.width = undefined;
 		layout.xaxis.tickangle = isPreview ? -20 : 0;
 		layout.xaxis.nticks = isPreview ? 4 : undefined;
+		layout.xaxis.autorange = true;
+		layout.xaxis.range = undefined;
 		layout.yaxis.nticks = isPreview ? 3 : undefined;
 		layout.yaxis.range = isPreview && visibleRecordings.length > 0
 			? [0, Math.max(1, Math.max(...visibleRecordings.map((recording) => Number(definition.getValue(recording)) || 0)) * 1.15)]
 			: undefined;
+
+		if (definition.kind === "line") {
+			layout.xaxis.type = "date";
+			layout.xaxis.tickformat = isPreview ? "%b %d" : "%b %d, %Y";
+			if (visibleRecordings.length > 0) {
+				const firstX = new Date(toChartDateValue(visibleRecordings[0], 0)).getTime();
+				const lastX = new Date(toChartDateValue(visibleRecordings[visibleRecordings.length - 1], visibleRecordings.length - 1)).getTime();
+				const span = Math.max(1, lastX - firstX);
+				const pad = Math.max(60 * 1000, Math.round(span * 0.06));
+				layout.xaxis.range = [new Date(firstX - pad).toISOString(), new Date(lastX + pad).toISOString()];
+			}
+		}
+
+		if (isPreview) {
+			layout.dragmode = false;
+			layout.xaxis.fixedrange = true;
+			layout.yaxis.fixedrange = true;
+		}
 
 		Plotly.react(container, [trace], layout, {
 			displayModeBar: false,
@@ -400,7 +480,10 @@
 				event.stopPropagation();
 				if (viewName === "detail") {
 					window.location.href = "insights.html";
+					return;
 				}
+
+				window.location.reload();
 			});
 		}
 

@@ -111,6 +111,17 @@ def _parse_iso_datetime(value: str | None) -> datetime | None:
 		return None
 
 
+def _parse_datetime_from_filename_stem(stem: str) -> datetime | None:
+	"""Parse YYYYMMDD_HHMMSS from a filename stem like ManualName_20260505_142530."""
+	match = re.search(r"(\d{8}_\d{6})", stem)
+	if not match:
+		return None
+	try:
+		return datetime.strptime(match.group(1), "%Y%m%d_%H%M%S")
+	except ValueError:
+		return None
+
+
 def build_insights_recordings() -> list[dict[str, Any]]:
 	"""Collect merged recording metrics for the insights dashboard."""
 	recordings: list[dict[str, Any]] = []
@@ -131,11 +142,14 @@ def build_insights_recordings() -> list[dict[str, Any]]:
 		if isinstance(min_pitch_st, (int, float)) and isinstance(max_pitch_st, (int, float)):
 			pitch_range = max(0.0, (float(max_pitch_st) - float(min_pitch_st)) / 2.0)
 
-		created_at = str(analysis_data.get("created_at") or "").strip()
+		created_at_from_stem = _parse_datetime_from_filename_stem(analysis_path.stem)
+		created_at_from_json = _parse_iso_datetime(str(analysis_data.get("created_at") or "").strip())
+		created_at_dt = created_at_from_stem or created_at_from_json
+		created_at = created_at_dt.isoformat(timespec="seconds") if created_at_dt else ""
 		recordings.append({
 			"recording_name": str(analysis_data.get("recording_name") or analysis_path.stem),
 			"created_at": created_at,
-			"created_at_sort": _parse_iso_datetime(created_at).isoformat() if _parse_iso_datetime(created_at) else analysis_path.stem,
+			"created_at_sort": created_at_dt.isoformat() if created_at_dt else analysis_path.stem,
 			"duration_seconds": speed_data.get("duration_seconds"),
 			"wpm": speed_data.get("wpm"),
 			"total_words": speed_data.get("total_words"),
@@ -166,11 +180,14 @@ def build_insights_recordings() -> list[dict[str, Any]]:
 			if isinstance(min_pitch_st, (int, float)) and isinstance(max_pitch_st, (int, float)):
 				pitch_range = max(0.0, (float(max_pitch_st) - float(min_pitch_st)) / 2.0)
 
-			created_at = str(speed_data.get("created_at") or "").strip()
+			created_at_from_stem = _parse_datetime_from_filename_stem(stem)
+			created_at_from_json = _parse_iso_datetime(str(speed_data.get("created_at") or "").strip())
+			created_at_dt = created_at_from_stem or created_at_from_json
+			created_at = created_at_dt.isoformat(timespec="seconds") if created_at_dt else ""
 			recordings.append({
 				"recording_name": str(speed_data.get("recording_name") or stem),
 				"created_at": created_at,
-				"created_at_sort": _parse_iso_datetime(created_at).isoformat() if _parse_iso_datetime(created_at) else stem,
+				"created_at_sort": created_at_dt.isoformat() if created_at_dt else stem,
 				"duration_seconds": speed_data.get("duration_seconds"),
 				"wpm": speed_data.get("wpm"),
 				"total_words": speed_data.get("total_words"),
