@@ -742,7 +742,7 @@
 				});
 				layout.showlegend = true;
 				layout.title = { text: "" };
-				layout.height = 480;
+				layout.height = undefined;
 				layout.xaxis.type = "date";
 				layout.xaxis.tickformat = tickConfig.tickformat;
 				layout.xaxis.dtick = tickConfig.dtick;
