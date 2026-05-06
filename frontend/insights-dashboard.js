@@ -18,6 +18,11 @@
 	];
 
 	const PALETTE = ['#C8E6C9', '#B8E2D4', '#A6DDE8', '#C5D9F2', '#D6C7EE', '#9FD8F7', '#B5EAD7', '#FFDAB9', '#FFD4B4', '#E2C7EE', '#D4E6F1', '#F0E2C3', '#E8D5B7', '#C9E4CA'];
+	const FILLER_PALETTE = [
+		'#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00',
+		'#a65628', '#f781bf', '#999999', '#1b9e77', '#d95f02',
+		'#7570b3', '#e7298a', '#66a61e', '#a6761d',
+	];
 
 	const PLOT_DEFINITIONS = {
 		pace: {
@@ -702,14 +707,25 @@
 				const fillerWords = collectFillerWords(filtered.length ? filtered : recordings);
 				let maxY = 5;
 				traces = fillerWords.map((word, idx) => {
-					const x = filtered.map((r, i) => toChartDateValue(r, i));
-					const y = filtered.map((r) => {
+					const byDay = new Map();
+					for (const r of filtered) {
+						const date = getRecordingDate(r);
+						if (!date) continue;
+						const dayKey = date.toISOString().slice(0, 10);
 						const totalWords = Math.max(1, Number(r.total_words) || 1);
 						const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
-						return (100.0 * count) / totalWords;
-					});
+						const val = (100.0 * count) / totalWords;
+						if (!byDay.has(dayKey)) byDay.set(dayKey, { sum: 0, n: 0 });
+						const entry = byDay.get(dayKey);
+						entry.sum += val;
+						entry.n += 1;
+					}
+					const days = Array.from(byDay.keys()).sort();
+					const x = days.map(d => d + "T12:00:00.000Z");
+					const y = days.map(d => byDay.get(d).sum / byDay.get(d).n);
 					const hasData = y.some((v) => v > 0);
 					maxY = Math.max(maxY, ...y, maxY);
+					const color = PALETTE[idx % PALETTE.length];
 					return {
 						type: "scatter",
 						mode: "lines+markers",
@@ -717,8 +733,8 @@
 						x,
 						y,
 						visible: hasData,
-						line: { color: PALETTE[idx % PALETTE.length], width: 2.5, shape: "spline" },
-						marker: { size: 6 },
+						line: { color, width: 2.5, shape: "spline" },
+						marker: { size: 6, color },
 						hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
 					};
 				});
