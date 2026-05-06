@@ -9,6 +9,8 @@
 		{ label: "All recordings", value: "all" },
 	];
 
+	const PALETTE = ['#C8E6C9', '#B8E2D4', '#A6DDE8', '#C5D9F2', '#D6C7EE', '#9FD8F7', '#B5EAD7', '#FFDAB9', '#FFD4B4', '#E2C7EE', '#D4E6F1', '#F0E2C3', '#E8D5B7', '#C9E4CA'];
+
 	const PLOT_DEFINITIONS = {
 		pace: {
 			key: "pace",
@@ -47,6 +49,17 @@
 			formatValue: (value) => `${value.toFixed(1)}%`,
 		},
 	};
+
+	function collectFillerWords(recordings) {
+		const set = new Set();
+		for (const r of recordings || []) {
+			const fc = r && r.filler_counts;
+			if (fc && typeof fc === 'object') {
+				for (const k of Object.keys(fc)) set.add(String(k));
+			}
+		}
+		return Array.from(set).sort();
+	}
 
 	const OVERVIEW_PLOTS = [
 		PLOT_DEFINITIONS.pace,
@@ -313,6 +326,90 @@
 		};
 	}
 
+	function buildWpmAndPitchTraces(definition, recordings) {
+		const ordered = sortRecordingsByDate(recordings);
+		const dd = getVisibleRecordings(ordered, definition.selectedCount);
+		if (definition.key === 'pace') {
+			// Build WPM traces: points, trend, avg and target zone
+			const dates = dd.map((r, i) => toChartDateValue(r, i));
+			const wpm_v = dd.map((r) => Number(r.wpm));
+			const avg = wpm_v.length ? wpm_v.reduce((a,b) => a+b,0)/wpm_v.length : NaN;
+			let trend = wpm_v.slice();
+			if (wpm_v.length >= 2) {
+				// simple linear fit (least squares) in JS using numeric approach
+				const xs = dates.map((d) => new Date(d).getTime());
+				const n = xs.length;
+				const sx = xs.reduce((a,b)=>a+b,0);
+				const sy = wpm_v.reduce((a,b)=>a+b,0);
+				const sx2 = xs.reduce((a,b)=>a+b*b,0);
+				const sxy = xs.reduce((a,b,i)=>a + b * wpm_v[i],0);
+				const denom = n * sx2 - sx * sx;
+				if (denom !== 0) {
+					const m = (n * sxy - sx * sy) / denom;
+					const c = (sy - m * sx) / n;
+					trend = xs.map((x) => m * x + c).map((v) => v);
+				}
+			}
+			if (trend.length !== wpm_v.length) trend = wpm_v.slice();
+			return {
+				traces: [
+					{
+						type: 'scatter', mode: 'markers', name: 'WPM', x: dates, y: wpm_v,
+						marker: { size: 8, color: PALETTE[2] },
+						customdata: dd.map((r,i)=>[r.recording_name, r.wpm]),
+						hovertemplate: '<b>%{customdata[0]}</b><br>Date: %{x|%b %d, %Y}<br>WPM: %{customdata[1]:.1f}<extra></extra>'
+					},
+					{
+						type: 'scatter', mode: 'lines', name: 'Trend', x: dates, y: trend,
+						line: { color: PALETTE[4], width: 2.5, dash: 'dash' }
+					},
+					{
+						type: 'scatter', mode: 'lines', name: `Average WPM (${isNaN(avg)?'':avg.toFixed(1)})`, x: dates, y: dates.map(()=>avg),
+						line: { color: '#4E5A67', width: 2, dash: 'dot' }
+					}
+				],
+				layoutExtras: {
+					shapes: [
+						{ type: 'rect', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 130, y1: 150, fillcolor: 'rgba(197,217,242,0.25)', line: { width:0 } }
+					],
+					yRange: [0, Math.max(180, (Math.max(...wpm_v, 0) || 150) * 1.18)]
+				}
+			};
+		} else if (definition.key === 'pitch') {
+			const orderedPitch = dd.filter((r)=>Number.isFinite(Number(r.pitch_mean_semitones)));
+			const dates = orderedPitch.map((r,i)=>toChartDateValue(r,i));
+			const avg = orderedPitch.map((r)=>Number(r.pitch_mean_semitones));
+			const minv = orderedPitch.map((r)=>Number(r.pitch_min_semitones));
+			const maxv = orderedPitch.map((r)=>Number(r.pitch_max_semitones));
+			const overallAvg = avg.length ? avg.reduce((a,b)=>a+b,0)/avg.length : NaN;
+			const upper = Math.max(7, ...maxv.map((v)=>v*1.15));
+			return {
+				traces: [
+					{
+						type: 'scatter', mode: 'lines', name: 'Min-max band',
+						x: dates.concat(dates.slice().reverse()),
+						y: maxv.concat(minv.slice().reverse()),
+						fill: 'toself', fillcolor: PALETTE[1], opacity: 0.38, line: { color: 'rgba(0,0,0,0)' }, hoverinfo: 'skip'
+					},
+					{
+						type: 'scatter', mode: 'lines+markers', name: 'Average variation', x: dates, y: avg,
+						line: { color: PALETTE[2], width: 2.5 }, marker: { size: 6 },
+						hovertemplate: '<b>%{x|%b %d, %Y}</b><br>Avg: %{y:.2f} st<extra></extra>'
+					},
+					{
+						type: 'scatter', mode: 'lines', name: `Overall average (${isNaN(overallAvg)?'':overallAvg.toFixed(2)})`, x: dates, y: dates.map(()=>overallAvg),
+						line: { color: '#4E5A67', width: 2, dash: 'dash' }
+					}
+				],
+				layoutExtras: {
+					shapes: [ { type: 'rect', xref: 'x', x0: dates[0]||null, x1: dates[dates.length-1]||null, yref: 'y', y0: 3.0, y1: 5.0, fillcolor: PALETTE[0], opacity: 0.2, line: { width: 0 } } ],
+					yRange: [0, upper]
+				}
+			};
+		}
+		return null;
+	}
+
 	function buildBarTrace(definition, recordings) {
 		const subset = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
 		const xLabels = subset.map((recording, index) => formatRecordingWithDateLabel(recording, index));
@@ -430,7 +527,48 @@
 
 		trace.cliponaxis = false;
 
-		Plotly.react(container, [trace], layout, {
+		// Special-case detailed definitions to produce multiple traces and extras
+		let traces = [trace];
+		let extraLayout = {};
+		if (!isPreview) {
+			if (definition.key === 'pace' || definition.key === 'pitch') {
+				const result = buildWpmAndPitchTraces(definition, recordings);
+				if (result) {
+					traces = result.traces;
+					extraLayout.shapes = result.layoutExtras && result.layoutExtras.shapes;
+					if (result.layoutExtras && result.layoutExtras.yRange) {
+						layout.yaxis.range = result.layoutExtras.yRange;
+					}
+				}
+			} else if (definition.key === 'fillerRecording') {
+				// Build stacked horizontal bars using filler_counts
+				const fillerWords = collectFillerWords(recordings);
+				const selected = sortRecordingsByDate(getVisibleRecordings(recordings, selectedCount));
+				const labels = selected.map((r,i)=>formatRecordingWithDateLabel(r,i));
+				traces = fillerWords.map((word, idx) => {
+					const values = selected.map((r)=> {
+						const tot = Number(r.total_words) || 1;
+						const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
+						return (count / Math.max(1, tot)) * 100.0;
+					});
+					return {
+						type: 'bar', orientation: 'h', name: word, y: labels, x: values, marker: { color: PALETTE[idx % PALETTE.length] },
+						customdata: selected.map((r)=>[word, r.recording_name, r.total_words]),
+						hovertemplate: '<b>%{customdata[1]}</b><br>Filler: %{customdata[0]}<br>Share: %{x:.2f}%<extra></extra>',
+					};
+				});
+				layout.barmode = 'stack';
+				layout.margin = { l: 240, r: 35, t: 115, b: 110 };
+				layout.yaxis = layout.yaxis || {};
+				layout.yaxis.categoryorder = 'array';
+				layout.yaxis.categoryarray = labels;
+				layout.xaxis = layout.xaxis || {};
+				layout.xaxis.ticksuffix = '%';
+				layout.title = { text: `Filler words as percentages per recording`, x:0.0, xanchor:'left' };
+			}
+		}
+
+		Plotly.react(container, traces, Object.assign({}, layout, extraLayout), {
 			displayModeBar: false,
 			responsive: true,
 		});

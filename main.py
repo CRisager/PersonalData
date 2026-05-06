@@ -133,6 +133,8 @@ def build_insights_recordings() -> list[dict[str, Any]]:
 
 		speed_data = analysis_data.get("speed") if isinstance(analysis_data.get("speed"), dict) else {}
 		filler_data = analysis_data.get("filler") if isinstance(analysis_data.get("filler"), dict) else {}
+		filler_counts_raw = filler_data.get("filler_word_counts", {}) if isinstance(filler_data, dict) else {}
+		filler_counts = {str(k): int(v) for k, v in (filler_counts_raw.items() if isinstance(filler_counts_raw, dict) else [])}
 		pitch_data = analysis_data.get("pitch") if isinstance(analysis_data.get("pitch"), dict) else {}
 		pitch_summary = pitch_data.get("summary") if isinstance(pitch_data.get("summary"), dict) else {}
 
@@ -149,6 +151,7 @@ def build_insights_recordings() -> list[dict[str, Any]]:
 		recordings.append({
 			"recording_name": str(analysis_data.get("recording_name") or analysis_path.stem),
 			"created_at": created_at,
+			"filler_counts": filler_counts,
 			"created_at_sort": created_at_dt.isoformat() if created_at_dt else analysis_path.stem,
 			"duration_seconds": speed_data.get("duration_seconds"),
 			"wpm": speed_data.get("wpm"),
