@@ -1461,6 +1461,53 @@ body {
 	overflow: hidden;
 }
 
+.filler-chart-scroll {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.filler-chart-scroll .plotly,
+.filler-chart-scroll .js-plotly-plot {
+	height: auto !important;
+}
+
+.filler-chart-legend {
+	flex-shrink: 0;
+	padding: 7px 6px 5px;
+	border-top: 1px solid #ececec;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px 10px;
+	font-family: "IBM Plex Mono", "Space Mono", Courier, monospace;
+	font-size: 10px;
+	color: #666563;
+}
+
+.filler-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: nowrap;
+}
+
+.filler-legend-disable-all {
+	font-weight: 600;
+	color: #333;
+	border-right: 1px solid #ddd;
+	padding-right: 10px;
+	margin-right: 5px;
+}
+
+.filler-legend-swatch {
+	display: inline-block;
+	width: 12px;
+	height: 10px;
+	border-radius: 2px;
+	flex-shrink: 0;
+}
+
 body[data-view="overview"] .bottom-nav .icon.search,
 body[data-view="detail"] .bottom-nav .icon.search {
 	stroke: #26ada5;

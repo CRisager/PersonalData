@@ -56,7 +56,6 @@
 			key: "fillerRecording",
 			title: "Filler words per recording",
 			subtitle: "Compare filler-word percentage within individual recordings.",
-			yAxisTitle: "Filler words (%)",
 			kind: "bar",
 			getValue: (recording) => Number(recording.filler_percentage),
 			formatValue: (value) => `${value.toFixed(1)}%`,
@@ -387,11 +386,12 @@
 	function getTimeframeTickConfig(timeframeKey) {
 		switch (String(timeframeKey || "all_time")) {
 			case "this_week":
-				return { tickformat: "%a %d", dtick: 86400000 };
+			case "last_week":
+				return { tickformat: "%a", dtick: 86400000 };
 			case "month":
 				return { tickformat: "%b %d", dtick: null };
 			case "six_months":
-				return { tickformat: "%b %Y", dtick: "M1" };
+				return { tickformat: "%b", dtick: "M1" };
 			case "year":
 				return { tickformat: "%b", dtick: "M1" };
 			case "all_time":
@@ -478,12 +478,14 @@
 						hovertemplate: '<b>%{customdata[0]}</b><br>Date: %{x|%b %d, %Y}<br>WPM: %{customdata[1]:.1f}<extra></extra>'
 					},
 					{
-						type: 'scatter', mode: 'lines', name: 'Trend', x: dates, y: trend,
+						type: 'scatter', mode: 'lines', name: 'Trend line', x: dates, y: trend,
 						line: { color: PALETTE[4], width: 2.5, dash: 'dash' }
 					},
 					{
-						type: 'scatter', mode: 'lines', name: `Average WPM (${isNaN(avg)?'':avg.toFixed(1)})`, x: dates, y: dates.map(()=>avg),
-						line: { color: '#4E5A67', width: 2, dash: 'dot' }
+						type: 'scatter', mode: 'lines', name: 'Recommended band',
+						x: [null], y: [null],
+						line: { color: PALETTE[3], width: 3 },
+						hoverinfo: 'skip', showlegend: true,
 					}
 				],
 				layoutExtras: {
@@ -515,11 +517,12 @@
 					{
 						type: 'scatter', mode: 'lines+markers', name: 'Average variation', x: dates, y: avg,
 						line: { color: PALETTE[2], width: 2.5 }, marker: { size: 6 },
-						hovertemplate: '<b>%{x|%b %d, %Y}</b><br>Avg: %{y:.2f} st<extra></extra>'
+						customdata: dates.map((d, i) => [minv[i], maxv[i]]),
+						hovertemplate: '<b>%{x|%b %d, %Y}</b><br>Avg: %{y:.2f} st<br>Min: %{customdata[0]:.2f} st<br>Max: %{customdata[1]:.2f} st<extra></extra>'
 					},
 					{
 						type: 'scatter', mode: 'lines', name: `Overall average (${isNaN(overallAvg)?'':overallAvg.toFixed(2)})`, x: dates, y: dates.map(()=>overallAvg),
-						line: { color: '#4E5A67', width: 2, dash: 'dash' }
+						line: { color: '#4E5A67', width: 2, dash: 'dash' }, hoverinfo: 'skip'
 					}
 				],
 				layoutExtras: {
@@ -657,6 +660,7 @@
 		// Special-case detailed definitions to produce multiple traces and extras
 		let traces = [trace];
 		let extraLayout = {};
+		let fillerLegendItems = null;
 		if (!isPreview) {
 			const detailSet = applyTimeframe(recordings, timeframeKey);
 			const timeframeLabel = getTimeframeLabel(timeframeKey);
@@ -687,6 +691,7 @@
 					layout.height = 480;
 					layout.title = { text: "" };
 					layout.xaxis.type = "date";
+					layout.xaxis.autorange = false;
 					layout.xaxis.tickformat = tickConfig.tickformat;
 					layout.xaxis.dtick = tickConfig.dtick;
 					layout.xaxis.range = xRange;
@@ -697,7 +702,6 @@
 					layout.showlegend = true;
 					layout.margin = { b: 130, t: 40, l: 60, r: 30 };
 				} else {
-					layout.title = { text: `Pitch range per session over time (${timeframeLabel})`, x: 0.0, xanchor: "left", font: { size: 15 } };
 					layout.xaxis.type = "date";
 					layout.xaxis.tickformat = tickConfig.tickformat;
 					layout.xaxis.dtick = tickConfig.dtick;
@@ -705,9 +709,15 @@
 					layout.xaxis.title = "Session date";
 					layout.yaxis.title = "Pitch variation (semitones from session median)";
 					layout.hovermode = "x unified";
-					layout.legend = { orientation: "v", yanchor: "top", y: 0.99, xanchor: "left", x: 0.01, font: { size: 11 } };
+					layout.xaxis.showspikes = true;
+					layout.xaxis.spikemode = "across";
+					layout.xaxis.spikesnap = "cursor";
+					layout.xaxis.spikedash = "dot";
+					layout.xaxis.spikecolor = "rgba(0,0,0,0.25)";
+					layout.xaxis.spikethickness = 1;
+					layout.legend = { orientation: "v", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
 					layout.showlegend = true;
-					layout.margin = { b: 80, t: 100, l: 60, r: 30 };
+					layout.margin = { b: 250, t: 50, l: 60, r: 30 };
 				}
 			} else if (definition.key === 'fillerTrend') {
 				const filtered = detailSet;
@@ -799,15 +809,32 @@
 					const hasData = values.some((v) => v > 0);
 					return {
 						type: 'bar', orientation: 'h', name: word, y: labels, x: values, marker: { color: PALETTE[idx % PALETTE.length] },
-						showlegend: hasData,
+						showlegend: false,
 						customdata: selected.map((r, i)=>[word, labels[i], dates[i], totals[i], Number(r.total_words) || 0]),
 						hovertemplate: '<b>%{customdata[1]}</b><br>Date: %{customdata[2]}<br>Filler word: %{customdata[0]}<br>Word share: %{x:.2f}%<br>Total filler: %{customdata[3]:.2f}%<br>Total words: %{customdata[4]:.0f}<extra></extra>',
 					};
 				});
+				fillerLegendItems = traces.map((t, idx) => ({
+					word: t.name,
+					color: t.marker ? t.marker.color : '#999',
+					traceIndex: idx,
+				}));
+				
+				// Calculate dynamic height: show exactly 15 bars in viewport, scroll if more
+				const maxVisibleBars = 15;
+				const marginBot = 50;
+				const marginTop = 30;
+				const marginLeft = 0;
+				const marginRight = 35;
+				const fixedViewportHeight = 400;
+				const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
+				const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
+				const totalChartHeight = marginTop + (selected.length * barHeightPerRecording) + marginBot;
+				
 				layout.barmode = 'stack';
-				layout.margin = { l: 240, r: 35, t: 115, b: 110 };
+				layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
 				layout.template = "plotly_white";
-				layout.height = Math.max(450, Math.min(1000, 110 + labels.length * 36));
+				layout.height = totalChartHeight;
 				layout.yaxis = layout.yaxis || {};
 				layout.yaxis.categoryorder = 'array';
 				layout.yaxis.categoryarray = labels;
@@ -816,10 +843,9 @@
 				layout.xaxis.ticksuffix = '%';
 				const maxFiller = Math.max(...(detailSet.length ? detailSet : recordings).map((r) => Number(r.filler_percentage) || 0), 10);
 				layout.xaxis.range = [0, Math.min(100, maxFiller * 1.2 + 3)];
-				layout.xaxis.title = { text: "Percentage of all spoken words", standoff: 12 };
-				layout.title = { text: `Filler words as percentages per recording (${timeframeLabel})`, x:0.0, xanchor:'left', font: { size: 15 } };
-				layout.legend = { orientation: "h", yanchor: "top", y: -0.14, xanchor: "left", x: 0, title: { text: "Filler word" }, font: { size: 11 } };
-				layout.showlegend = true;
+				layout.xaxis.title = { text: "% of all spoken words", standoff: 12 };
+				layout.title = { text: "" };
+				layout.showlegend = false;
 				if (!selected.length) {
 					extraLayout.annotations = [{
 						text: "No recordings in this timeframe",
@@ -834,10 +860,84 @@
 			layout.annotations = extraLayout.annotations || [];
 		}
 
-		Plotly.react(container, traces, Object.assign({}, layout, extraLayout), {
+		let plotTarget = container;
+		if (!isPreview && definition.key === 'fillerRecording') {
+			let scrollPane = container.querySelector('.filler-chart-scroll');
+			if (!scrollPane) {
+				container.style.cssText += ';display:flex;flex-direction:column;overflow:hidden;';
+				scrollPane = document.createElement('div');
+				scrollPane.className = 'filler-chart-scroll';
+				const legendPane = document.createElement('div');
+				legendPane.className = 'filler-chart-legend';
+				container.appendChild(scrollPane);
+				container.appendChild(legendPane);
+			}
+			plotTarget = scrollPane;
+		}
+
+		Plotly.react(plotTarget, traces, Object.assign({}, layout, extraLayout), {
 			displayModeBar: false,
-			responsive: true,
+			responsive: false,
 		});
+
+		if (!isPreview && definition.key === 'fillerRecording' && fillerLegendItems) {
+			const legendPane = container.querySelector('.filler-chart-legend');
+			if (legendPane) {
+				legendPane.innerHTML = '';
+				
+				// Add "Disable all" item
+				const disableAllItem = document.createElement('span');
+				disableAllItem.className = 'filler-legend-item filler-legend-disable-all';
+				disableAllItem.style.cursor = 'pointer';
+				disableAllItem.textContent = 'Disable all';
+				disableAllItem.addEventListener('click', () => {
+					const anyVisible = fillerLegendItems.some((item) => {
+						const trace = plotTarget.data && plotTarget.data[item.traceIndex];
+						const v = trace ? trace.visible : true;
+						return v !== "legendonly" && v !== false;
+					});
+					const updates = fillerLegendItems.map(() => anyVisible ? "legendonly" : true);
+					Plotly.restyle(plotTarget, "visible", updates, fillerLegendItems.map((item) => item.traceIndex));
+					updateLegendItemVisibility();
+				});
+				legendPane.appendChild(disableAllItem);
+				
+				// Add individual filler word items
+				fillerLegendItems.forEach((item) => {
+					const span = document.createElement('span');
+					span.className = 'filler-legend-item';
+					span.style.cursor = 'pointer';
+					const swatch = document.createElement('span');
+					swatch.className = 'filler-legend-swatch';
+					swatch.style.background = item.color;
+					const label = document.createElement('span');
+					label.textContent = item.word;
+					span.appendChild(swatch);
+					span.appendChild(label);
+					span.addEventListener('click', () => {
+						const trace = plotTarget.data && plotTarget.data[item.traceIndex];
+						const currentVisible = trace ? trace.visible : true;
+						const newVisible = currentVisible === "legendonly" || currentVisible === false ? true : "legendonly";
+						Plotly.restyle(plotTarget, "visible", newVisible, [item.traceIndex]);
+						updateLegendItemVisibility();
+					});
+					legendPane.appendChild(span);
+				});
+				
+				function updateLegendItemVisibility() {
+					if (!plotTarget.data) return;
+					fillerLegendItems.forEach((item) => {
+						const span = legendPane.querySelectorAll('.filler-legend-item')[item.traceIndex + 1];
+						const trace = plotTarget.data[item.traceIndex];
+						const isVisible = trace && trace.visible && trace.visible !== "legendonly";
+						if (span) {
+							span.style.opacity = isVisible ? '1' : '0.4';
+						}
+					});
+				}
+				updateLegendItemVisibility();
+			}
+		}
 
 		if (!isPreview && definition.key === "fillerTrend" && !container._fillerLegendBound) {
 			container._fillerLegendBound = true;
