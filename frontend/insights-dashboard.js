@@ -45,9 +45,9 @@
 		},
 		pitch: {
 			key: "pitch",
-			title: "Pitch range over time",
+			title: "Pitch variation over time",
 			subtitle: "Compare pitch variation across recordings.",
-			yAxisTitle: "Pitch variation (semitones)",
+			yAxisTitle: "Pitch variation (semitones from session median)",
 			kind: "line",
 			getValue: (recording) => Number(recording.pitch_range),
 			formatValue: (value) => `${value.toFixed(1)} st`,
@@ -500,7 +500,10 @@
 			const minv = orderedPitch.map((r)=>Number(r.pitch_min_semitones));
 			const maxv = orderedPitch.map((r)=>Number(r.pitch_max_semitones));
 			const overallAvg = avg.length ? avg.reduce((a,b)=>a+b,0)/avg.length : NaN;
-			const upper = Math.max(7, ...maxv.map((v)=>v*1.15));
+			const rangeCandidates = [...avg, ...minv, ...maxv].filter((value) => Number.isFinite(value));
+			const maxAbsVariation = rangeCandidates.length
+				? Math.max(5, ...rangeCandidates.map((value) => Math.abs(value)))
+				: 5;
 			return {
 				traces: [
 					{
@@ -520,8 +523,12 @@
 					}
 				],
 				layoutExtras: {
-					shapes: [ { type: 'rect', xref: 'x', x0: dates[0]||null, x1: dates[dates.length-1]||null, yref: 'y', y0: 3.0, y1: 5.0, fillcolor: PALETTE[0], opacity: 0.2, line: { width: 0 } } ],
-					yRange: [0, upper]
+					shapes: [
+						{ type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 0, y1: 0, line: { color: '#666563', width: 1.5, dash: 'dot' } },
+						{ type: 'rect', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 3.0, y1: 5.0, fillcolor: PALETTE[0], opacity: 0.22, line: { width: 0 } },
+						{ type: 'rect', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: -5.0, y1: -3.0, fillcolor: PALETTE[0], opacity: 0.22, line: { width: 0 } },
+					],
+					yRange: [-Math.max(10, maxAbsVariation * 1.1), Math.max(10, maxAbsVariation * 1.1)]
 				}
 			};
 		}
