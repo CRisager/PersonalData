@@ -612,13 +612,17 @@
 			? buildBarTrace(definition, recordings)
 			: buildLineTrace(definition, recordings);
 
-		const visibleRecordings = isPreview
-			? getVisibleRecordings(recordings, selectedCount)
-			: applyTimeframe(recordings, timeframeKey);
+		let visibleRecordings;
+		if (isPreview) {
+			const base = timeframeKey ? applyTimeframe(recordings, timeframeKey) : recordings;
+			visibleRecordings = getVisibleRecordings(base, selectedCount);
+		} else {
+			visibleRecordings = applyTimeframe(recordings, timeframeKey);
+		}
 		const visibleRecordingsByDate = sortRecordingsByDate(visibleRecordings);
 		const layout = buildLayout(definition, isPreview);
 		const containerWidth = Math.max(Math.floor(container.getBoundingClientRect().width || container.clientWidth || 0), 1);
-		layout.height = isPreview ? 170 : 360;
+		layout.height = isPreview ? 260 : 360;
 		layout.width = isPreview ? containerWidth : undefined;
 		layout.autosize = true;
 		layout.xaxis.tickangle = isPreview ? -20 : 0;
@@ -653,6 +657,7 @@
 			layout.dragmode = false;
 			layout.xaxis.fixedrange = true;
 			layout.yaxis.fixedrange = true;
+			layout.showlegend = false;
 		}
 
 		trace.cliponaxis = false;
@@ -661,14 +666,54 @@
 		let traces = [trace];
 		let extraLayout = {};
 		let fillerLegendItems = null;
-		if (!isPreview) {
-			const detailSet = applyTimeframe(recordings, timeframeKey);
-			const timeframeLabel = getTimeframeLabel(timeframeKey);
-			const tickConfig = getTimeframeTickConfig(timeframeKey);
-			const xRange = getTimeframeXRange(recordings, detailSet, timeframeKey);
 
+		// Preview: for fillerRecording, build the stacked breakdown (compact)
+		if (isPreview && definition.key === 'fillerRecording') {
+			const detailSetPreview = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
+			const selectedPreview = [...detailSetPreview].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
+			const displayedPreview = selectedPreview.slice(0, 7);
+			const labels = displayedPreview.map((r) => String(r.recording_name || "Unknown recording"));
+			const dates = displayedPreview.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
+			const totals = displayedPreview.map((r) => Number(r.filler_percentage) || 0);
+			const fillerWords = collectFillerWords(displayedPreview.length ? displayedPreview : recordings);
+			traces = fillerWords.map((word, idx) => {
+				const values = displayedPreview.map((r) => {
+					const tot = Number(r.total_words) || 1;
+					const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
+					return (count / Math.max(1, tot)) * 100.0;
+				});
+				return {
+					type: 'bar', orientation: 'h', name: word, y: labels, x: values, marker: { color: PALETTE[idx % PALETTE.length] },
+					showlegend: false,
+					customdata: displayedPreview.map((r, i) => [word, labels[i], dates[i], totals[i], Number(r.total_words) || 0]),
+					hovertemplate: '<b>%{customdata[1]}</b><br>Date: %{customdata[2]}<br>Filler word: %{customdata[0]}<br>Word share: %{x:.2f}%<br>Total filler: %{customdata[3]:.2f}%<br>Total words: %{customdata[4]:.0f}<extra></extra>',
+				};
+			});
+			fillerLegendItems = traces.map((t, idx) => ({ word: t.name, color: t.marker ? t.marker.color : '#999', traceIndex: idx }));
+			// Preview layout: compact
+			layout.barmode = 'stack';
+			layout.margin = { l: 0, r: 25, t: 20, b: 30 };
 			layout.template = "plotly_white";
-			layout.height = 600;
+			// compute height so up to 7 bars fit
+			const maxVisibleBars = 7;
+			const fixedViewportHeight = 220;
+			const availableHeightForBars = fixedViewportHeight - layout.margin.b - layout.margin.t;
+			const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
+			layout.height = Math.max(120, layout.margin.t + displayedPreview.length * barHeightPerRecording + layout.margin.b);
+			layout.showlegend = false;
+		}
+		// Build a detailSet for detailed views or a visible subset for previews
+		const detailSet = isPreview
+			? sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount))
+			: applyTimeframe(recordings, timeframeKey);
+		const timeframeLabel = getTimeframeLabel(timeframeKey);
+		const tickConfig = getTimeframeTickConfig(timeframeKey);
+		const xRange = getTimeframeXRange(recordings, detailSet, timeframeKey);
+
+		// For all non-fillerRecording-preview cases, run the detailed trace builder
+		if (!(isPreview && definition.key === 'fillerRecording')) {
+			layout.template = "plotly_white";
+			if (!isPreview) layout.height = 600;
 
 			if (definition.key === 'pace' || definition.key === 'pitch') {
 				const result = buildWpmAndPitchTraces(definition, detailSet);
@@ -688,7 +733,7 @@
 				}
 
 				if (definition.key === "pace") {
-					layout.height = 480;
+					if (!isPreview) layout.height = 480;
 					layout.title = { text: "" };
 					layout.xaxis.type = "date";
 					layout.xaxis.autorange = false;
@@ -699,8 +744,8 @@
 					layout.yaxis.title = "Words per minute (WPM)";
 					layout.hovermode = "closest";
 					layout.legend = { orientation: "h", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
-					layout.showlegend = true;
-					layout.margin = { b: 130, t: 40, l: 60, r: 30 };
+					layout.showlegend = !isPreview;
+					layout.margin = isPreview ? { b: 24, t: 10, l: 34, r: 12 } : { b: 130, t: 40, l: 60, r: 30 };
 				} else {
 					layout.xaxis.type = "date";
 					layout.xaxis.tickformat = tickConfig.tickformat;
@@ -708,16 +753,16 @@
 					layout.xaxis.range = xRange;
 					layout.xaxis.title = "Session date";
 					layout.yaxis.title = "Pitch variation (semitones from session median)";
-					layout.hovermode = "x unified";
-					layout.xaxis.showspikes = true;
-					layout.xaxis.spikemode = "across";
-					layout.xaxis.spikesnap = "cursor";
-					layout.xaxis.spikedash = "dot";
-					layout.xaxis.spikecolor = "rgba(0,0,0,0.25)";
-					layout.xaxis.spikethickness = 1;
+					layout.hovermode = isPreview ? "closest" : "x unified";
+					layout.xaxis.showspikes = !isPreview;
+					layout.xaxis.spikemode = isPreview ? false : "across";
+					layout.xaxis.spikesnap = isPreview ? false : "cursor";
+					layout.xaxis.spikedash = isPreview ? false : "dot";
+					layout.xaxis.spikecolor = isPreview ? false : "rgba(0,0,0,0.25)";
+					layout.xaxis.spikethickness = isPreview ? false : 1;
 					layout.legend = { orientation: "v", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
-					layout.showlegend = true;
-					layout.margin = { b: 250, t: 50, l: 60, r: 30 };
+					layout.showlegend = !isPreview;
+					layout.margin = isPreview ? { b: 24, t: 10, l: 34, r: 12 } : { b: 250, t: 50, l: 60, r: 30 };
 				}
 			} else if (definition.key === 'fillerTrend') {
 				const filtered = detailSet;
@@ -742,18 +787,19 @@
 					const y = days.map(d => byDay.get(d).sum / byDay.get(d).n);
 					const hasData = y.some((v) => v > 0);
 					maxY = Math.max(maxY, ...y, maxY);
-					const color = PALETTE[idx % PALETTE.length];
-					return {
-						type: "scatter",
-						mode: "lines+markers",
-						name: word,
-						x,
-						y,
-						visible: hasData,
-						line: { color, width: 2.5, shape: "spline" },
-						marker: { size: 6, color },
-						hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
-					};
+						const color = PALETTE[idx % PALETTE.length];
+						return {
+							type: "scatter",
+							mode: "lines+markers",
+							name: word,
+							x,
+							y,
+							visible: hasData,
+							showlegend: !isPreview,
+							line: { color, width: 2.5, shape: "spline" },
+							marker: { size: 6, color },
+							hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
+						};
 				});
 				traces.unshift({
 					type: "scatter",
@@ -761,12 +807,12 @@
 					name: "Disable all",
 					x: [],
 					y: [],
-					showlegend: true,
+					showlegend: !isPreview,
 					hoverinfo: "none",
 					line: { color: "#999" },
 					marker: { color: "#999" },
 				});
-				layout.showlegend = true;
+				layout.showlegend = !isPreview;
 				layout.title = { text: "" };
 				layout.height = undefined;
 				layout.xaxis.type = "date";
@@ -784,7 +830,7 @@
 					x: 0,
 					font: { size: 11 },
 				};
-				layout.margin = { b: 130, t: 40, l: 60, r: 30 };
+				layout.margin = isPreview ? { b: 24, t: 10, l: 34, r: 12 } : { b: 130, t: 40, l: 60, r: 30 };
 				layout.yaxis.range = [0, Math.max(5, maxY * 1.2)];
 				if (!filtered.length) {
 					extraLayout.annotations = [{
@@ -797,11 +843,15 @@
 				// Build stacked horizontal bars using filler_counts
 				const fillerWords = collectFillerWords(detailSet.length ? detailSet : recordings);
 				const selected = [...detailSet].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
-				const labels = selected.map((r) => String(r.recording_name || "Unknown recording"));
-				const dates = selected.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
-				const totals = selected.map((r) => Number(r.filler_percentage) || 0);
+				
+				// For preview, limit to top 7 bars; for detail, show all
+				const displayedRecordings = isPreview ? selected.slice(0, 7) : selected;
+				const labels = displayedRecordings.map((r) => String(r.recording_name || "Unknown recording"));
+				const dates = displayedRecordings.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
+				const totals = displayedRecordings.map((r) => Number(r.filler_percentage) || 0);
+				
 				traces = fillerWords.map((word, idx) => {
-					const values = selected.map((r)=> {
+					const values = displayedRecordings.map((r)=> {
 						const tot = Number(r.total_words) || 1;
 						const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
 						return (count / Math.max(1, tot)) * 100.0;
@@ -810,7 +860,7 @@
 					return {
 						type: 'bar', orientation: 'h', name: word, y: labels, x: values, marker: { color: PALETTE[idx % PALETTE.length] },
 						showlegend: false,
-						customdata: selected.map((r, i)=>[word, labels[i], dates[i], totals[i], Number(r.total_words) || 0]),
+						customdata: displayedRecordings.map((r, i)=>[word, labels[i], dates[i], totals[i], Number(r.total_words) || 0]),
 						hovertemplate: '<b>%{customdata[1]}</b><br>Date: %{customdata[2]}<br>Filler word: %{customdata[0]}<br>Word share: %{x:.2f}%<br>Total filler: %{customdata[3]:.2f}%<br>Total words: %{customdata[4]:.0f}<extra></extra>',
 					};
 				});
@@ -820,21 +870,50 @@
 					traceIndex: idx,
 				}));
 				
-				// Calculate dynamic height: show exactly 15 bars in viewport, scroll if more
-				const maxVisibleBars = 15;
-				const marginBot = 50;
-				const marginTop = 30;
-				const marginLeft = 0;
-				const marginRight = 35;
-				const fixedViewportHeight = 400;
-				const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
-				const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
-				const totalChartHeight = marginTop + (selected.length * barHeightPerRecording) + marginBot;
+				if (isPreview) {
+					// Preview: show top 7 bars in scrollable container
+					const maxVisibleBars = 7;
+					const marginBot = 30;
+					const marginTop = 20;
+					const marginLeft = 0;
+					const marginRight = 25;
+					const fixedViewportHeight = 220;
+					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
+					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
+					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
+					
+					layout.barmode = 'stack';
+					layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
+					layout.template = "plotly_white";
+					layout.height = totalChartHeight;
+					layout.showlegend = false;
+				} else {
+					// Detail view: show all bars in scrollable container
+					const maxVisibleBars = 15;
+					const marginBot = 50;
+					const marginTop = 30;
+					const marginLeft = 0;
+					const marginRight = 35;
+					const fixedViewportHeight = 400;
+					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
+					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
+					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
+					
+					layout.barmode = 'stack';
+					layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
+					layout.template = "plotly_white";
+					layout.height = totalChartHeight;
+					layout.showlegend = true;
+					layout.legend = {
+						orientation: "h",
+						yanchor: "bottom",
+						y: -0.12,
+						xanchor: "left",
+						x: 0,
+						font: { size: 11 },
+					};
+				}
 				
-				layout.barmode = 'stack';
-				layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
-				layout.template = "plotly_white";
-				layout.height = totalChartHeight;
 				layout.yaxis = layout.yaxis || {};
 				layout.yaxis.categoryorder = 'array';
 				layout.yaxis.categoryarray = labels;
@@ -843,10 +922,14 @@
 				layout.xaxis.ticksuffix = '%';
 				const maxFiller = Math.max(...(detailSet.length ? detailSet : recordings).map((r) => Number(r.filler_percentage) || 0), 10);
 				layout.xaxis.range = [0, Math.min(100, maxFiller * 1.2 + 3)];
-				layout.xaxis.title = { text: "% of all spoken words", standoff: 12 };
+				layout.xaxis.title = isPreview
+					? { text: "% of spoken words", standoff: 10 }
+					: { text: "% of all spoken words", standoff: 12 };
+				if (isPreview) {
+					layout.yaxis.title = "Recording";
+				}
 				layout.title = { text: "" };
-				layout.showlegend = false;
-				if (!selected.length) {
+				if (!displayedRecordings.length) {
 					extraLayout.annotations = [{
 						text: "No recordings in this timeframe",
 						xref: "paper", yref: "paper", x: 0.5, y: 0.5,
@@ -861,16 +944,18 @@
 		}
 
 		let plotTarget = container;
-		if (!isPreview && definition.key === 'fillerRecording') {
+		if (definition.key === 'fillerRecording') {
 			let scrollPane = container.querySelector('.filler-chart-scroll');
 			if (!scrollPane) {
 				container.style.cssText += ';display:flex;flex-direction:column;overflow:hidden;';
 				scrollPane = document.createElement('div');
 				scrollPane.className = 'filler-chart-scroll';
-				const legendPane = document.createElement('div');
-				legendPane.className = 'filler-chart-legend';
 				container.appendChild(scrollPane);
-				container.appendChild(legendPane);
+				if (!isPreview) {
+					const legendPane = document.createElement('div');
+					legendPane.className = 'filler-chart-legend';
+					container.appendChild(legendPane);
+				}
 			}
 			plotTarget = scrollPane;
 		}
@@ -987,8 +1072,11 @@
 
 		const controls = document.createElement("div");
 		controls.className = "insight-card-controls";
-		const select = createCountSelect(initialSelection);
-		controls.appendChild(select);
+		let timeframeSelect = null;
+		if (definition.key === "pace" || definition.key === "pitch" || definition.key === "fillerTrend" || definition.key === "fillerRecording") {
+			timeframeSelect = createTimeframeSelect("all_time");
+			controls.appendChild(timeframeSelect);
+		}
 
 		header.append(titleWrap, controls);
 
@@ -998,7 +1086,8 @@
 		card.append(header, chart);
 
 		const rerender = () => {
-			renderPlotInto(chart, definition, recordings, select.value, true);
+			// Use the card's initialSelection for count; previews don't expose count selector
+			renderPlotInto(chart, definition, recordings, initialSelection, true, timeframeSelect ? timeframeSelect.value : undefined);
 		};
 
 		const scheduleInitialRerender = () => {
@@ -1007,14 +1096,18 @@
 			});
 		};
 
-		select.addEventListener("click", (event) => event.stopPropagation());
-		select.addEventListener("change", (event) => {
-			event.stopPropagation();
-			rerender();
-		});
+		if (timeframeSelect) {
+			timeframeSelect.addEventListener("click", (event) => event.stopPropagation());
+			timeframeSelect.addEventListener("change", (event) => {
+				event.stopPropagation();
+				rerender();
+			});
+		}
 
 		card.addEventListener("click", () => {
-			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(select.value)}`;
+			let url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
+			if (timeframeSelect) url += `&timeframe=${encodeURIComponent(timeframeSelect.value)}`;
+			window.location.href = url;
 		});
 		card.addEventListener("keydown", (event) => {
 			if (event.key !== "Enter" && event.key !== " ") {
@@ -1022,7 +1115,7 @@
 			}
 
 			event.preventDefault();
-			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(select.value)}`;
+			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
 		});
 
 		scheduleInitialRerender();
