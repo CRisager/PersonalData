@@ -704,6 +704,19 @@
 			const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
 			layout.height = Math.max(120, layout.margin.t + displayedPreview.length * barHeightPerRecording + layout.margin.b);
 			layout.showlegend = false;
+			// Ensure all recording labels appear as y-axis ticks in the compact preview
+			layout.yaxis = layout.yaxis || {};
+			layout.yaxis.nticks = Math.max(3, displayedPreview.length);
+			// Match detailed plot behaviour: explicitly set category order/array
+			// so each recording name appears as a y-axis tick in the preview.
+			layout.yaxis.categoryorder = 'array';
+			layout.yaxis.categoryarray = labels;
+			layout.yaxis.autorange = 'reversed';
+			// Ensure ticks are placed for every category (labels array) — use explicit tickmode
+			layout.yaxis.tickmode = 'array';
+			layout.yaxis.tickvals = labels;
+			layout.yaxis.ticktext = labels;
+			layout.yaxis.tickfont = layout.yaxis.tickfont || { size: 11 };
 		}
 		// Build a detailSet for detailed views or a visible subset for previews
 		const detailSet = usePreviewLayout

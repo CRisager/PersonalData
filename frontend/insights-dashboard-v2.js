@@ -998,6 +998,30 @@
 			plotTarget = scrollPane;
 		}
 
+		// For overview cards in v2 we want static, non-interactive previews:
+		// - disable hover/tooltips
+		// - disable hovermode
+		if (isOverview) {
+			try {
+				layout.hovermode = false;
+			} catch (e) {
+				// ignore
+			}
+			try {
+				traces = (traces || []).map((t) => {
+					try {
+						t.hoverinfo = 'none';
+					} catch (e) {}
+					try {
+						t.hovertemplate = '';
+					} catch (e) {}
+					return t;
+				});
+			} catch (e) {
+				// ignore
+			}
+		}
+
 		Plotly.react(plotTarget, traces, Object.assign({}, layout, extraLayout), {
 			displayModeBar: false,
 			responsive: false,
@@ -1110,11 +1134,8 @@
 
 		const controls = document.createElement("div");
 		controls.className = "insight-card-controls";
-		let timeframeSelect = null;
-		if (definition.key === "pace" || definition.key === "pitch" || definition.key === "fillerTrend" || definition.key === "fillerRecording") {
-			timeframeSelect = createTimeframeSelect("all_time");
-			controls.appendChild(timeframeSelect);
-		}
+		// Overview cards in v2 are static: do not render timeframe dropdowns here.
+		// Detailed views still create controls in their own code path.
 
 		header.append(titleWrap, controls);
 
@@ -1124,8 +1145,8 @@
 		card.append(header, chart);
 
 		const rerender = () => {
-			// Overview cards always render the full dataset.
-			renderPlotInto(chart, definition, recordings, initialSelection, true, timeframeSelect ? timeframeSelect.value : undefined, true);
+			// Overview cards always render the full dataset. Disable hover/tooltips for overview cards.
+			renderPlotInto(chart, definition, recordings, initialSelection, true, undefined, true);
 		};
 
 		const scheduleInitialRerender = () => {
@@ -1154,17 +1175,10 @@
 			}
 		};
 
-		if (timeframeSelect) {
-			timeframeSelect.addEventListener("click", (event) => event.stopPropagation());
-			timeframeSelect.addEventListener("change", (event) => {
-				event.stopPropagation();
-				rerender();
-			});
-		}
+		// No controls to wire for overview cards.
 
 		card.addEventListener("click", () => {
-			let url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
-			if (timeframeSelect) url += `&timeframe=${encodeURIComponent(timeframeSelect.value)}`;
+			const url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
 			window.location.href = url;
 		});
 		card.addEventListener("keydown", (event) => {
@@ -1173,8 +1187,7 @@
 			}
 
 			event.preventDefault();
-			let url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
-			if (timeframeSelect) url += `&timeframe=${encodeURIComponent(timeframeSelect.value)}`;
+			const url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
 			window.location.href = url;
 		});
 
@@ -1200,12 +1213,8 @@
 			searchIcon.style.cursor = "pointer";
 			searchIcon.addEventListener("click", (event) => {
 				event.stopPropagation();
-				if (viewName === "detail") {
-					window.location.href = "insights.html";
-					return;
-				}
-
-				window.location.reload();
+				// Navigate to the original interactive insights page (non-v2)
+				window.location.href = "insights.html";
 			});
 		}
 
