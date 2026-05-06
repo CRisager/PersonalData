@@ -1213,7 +1213,7 @@
 			folderIcon.style.cursor = "pointer";
 			folderIcon.addEventListener("click", (event) => {
 				event.stopPropagation();
-				window.location.href = "insights_v2.html";
+				window.location.href = "insights.html";
 			});
 		}
 

@@ -1525,6 +1525,15 @@ body[data-view="overview"] .bottom-nav .record-icon,
 body[data-view="detail"] .bottom-nav .record-icon {
 	cursor: pointer;
 }
+	
+	/* Folder icon styling based on active version */
+	body[data-version="v2"] .bottom-nav .icon.folder {
+		stroke: var(--teal-bright);
+	}
+	
+	body[data-version="v2"] .bottom-nav .icon:not(.folder) {
+		stroke: var(--teal-dark);
+	}
 
 @media (max-width: 430px) {
 	.insight-card,
