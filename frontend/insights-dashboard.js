@@ -597,10 +597,13 @@
 		};
 	}
 
-	function renderPlotInto(container, definition, recordings, selectedCount, isPreview, timeframeKey) {
+	function renderPlotInto(container, definition, recordings, selectedCount, isPreview, timeframeKey, isOverviewCard = false) {
 		if (!container) {
 			return;
 		}
+
+		const isOverview = Boolean(isOverviewCard);
+		const usePreviewLayout = isPreview && !isOverview;
 
 		if (!Array.isArray(recordings) || recordings.length === 0) {
 			container.innerHTML = '<div class="dashboard-empty">No recordings found yet.</div>';
@@ -613,24 +616,24 @@
 			: buildLineTrace(definition, recordings);
 
 		let visibleRecordings;
-		if (isPreview) {
+		if (usePreviewLayout) {
 			const base = timeframeKey ? applyTimeframe(recordings, timeframeKey) : recordings;
 			visibleRecordings = getVisibleRecordings(base, selectedCount);
 		} else {
 			visibleRecordings = applyTimeframe(recordings, timeframeKey);
 		}
 		const visibleRecordingsByDate = sortRecordingsByDate(visibleRecordings);
-		const layout = buildLayout(definition, isPreview);
+		const layout = buildLayout(definition, usePreviewLayout);
 		const containerWidth = Math.max(Math.floor(container.getBoundingClientRect().width || container.clientWidth || 0), 1);
-		layout.height = isPreview ? 260 : 360;
-		layout.width = isPreview ? containerWidth : undefined;
+		layout.height = usePreviewLayout ? 260 : isOverview ? 300 : 360;
+		layout.width = usePreviewLayout ? containerWidth : undefined;
 		layout.autosize = true;
-		layout.xaxis.tickangle = isPreview ? -20 : 0;
-		layout.xaxis.nticks = isPreview ? 4 : undefined;
+		layout.xaxis.tickangle = usePreviewLayout ? -20 : isOverview ? -10 : 0;
+		layout.xaxis.nticks = usePreviewLayout ? 4 : isOverview ? 5 : undefined;
 		layout.xaxis.autorange = true;
 		layout.xaxis.range = undefined;
-		layout.yaxis.nticks = isPreview ? 3 : undefined;
-		if (isPreview && visibleRecordingsByDate.length > 0) {
+		layout.yaxis.nticks = usePreviewLayout ? 3 : isOverview ? 4 : undefined;
+		if (usePreviewLayout && visibleRecordingsByDate.length > 0) {
 			const visibleValues = visibleRecordingsByDate.map((recording) => Number(definition.getValue(recording)) || 0);
 			const minValue = Math.min(...visibleValues);
 			const maxValue = Math.max(...visibleValues);
@@ -643,17 +646,17 @@
 
 		if (definition.kind === "line") {
 			layout.xaxis.type = "date";
-			layout.xaxis.tickformat = isPreview ? "%b %d" : "%b %d, %Y";
+			layout.xaxis.tickformat = usePreviewLayout ? "%b %d" : isOverview ? "%b %d" : "%b %d, %Y";
 			if (visibleRecordingsByDate.length > 0) {
 				const firstX = new Date(toChartDateValue(visibleRecordingsByDate[0], 0)).getTime();
 				const lastX = new Date(toChartDateValue(visibleRecordingsByDate[visibleRecordingsByDate.length - 1], visibleRecordingsByDate.length - 1)).getTime();
 				const span = Math.max(1, lastX - firstX);
-				const pad = Math.max(isPreview ? 30 * 60 * 1000 : 60 * 1000, Math.round(span * (isPreview ? 0.18 : 0.06)));
+				const pad = Math.max(usePreviewLayout ? 30 * 60 * 1000 : isOverview ? 12 * 60 * 60 * 1000 : 60 * 1000, Math.round(span * (usePreviewLayout ? 0.18 : isOverview ? 0.12 : 0.06)));
 				layout.xaxis.range = [new Date(firstX - pad).toISOString(), new Date(lastX + pad).toISOString()];
 			}
 		}
 
-		if (isPreview) {
+		if (usePreviewLayout || isOverview) {
 			layout.dragmode = false;
 			layout.xaxis.fixedrange = true;
 			layout.yaxis.fixedrange = true;
@@ -668,7 +671,7 @@
 		let fillerLegendItems = null;
 
 		// Preview: for fillerRecording, build the stacked breakdown (compact)
-		if (isPreview && definition.key === 'fillerRecording') {
+		if (usePreviewLayout && definition.key === 'fillerRecording') {
 			const detailSetPreview = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
 			const selectedPreview = [...detailSetPreview].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
 			const displayedPreview = selectedPreview.slice(0, 7);
@@ -703,7 +706,7 @@
 			layout.showlegend = false;
 		}
 		// Build a detailSet for detailed views or a visible subset for previews
-		const detailSet = isPreview
+		const detailSet = usePreviewLayout
 			? sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount))
 			: applyTimeframe(recordings, timeframeKey);
 		const timeframeLabel = getTimeframeLabel(timeframeKey);
@@ -711,9 +714,9 @@
 		const xRange = getTimeframeXRange(recordings, detailSet, timeframeKey);
 
 		// For all non-fillerRecording-preview cases, run the detailed trace builder
-		if (!(isPreview && definition.key === 'fillerRecording')) {
+		if (!(usePreviewLayout && definition.key === 'fillerRecording')) {
 			layout.template = "plotly_white";
-			if (!isPreview) layout.height = 600;
+			if (!usePreviewLayout) layout.height = isOverview ? 300 : 600;
 
 			if (definition.key === 'pace' || definition.key === 'pitch') {
 				const result = buildWpmAndPitchTraces(definition, detailSet);
@@ -733,7 +736,7 @@
 				}
 
 				if (definition.key === "pace") {
-					if (!isPreview) layout.height = 480;
+					if (!usePreviewLayout) layout.height = isOverview ? 300 : 480;
 					layout.title = { text: "" };
 					layout.xaxis.type = "date";
 					layout.xaxis.autorange = false;
@@ -743,9 +746,9 @@
 					layout.xaxis.title = "Session date";
 					layout.yaxis.title = "Words per minute (WPM)";
 					layout.hovermode = "closest";
-					layout.legend = { orientation: "h", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
-					layout.showlegend = !isPreview;
-					layout.margin = isPreview ? { b: 24, t: 10, l: 34, r: 12 } : { b: 130, t: 40, l: 60, r: 30 };
+					layout.legend = { orientation: "h", yanchor: "top", y: isOverview ? -0.18 : -0.22, xanchor: "left", x: 0, font: { size: 11 } };
+					layout.showlegend = !usePreviewLayout && !isOverview;
+					layout.margin = usePreviewLayout ? { b: 24, t: 10, l: 34, r: 12 } : isOverview ? { b: 72, t: 20, l: 46, r: 18 } : { b: 130, t: 40, l: 60, r: 30 };
 				} else {
 					layout.xaxis.type = "date";
 					layout.xaxis.tickformat = tickConfig.tickformat;
@@ -753,16 +756,20 @@
 					layout.xaxis.range = xRange;
 					layout.xaxis.title = "Session date";
 					layout.yaxis.title = "Pitch variation (semitones from session median)";
-					layout.hovermode = isPreview ? "closest" : "x unified";
-					layout.xaxis.showspikes = !isPreview;
-					layout.xaxis.spikemode = isPreview ? false : "across";
-					layout.xaxis.spikesnap = isPreview ? false : "cursor";
-					layout.xaxis.spikedash = isPreview ? false : "dot";
-					layout.xaxis.spikecolor = isPreview ? false : "rgba(0,0,0,0.25)";
-					layout.xaxis.spikethickness = isPreview ? false : 1;
+					layout.hovermode = usePreviewLayout ? "closest" : "x unified";
+					// For overview cards, use white hoverlabel background for readability
+					if (isOverview) {
+						layout.hoverlabel = { bgcolor: '#ffffff', font: { color: '#122a2c' } };
+					}
+					layout.xaxis.showspikes = !usePreviewLayout && !isOverview;
+					layout.xaxis.spikemode = usePreviewLayout || isOverview ? false : "across";
+					layout.xaxis.spikesnap = usePreviewLayout || isOverview ? false : "cursor";
+					layout.xaxis.spikedash = usePreviewLayout || isOverview ? false : "dot";
+					layout.xaxis.spikecolor = usePreviewLayout || isOverview ? false : "rgba(0,0,0,0.25)";
+					layout.xaxis.spikethickness = usePreviewLayout || isOverview ? false : 1;
 					layout.legend = { orientation: "v", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
-					layout.showlegend = !isPreview;
-					layout.margin = isPreview ? { b: 24, t: 10, l: 34, r: 12 } : { b: 250, t: 50, l: 60, r: 30 };
+					layout.showlegend = !usePreviewLayout && !isOverview;
+					layout.margin = usePreviewLayout ? { b: 24, t: 10, l: 34, r: 12 } : isOverview ? { b: 72, t: 20, l: 46, r: 18 } : { b: 250, t: 50, l: 60, r: 30 };
 				}
 			} else if (definition.key === 'fillerTrend') {
 				const filtered = detailSet;
@@ -795,7 +802,7 @@
 							x,
 							y,
 							visible: hasData,
-							showlegend: !isPreview,
+							showlegend: !usePreviewLayout,
 							line: { color, width: 2.5, shape: "spline" },
 							marker: { size: 6, color },
 							hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
@@ -807,14 +814,14 @@
 					name: "Disable all",
 					x: [],
 					y: [],
-					showlegend: !isPreview,
+					showlegend: !usePreviewLayout,
 					hoverinfo: "none",
 					line: { color: "#999" },
 					marker: { color: "#999" },
 				});
-				layout.showlegend = !isPreview;
+				layout.showlegend = !usePreviewLayout && !isOverview;
 				layout.title = { text: "" };
-				layout.height = undefined;
+				layout.height = isOverview ? 280 : undefined;
 				layout.xaxis.type = "date";
 				layout.xaxis.tickformat = tickConfig.tickformat;
 				layout.xaxis.dtick = tickConfig.dtick;
@@ -830,7 +837,7 @@
 					x: 0,
 					font: { size: 11 },
 				};
-				layout.margin = isPreview ? { b: 24, t: 10, l: 34, r: 12 } : { b: 130, t: 40, l: 60, r: 30 };
+				layout.margin = usePreviewLayout ? { b: 24, t: 10, l: 34, r: 12 } : isOverview ? { b: 72, t: 20, l: 46, r: 18 } : { b: 130, t: 40, l: 60, r: 30 };
 				layout.yaxis.range = [0, Math.max(5, maxY * 1.2)];
 				if (!filtered.length) {
 					extraLayout.annotations = [{
@@ -845,7 +852,7 @@
 				const selected = [...detailSet].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
 				
 				// For preview, limit to top 7 bars; for detail, show all
-				const displayedRecordings = isPreview ? selected.slice(0, 7) : selected;
+				const displayedRecordings = usePreviewLayout ? selected.slice(0, 7) : selected;
 				const labels = displayedRecordings.map((r) => String(r.recording_name || "Unknown recording"));
 				const dates = displayedRecordings.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
 				const totals = displayedRecordings.map((r) => Number(r.filler_percentage) || 0);
@@ -870,7 +877,7 @@
 					traceIndex: idx,
 				}));
 				
-				if (isPreview) {
+				if (usePreviewLayout) {
 					// Preview: show top 7 bars in scrollable container
 					const maxVisibleBars = 7;
 					const marginBot = 30;
@@ -889,12 +896,12 @@
 					layout.showlegend = false;
 				} else {
 					// Detail view: show all bars in scrollable container
-					const maxVisibleBars = 15;
-					const marginBot = 50;
-					const marginTop = 30;
+					const maxVisibleBars = isOverview ? 6 : 15;
+					const marginBot = isOverview ? 28 : 50;
+					const marginTop = isOverview ? 18 : 30;
 					const marginLeft = 0;
-					const marginRight = 35;
-					const fixedViewportHeight = 400;
+					const marginRight = isOverview ? 20 : 35;
+					const fixedViewportHeight = isOverview ? 210 : 400;
 					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
 					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
 					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
@@ -903,11 +910,11 @@
 					layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
 					layout.template = "plotly_white";
 					layout.height = totalChartHeight;
-					layout.showlegend = true;
+					layout.showlegend = !isOverview;
 					layout.legend = {
 						orientation: "h",
 						yanchor: "bottom",
-						y: -0.12,
+						y: isOverview ? -0.08 : -0.12,
 						xanchor: "left",
 						x: 0,
 						font: { size: 11 },
@@ -922,10 +929,10 @@
 				layout.xaxis.ticksuffix = '%';
 				const maxFiller = Math.max(...(detailSet.length ? detailSet : recordings).map((r) => Number(r.filler_percentage) || 0), 10);
 				layout.xaxis.range = [0, Math.min(100, maxFiller * 1.2 + 3)];
-				layout.xaxis.title = isPreview
+				layout.xaxis.title = usePreviewLayout
 					? { text: "% of spoken words", standoff: 10 }
 					: { text: "% of all spoken words", standoff: 12 };
-				if (isPreview) {
+				if (usePreviewLayout) {
 					layout.yaxis.title = "Recording";
 				}
 				layout.title = { text: "" };
@@ -939,7 +946,7 @@
 			}
 		}
 
-		if (!isPreview) {
+		if (!usePreviewLayout) {
 			layout.annotations = extraLayout.annotations || [];
 		}
 
@@ -951,12 +958,43 @@
 				scrollPane = document.createElement('div');
 				scrollPane.className = 'filler-chart-scroll';
 				container.appendChild(scrollPane);
-				if (!isPreview) {
+				if (!usePreviewLayout && !isOverview) {
 					const legendPane = document.createElement('div');
 					legendPane.className = 'filler-chart-legend';
 					container.appendChild(legendPane);
 				}
 			}
+
+			// Constrain overview cards: set scroll pane height to the chart container's
+			// computed height so the card remains fixed and extra bars become scrollable.
+			if (scrollPane) {
+				if (isOverview) {
+					// Compute a fixed chart area height based on the card's square size.
+					// Use the card's layout (width == height due to aspect-ratio) and reserve
+					// space for the header so the chart area becomes a stable box.
+					const cardEl = container.closest('.insight-card');
+					let chartAreaH = 220;
+					if (cardEl) {
+						const cardRect = cardEl.getBoundingClientRect();
+						const headerEl = cardEl.querySelector('.insight-card-header');
+						const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+						// aim for square card: use card height minus header as available chart area
+						chartAreaH = Math.max(80, Math.floor(cardRect.height - headerH - 8));
+					}
+					scrollPane.style.height = `${chartAreaH}px`;
+					scrollPane.style.overflowY = 'auto';
+					scrollPane.style.maxHeight = '100%';
+					scrollPane.style.minHeight = '0';
+				} else if (usePreviewLayout) {
+					// For compact previews, allow Plotly-driven heights but keep overflow available
+					scrollPane.style.overflowY = 'auto';
+				} else {
+					// For detail views, leave scrolling to CSS/legend pane
+					scrollPane.style.height = '';
+					scrollPane.style.overflowY = '';
+				}
+			}
+
 			plotTarget = scrollPane;
 		}
 
@@ -965,7 +1003,7 @@
 			responsive: false,
 		});
 
-		if (!isPreview && definition.key === 'fillerRecording' && fillerLegendItems) {
+		if (!usePreviewLayout && !isOverview && definition.key === 'fillerRecording' && fillerLegendItems) {
 			const legendPane = container.querySelector('.filler-chart-legend');
 			if (legendPane) {
 				legendPane.innerHTML = '';
@@ -1024,7 +1062,7 @@
 			}
 		}
 
-		if (!isPreview && definition.key === "fillerTrend" && !container._fillerLegendBound) {
+		if (!usePreviewLayout && !isOverview && definition.key === "fillerTrend" && !container._fillerLegendBound) {
 			container._fillerLegendBound = true;
 			container.on("plotly_legendclick", function(data) {
 				if (data.data[data.curveNumber].name !== "Disable all") return;
@@ -1040,7 +1078,7 @@
 			});
 		}
 
-		if (isPreview) {
+		if (usePreviewLayout) {
 			window.requestAnimationFrame(() => {
 				Plotly.Plots.resize(container);
 			});
@@ -1086,14 +1124,34 @@
 		card.append(header, chart);
 
 		const rerender = () => {
-			// Use the card's initialSelection for count; previews don't expose count selector
-			renderPlotInto(chart, definition, recordings, initialSelection, true, timeframeSelect ? timeframeSelect.value : undefined);
+			// Overview cards always render the full dataset.
+			renderPlotInto(chart, definition, recordings, initialSelection, true, timeframeSelect ? timeframeSelect.value : undefined, true);
 		};
 
 		const scheduleInitialRerender = () => {
-			window.requestAnimationFrame(() => {
+			// Use a ResizeObserver to keep the card square by matching height to width.
+			// This reacts to the phone-stage scaling and window resizes.
+			try {
+				const applySquare = () => {
+					const w = Math.floor(card.offsetWidth || card.clientWidth || 0);
+					if (w > 0) {
+						card.style.height = w + 'px';
+						chart.style.maxHeight = '100%';
+						chart.style.minHeight = '0';
+					}
+				};
+				const ro = new ResizeObserver(() => {
+					applySquare();
+					// after sizing, render the chart inside the constrained area
+					window.requestAnimationFrame(rerender);
+				});
+				ro.observe(card);
+				// apply once immediately
+				applySquare();
+			} catch (e) {
+				// fallback: schedule a single render
 				window.requestAnimationFrame(rerender);
-			});
+			}
 		};
 
 		if (timeframeSelect) {
@@ -1115,7 +1173,9 @@
 			}
 
 			event.preventDefault();
-			window.location.href = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
+			let url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
+			if (timeframeSelect) url += `&timeframe=${encodeURIComponent(timeframeSelect.value)}`;
+			window.location.href = url;
 		});
 
 		scheduleInitialRerender();
@@ -1177,7 +1237,7 @@
 
 		app.innerHTML = "";
 		for (const definition of OVERVIEW_PLOTS) {
-			app.appendChild(createCard(definition, recordings, 5));
+			app.appendChild(createCard(definition, recordings, "all"));
 		}
 	}
 
