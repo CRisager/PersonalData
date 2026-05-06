@@ -1,5 +1,5 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
-    "python.defaultInterpreterPath": "/Users/andreabolvig/anaconda3/bin/python3"
+    "python.defaultInterpreterPath": "/Users/andreabolvig/anaconda3/envs/PersonalDataEnv/bin/python"
 }
