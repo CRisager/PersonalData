@@ -70,10 +70,10 @@
 	}
 
 	const OVERVIEW_PLOTS = [
-		PLOT_DEFINITIONS.pace,
 		PLOT_DEFINITIONS.fillerTrend,
-		PLOT_DEFINITIONS.pitch,
 		PLOT_DEFINITIONS.fillerRecording,
+		PLOT_DEFINITIONS.pace,
+		PLOT_DEFINITIONS.pitch,
 	];
 
 	const phoneStage = document.getElementById("phoneStage");
@@ -672,6 +672,7 @@
 				}
 
 				if (definition.key === "pace") {
+					layout.height = 480;
 					layout.title = { text: "" };
 					layout.xaxis.type = "date";
 					layout.xaxis.tickformat = tickConfig.tickformat;
@@ -680,9 +681,9 @@
 					layout.xaxis.title = "Session date";
 					layout.yaxis.title = "Words per minute (WPM)";
 					layout.hovermode = "closest";
-					layout.legend = { orientation: "h", yanchor: "top", y: -0.14, xanchor: "left", x: 0, font: { size: 11 } };
+					layout.legend = { orientation: "h", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
 					layout.showlegend = true;
-					layout.margin = { b: 110, t: 40, l: 60, r: 30 };
+					layout.margin = { b: 130, t: 40, l: 60, r: 30 };
 				} else {
 					layout.title = { text: `Pitch range per session over time (${timeframeLabel})`, x: 0.0, xanchor: "left", font: { size: 15 } };
 					layout.xaxis.type = "date";
@@ -716,13 +717,25 @@
 						x,
 						y,
 						visible: hasData,
-						line: { color: PALETTE[idx % PALETTE.length], width: 2.5 },
+						line: { color: PALETTE[idx % PALETTE.length], width: 2.5, shape: "spline" },
 						marker: { size: 6 },
 						hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
 					};
 				});
+				traces.unshift({
+					type: "scatter",
+					mode: "none",
+					name: "Disable all",
+					x: [],
+					y: [],
+					showlegend: true,
+					hoverinfo: "none",
+					line: { color: "#999" },
+					marker: { color: "#999" },
+				});
 				layout.showlegend = true;
-				layout.title = { text: `Filler words over time (${timeframeLabel})`, x: 0.0, xanchor: "left", font: { size: 15 } };
+				layout.title = { text: "" };
+				layout.height = 480;
 				layout.xaxis.type = "date";
 				layout.xaxis.tickformat = tickConfig.tickformat;
 				layout.xaxis.dtick = tickConfig.dtick;
@@ -733,12 +746,12 @@
 				layout.legend = {
 					orientation: "h",
 					yanchor: "top",
-					y: -0.14,
+					y: -0.22,
 					xanchor: "left",
 					x: 0,
 					font: { size: 11 },
 				};
-				layout.margin = { b: 110, t: 115, l: 60, r: 30 };
+				layout.margin = { b: 130, t: 40, l: 60, r: 30 };
 				layout.yaxis.range = [0, Math.max(5, maxY * 1.2)];
 				if (!filtered.length) {
 					extraLayout.annotations = [{
@@ -802,6 +815,22 @@
 			displayModeBar: false,
 			responsive: true,
 		});
+
+		if (!isPreview && definition.key === "fillerTrend" && !container._fillerLegendBound) {
+			container._fillerLegendBound = true;
+			container.on("plotly_legendclick", function(data) {
+				if (data.data[data.curveNumber].name !== "Disable all") return;
+				const realIndices = data.data
+					.map((t, i) => t.name !== "Disable all" ? i : null)
+					.filter(i => i !== null);
+				const anyVisible = realIndices.some(i => {
+					const v = data.data[i].visible;
+					return v !== "legendonly" && v !== false;
+				});
+				Plotly.restyle(container, "visible", realIndices.map(() => anyVisible ? "legendonly" : true), realIndices);
+				return false;
+			});
+		}
 
 		if (isPreview) {
 			window.requestAnimationFrame(() => {
