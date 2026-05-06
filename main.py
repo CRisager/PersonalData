@@ -233,11 +233,11 @@ def process_audio_array(
 		)
 	except ImportError as exc:
 		missing = str(exc)
-		raise SystemExit(
+		raise RuntimeError(
 			"Missing dependency while loading pipeline modules. "
 			"Install required packages (e.g. sounddevice, soundfile, openai-whisper, librosa, numpy, scipy, matplotlib) "
 			f"and retry. Details: {missing}"
-		)
+		) from exc
 
 	audio = np.asarray(audio, dtype=np.float32).squeeze()
 	if audio.ndim != 1:
@@ -415,7 +415,7 @@ def process_audio_file(
 		import soundfile as sf
 		from scipy import signal
 	except ImportError as exc:
-		raise SystemExit(f"Missing dependency while loading uploaded audio: {exc}")
+		raise RuntimeError(f"Missing dependency while loading uploaded audio: {exc}") from exc
 
 	audio_data, sample_rate = sf.read(str(audio_file_path))
 	audio_data = np.asarray(audio_data, dtype=np.float32)

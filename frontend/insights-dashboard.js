@@ -9,6 +9,14 @@
 		{ label: "All recordings", value: "all" },
 	];
 
+	const TIMEFRAME_OPTIONS = [
+		{ label: "This week", value: "this_week" },
+		{ label: "Month", value: "month" },
+		{ label: "6 months", value: "six_months" },
+		{ label: "Year", value: "year" },
+		{ label: "All time", value: "all_time" },
+	];
+
 	const PALETTE = ['#C8E6C9', '#B8E2D4', '#A6DDE8', '#C5D9F2', '#D6C7EE', '#9FD8F7', '#B5EAD7', '#FFDAB9', '#FFD4B4', '#E2C7EE', '#D4E6F1', '#F0E2C3', '#E8D5B7', '#C9E4CA'];
 
 	const PLOT_DEFINITIONS = {
@@ -62,10 +70,10 @@
 	}
 
 	const OVERVIEW_PLOTS = [
-		PLOT_DEFINITIONS.pace,
 		PLOT_DEFINITIONS.fillerTrend,
-		PLOT_DEFINITIONS.pitch,
 		PLOT_DEFINITIONS.fillerRecording,
+		PLOT_DEFINITIONS.pace,
+		PLOT_DEFINITIONS.pitch,
 	];
 
 	const phoneStage = document.getElementById("phoneStage");
@@ -303,6 +311,111 @@
 		return select;
 	}
 
+	function createTimeframeSelect(selectedValue) {
+		const select = document.createElement("select");
+		select.className = "insight-count-select";
+		for (const option of TIMEFRAME_OPTIONS) {
+			const item = document.createElement("option");
+			item.value = String(option.value);
+			item.textContent = option.label;
+			if (String(option.value) === String(selectedValue)) {
+				item.selected = true;
+			}
+			select.appendChild(item);
+		}
+		return select;
+	}
+
+	function getDateRangeForTimeframe(timeframeKey) {
+		const today = new Date();
+		const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		const weekday = dayStart.getDay();
+		const mondayOffset = (weekday + 6) % 7;
+		const mondayThisWeek = new Date(dayStart);
+		mondayThisWeek.setDate(dayStart.getDate() - mondayOffset);
+		const sundayThisWeek = new Date(mondayThisWeek);
+		sundayThisWeek.setDate(mondayThisWeek.getDate() + 6);
+
+		const mondayLastWeek = new Date(mondayThisWeek);
+		mondayLastWeek.setDate(mondayThisWeek.getDate() - 7);
+		const sundayLastWeek = new Date(mondayLastWeek);
+		sundayLastWeek.setDate(mondayLastWeek.getDate() + 6);
+
+		switch (String(timeframeKey || "all_time")) {
+			case "this_week":
+				return { start: mondayThisWeek, end: sundayThisWeek };
+			case "last_week":
+				return { start: mondayLastWeek, end: sundayLastWeek };
+			case "month":
+				return { start: new Date(dayStart.getFullYear(), dayStart.getMonth(), 1), end: dayStart };
+			case "six_months": {
+				const start = new Date(dayStart);
+				start.setMonth(start.getMonth() - 6);
+				return { start, end: dayStart };
+			}
+			case "year":
+				return { start: new Date(dayStart.getFullYear(), 0, 1), end: dayStart };
+			case "all_time":
+			default:
+				return { start: null, end: null };
+		}
+	}
+
+	function applyTimeframe(recordings, timeframeKey) {
+		const ordered = sortRecordingsByDate(recordings || []);
+		const { start, end } = getDateRangeForTimeframe(timeframeKey);
+		if (!start || !end) {
+			return ordered;
+		}
+		return ordered.filter((r) => {
+			const d = getRecordingDate(r);
+			if (!d) return false;
+			return d >= start && d <= new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999);
+		});
+	}
+
+	function getTimeframeLabel(timeframeKey) {
+		const found = TIMEFRAME_OPTIONS.find((opt) => opt.value === timeframeKey);
+		return found ? found.label : "All time";
+	}
+
+	function getTimeframeTickConfig(timeframeKey) {
+		switch (String(timeframeKey || "all_time")) {
+			case "this_week":
+				return { tickformat: "%a %d", dtick: 86400000 };
+			case "month":
+				return { tickformat: "%b %d", dtick: null };
+			case "six_months":
+				return { tickformat: "%b %Y", dtick: "M1" };
+			case "year":
+				return { tickformat: "%b", dtick: "M1" };
+			case "all_time":
+			default:
+				return { tickformat: "%b %Y", dtick: "M1" };
+		}
+	}
+
+	function getTimeframeXRange(allRecords, filteredRecords, timeframeKey) {
+		const allDates = (allRecords || []).map((r) => getRecordingDate(r)).filter(Boolean);
+		if (!allDates.length) {
+			return [null, null];
+		}
+
+		if (String(timeframeKey || "all_time") === "all_time") {
+			const minDate = new Date(Math.min(...allDates.map((d) => d.getTime())));
+			const maxDate = new Date(Math.max(...allDates.map((d) => d.getTime())));
+			const padMs = 20 * 24 * 60 * 60 * 1000;
+			return [new Date(minDate.getTime() - padMs).toISOString(), new Date(maxDate.getTime() + padMs).toISOString()];
+		}
+
+		const { start, end } = getDateRangeForTimeframe(timeframeKey);
+		if (!start || !end) {
+			return [null, null];
+		}
+		const padMs = 24 * 60 * 60 * 1000;
+		return [new Date(start.getTime() - padMs).toISOString(), new Date(end.getTime() + padMs).toISOString()];
+	}
+
 	function buildLineTrace(definition, recordings) {
 		const subset = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
 		return {
@@ -469,7 +582,7 @@
 		};
 	}
 
-	function renderPlotInto(container, definition, recordings, selectedCount, isPreview) {
+	function renderPlotInto(container, definition, recordings, selectedCount, isPreview, timeframeKey) {
 		if (!container) {
 			return;
 		}
@@ -484,7 +597,9 @@
 			? buildBarTrace(definition, recordings)
 			: buildLineTrace(definition, recordings);
 
-		const visibleRecordings = getVisibleRecordings(recordings, selectedCount);
+		const visibleRecordings = isPreview
+			? getVisibleRecordings(recordings, selectedCount)
+			: applyTimeframe(recordings, timeframeKey);
 		const visibleRecordingsByDate = sortRecordingsByDate(visibleRecordings);
 		const layout = buildLayout(definition, isPreview);
 		const containerWidth = Math.max(Math.floor(container.getBoundingClientRect().width || container.clientWidth || 0), 1);
@@ -531,47 +646,191 @@
 		let traces = [trace];
 		let extraLayout = {};
 		if (!isPreview) {
+			const detailSet = applyTimeframe(recordings, timeframeKey);
+			const timeframeLabel = getTimeframeLabel(timeframeKey);
+			const tickConfig = getTimeframeTickConfig(timeframeKey);
+			const xRange = getTimeframeXRange(recordings, detailSet, timeframeKey);
+
+			layout.template = "plotly_white";
+			layout.height = 600;
+
 			if (definition.key === 'pace' || definition.key === 'pitch') {
-				const result = buildWpmAndPitchTraces(definition, recordings);
+				const result = buildWpmAndPitchTraces(definition, detailSet);
 				if (result) {
 					traces = result.traces;
 					extraLayout.shapes = result.layoutExtras && result.layoutExtras.shapes;
 					if (result.layoutExtras && result.layoutExtras.yRange) {
 						layout.yaxis.range = result.layoutExtras.yRange;
 					}
+					if (!traces.length || !traces[0].x || traces[0].x.length === 0) {
+						extraLayout.annotations = [{
+							text: "No recordings in this timeframe",
+							xref: "paper", yref: "paper", x: 0.5, y: 0.5,
+							showarrow: false, font: { size: 17, color: "#aaaaaa" },
+						}];
+					}
+				}
+
+				if (definition.key === "pace") {
+					layout.height = 480;
+					layout.title = { text: "" };
+					layout.xaxis.type = "date";
+					layout.xaxis.tickformat = tickConfig.tickformat;
+					layout.xaxis.dtick = tickConfig.dtick;
+					layout.xaxis.range = xRange;
+					layout.xaxis.title = "Session date";
+					layout.yaxis.title = "Words per minute (WPM)";
+					layout.hovermode = "closest";
+					layout.legend = { orientation: "h", yanchor: "top", y: -0.22, xanchor: "left", x: 0, font: { size: 11 } };
+					layout.showlegend = true;
+					layout.margin = { b: 130, t: 40, l: 60, r: 30 };
+				} else {
+					layout.title = { text: `Pitch range per session over time (${timeframeLabel})`, x: 0.0, xanchor: "left", font: { size: 15 } };
+					layout.xaxis.type = "date";
+					layout.xaxis.tickformat = tickConfig.tickformat;
+					layout.xaxis.dtick = tickConfig.dtick;
+					layout.xaxis.range = xRange;
+					layout.xaxis.title = "Session date";
+					layout.yaxis.title = "Pitch variation (semitones from session median)";
+					layout.hovermode = "x unified";
+					layout.legend = { orientation: "v", yanchor: "top", y: 0.99, xanchor: "left", x: 0.01, font: { size: 11 } };
+					layout.showlegend = true;
+					layout.margin = { b: 80, t: 100, l: 60, r: 30 };
+				}
+			} else if (definition.key === 'fillerTrend') {
+				const filtered = detailSet;
+				const fillerWords = collectFillerWords(filtered.length ? filtered : recordings);
+				let maxY = 5;
+				traces = fillerWords.map((word, idx) => {
+					const x = filtered.map((r, i) => toChartDateValue(r, i));
+					const y = filtered.map((r) => {
+						const totalWords = Math.max(1, Number(r.total_words) || 1);
+						const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
+						return (100.0 * count) / totalWords;
+					});
+					const hasData = y.some((v) => v > 0);
+					maxY = Math.max(maxY, ...y, maxY);
+					return {
+						type: "scatter",
+						mode: "lines+markers",
+						name: word,
+						x,
+						y,
+						visible: hasData,
+						line: { color: PALETTE[idx % PALETTE.length], width: 2.5, shape: "spline" },
+						marker: { size: 6 },
+						hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
+					};
+				});
+				traces.unshift({
+					type: "scatter",
+					mode: "none",
+					name: "Disable all",
+					x: [],
+					y: [],
+					showlegend: true,
+					hoverinfo: "none",
+					line: { color: "#999" },
+					marker: { color: "#999" },
+				});
+				layout.showlegend = true;
+				layout.title = { text: "" };
+				layout.height = 480;
+				layout.xaxis.type = "date";
+				layout.xaxis.tickformat = tickConfig.tickformat;
+				layout.xaxis.dtick = tickConfig.dtick;
+				layout.xaxis.range = xRange;
+				layout.xaxis.title = "Recording date";
+				layout.yaxis.title = "Percentage of spoken words (%)";
+				layout.hovermode = "closest";
+				layout.legend = {
+					orientation: "h",
+					yanchor: "top",
+					y: -0.22,
+					xanchor: "left",
+					x: 0,
+					font: { size: 11 },
+				};
+				layout.margin = { b: 130, t: 40, l: 60, r: 30 };
+				layout.yaxis.range = [0, Math.max(5, maxY * 1.2)];
+				if (!filtered.length) {
+					extraLayout.annotations = [{
+						text: "No recordings in this timeframe",
+						xref: "paper", yref: "paper", x: 0.5, y: 0.5,
+						showarrow: false, font: { size: 17, color: "#aaaaaa" },
+					}];
 				}
 			} else if (definition.key === 'fillerRecording') {
 				// Build stacked horizontal bars using filler_counts
-				const fillerWords = collectFillerWords(recordings);
-				const selected = sortRecordingsByDate(getVisibleRecordings(recordings, selectedCount));
-				const labels = selected.map((r,i)=>formatRecordingWithDateLabel(r,i));
+				const fillerWords = collectFillerWords(detailSet.length ? detailSet : recordings);
+				const selected = [...detailSet].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
+				const labels = selected.map((r) => String(r.recording_name || "Unknown recording"));
+				const dates = selected.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
+				const totals = selected.map((r) => Number(r.filler_percentage) || 0);
 				traces = fillerWords.map((word, idx) => {
 					const values = selected.map((r)=> {
 						const tot = Number(r.total_words) || 1;
 						const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
 						return (count / Math.max(1, tot)) * 100.0;
 					});
+					const hasData = values.some((v) => v > 0);
 					return {
 						type: 'bar', orientation: 'h', name: word, y: labels, x: values, marker: { color: PALETTE[idx % PALETTE.length] },
-						customdata: selected.map((r)=>[word, r.recording_name, r.total_words]),
-						hovertemplate: '<b>%{customdata[1]}</b><br>Filler: %{customdata[0]}<br>Share: %{x:.2f}%<extra></extra>',
+						showlegend: hasData,
+						customdata: selected.map((r, i)=>[word, labels[i], dates[i], totals[i], Number(r.total_words) || 0]),
+						hovertemplate: '<b>%{customdata[1]}</b><br>Date: %{customdata[2]}<br>Filler word: %{customdata[0]}<br>Word share: %{x:.2f}%<br>Total filler: %{customdata[3]:.2f}%<br>Total words: %{customdata[4]:.0f}<extra></extra>',
 					};
 				});
 				layout.barmode = 'stack';
 				layout.margin = { l: 240, r: 35, t: 115, b: 110 };
+				layout.template = "plotly_white";
+				layout.height = Math.max(450, Math.min(1000, 110 + labels.length * 36));
 				layout.yaxis = layout.yaxis || {};
 				layout.yaxis.categoryorder = 'array';
 				layout.yaxis.categoryarray = labels;
+				layout.yaxis.autorange = 'reversed';
 				layout.xaxis = layout.xaxis || {};
 				layout.xaxis.ticksuffix = '%';
-				layout.title = { text: `Filler words as percentages per recording`, x:0.0, xanchor:'left' };
+				const maxFiller = Math.max(...(detailSet.length ? detailSet : recordings).map((r) => Number(r.filler_percentage) || 0), 10);
+				layout.xaxis.range = [0, Math.min(100, maxFiller * 1.2 + 3)];
+				layout.xaxis.title = { text: "Percentage of all spoken words", standoff: 12 };
+				layout.title = { text: `Filler words as percentages per recording (${timeframeLabel})`, x:0.0, xanchor:'left', font: { size: 15 } };
+				layout.legend = { orientation: "h", yanchor: "top", y: -0.14, xanchor: "left", x: 0, title: { text: "Filler word" }, font: { size: 11 } };
+				layout.showlegend = true;
+				if (!selected.length) {
+					extraLayout.annotations = [{
+						text: "No recordings in this timeframe",
+						xref: "paper", yref: "paper", x: 0.5, y: 0.5,
+						showarrow: false, font: { size: 17, color: "#aaaaaa" },
+					}];
+				}
 			}
+		}
+
+		if (!isPreview) {
+			layout.annotations = extraLayout.annotations || [];
 		}
 
 		Plotly.react(container, traces, Object.assign({}, layout, extraLayout), {
 			displayModeBar: false,
 			responsive: true,
 		});
+
+		if (!isPreview && definition.key === "fillerTrend" && !container._fillerLegendBound) {
+			container._fillerLegendBound = true;
+			container.on("plotly_legendclick", function(data) {
+				if (data.data[data.curveNumber].name !== "Disable all") return;
+				const realIndices = data.data
+					.map((t, i) => t.name !== "Disable all" ? i : null)
+					.filter(i => i !== null);
+				const anyVisible = realIndices.some(i => {
+					const v = data.data[i].visible;
+					return v !== "legendonly" && v !== false;
+				});
+				Plotly.restyle(container, "visible", realIndices.map(() => anyVisible ? "legendonly" : true), realIndices);
+				return false;
+			});
+		}
 
 		if (isPreview) {
 			window.requestAnimationFrame(() => {
@@ -744,12 +1003,19 @@
 
 		const intro = document.createElement("p");
 		intro.className = "plot-intro";
-		intro.textContent = "Use the dropdown to adjust how much data you want to see. \n Hover over the plot to see specifics regarding each data point.";
+		intro.textContent = "Use the dropdown to adjust the visible time frame. \n Hover over data points to see specifics.";
 
 		const controls = document.createElement("div");
 		controls.className = "plot-toolbar-controls";
 		const select = createCountSelect(selectedCount);
-		controls.appendChild(select);
+		let timeframeSelect = null;
+		if (definition.key === "pace" || definition.key === "pitch" || definition.key === "fillerTrend" || definition.key === "fillerRecording") {
+			timeframeSelect = createTimeframeSelect("all_time");
+			controls.appendChild(timeframeSelect);
+		} else {
+			// Fallback (currently unused): keep count selector for non-timeframe plots.
+			controls.appendChild(select);
+		}
 
 		toolbar.append(titleWrap, controls);
 
@@ -765,11 +1031,18 @@
 		app.appendChild(detailStack);
 
 		const rerender = () => {
-			renderPlotInto(chartWrap, definition, recordings, select.value, false);
+			const effectiveCount = timeframeSelect ? "all" : select.value;
+			renderPlotInto(chartWrap, definition, recordings, effectiveCount, false, timeframeSelect ? timeframeSelect.value : "all_time");
 		};
 
-		select.addEventListener("change", rerender);
-		select.addEventListener("click", (event) => event.stopPropagation());
+		if (!timeframeSelect) {
+			select.addEventListener("change", rerender);
+			select.addEventListener("click", (event) => event.stopPropagation());
+		}
+		if (timeframeSelect) {
+			timeframeSelect.addEventListener("change", rerender);
+			timeframeSelect.addEventListener("click", (event) => event.stopPropagation());
+		}
 		rerender();
 	}
 

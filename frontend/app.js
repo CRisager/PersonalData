@@ -1247,10 +1247,8 @@ function renderLearnJar(fillerPercentage, previousAveragePercentage) {
 	const clampedFillerPct = Math.max(0, Math.min(100, fillerPercentage));
 	const clampedPreviousPct = Math.max(0, Math.min(100, previousAveragePercentage));
 
-	// Calculate fill height in viewBox coordinates
-	// If less than 10%, use 10% height minimum for readability
-	const displayFillerPct = Math.max(10, clampedFillerPct);
-	const fillHeightViewBox = (displayFillerPct / 100) * JAR_VIEWBOX_HEIGHT;
+	// Calculate fill height in viewBox coordinates using actual filler percentage
+	const fillHeightViewBox = (clampedFillerPct / 100) * JAR_VIEWBOX_HEIGHT;
 	const fillY = JAR_VIEWBOX_HEIGHT - fillHeightViewBox;
 	const fillRadius = Math.min(JAR_CORNER_RADIUS, fillHeightViewBox / 2, JAR_VIEWBOX_WIDTH / 2);
 
@@ -1268,11 +1266,10 @@ function renderLearnJar(fillerPercentage, previousAveragePercentage) {
 		learnJarFill.setAttribute("d", roundedBottomFillPath);
 	}
 
-	// Update current percentage text
+	// Update current percentage text — always fixed at 10% height from the bottom
 	if (learnJarFillerText) {
 		learnJarFillerText.textContent = `${Math.round(clampedFillerPct)}%`;
-		// Center text vertically in the red fill area (or minimum 10% area)
-		const textYViewBox = JAR_VIEWBOX_HEIGHT - (fillHeightViewBox / 2);
+		const textYViewBox = JAR_VIEWBOX_HEIGHT - (0.10 * JAR_VIEWBOX_HEIGHT);
 		learnJarFillerText.setAttribute("y", textYViewBox.toFixed(2));
 	}
 
