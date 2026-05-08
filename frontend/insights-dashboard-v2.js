@@ -1196,45 +1196,6 @@
 		return card;
 	}
 
-	function setNavState(viewName) {
-		const recordIcon = document.querySelector(".bottom-nav .record-icon");
-		const searchIcon = document.querySelector(".bottom-nav .icon.search");
-		const folderIcon = document.querySelector(".bottom-nav .icon.folder");
-		const bottomNav = document.querySelector(".bottom-nav");
-
-		if (recordIcon) {
-			recordIcon.style.cursor = "pointer";
-			recordIcon.addEventListener("click", (event) => {
-				event.stopPropagation();
-				window.location.href = "../index.html";
-			});
-		}
-
-		if (searchIcon) {
-			searchIcon.style.cursor = "pointer";
-			searchIcon.addEventListener("click", (event) => {
-				event.stopPropagation();
-				// Navigate to the original interactive insights page (non-v2)
-				window.location.href = "insights.html";
-			});
-		}
-
-		if (folderIcon) {
-			folderIcon.style.cursor = "pointer";
-			folderIcon.addEventListener("click", (event) => {
-				event.stopPropagation();
-				window.location.href = "insights.html";
-			});
-		}
-
-		if (bottomNav && viewName === "overview") {
-			bottomNav.setAttribute("aria-label", "Primary navigation");
-		}
-	}
-
-	function applyActiveNavStyles(viewName) {
-		document.body.dataset.view = viewName;
-	}
 
 	function getPageContext() {
 		const params = new URLSearchParams(window.location.search);
@@ -1357,8 +1318,6 @@
 
 	async function start() {
 		const context = getPageContext();
-		applyActiveNavStyles(context.view);
-		setNavState(context.view);
 		initializeLoadingState(context.view);
 
 		try {

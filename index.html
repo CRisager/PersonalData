@@ -10,7 +10,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
 	<link rel="stylesheet" href="frontend/styles.css" />
 </head>
-<body>
+<body data-active-nav="record">
 	<div class="phone-stage" id="phoneStage">
 		<div class="phone-shell">
 			<main class="phone" aria-label="New recording screen">
@@ -286,36 +286,55 @@
 							</button>
 						</div>
 					</div>
+					<div class="learn-view-overview" id="learnViewOverview" hidden>
+						<div class="learn-overview-grid">
+							<!-- Filler Words Section -->
+							<div class="overview-metric-card">
+								<h3 class="overview-metric-title">Filler words</h3>
+								<p class="overview-metric-text" id="overviewFillerText">You used % less filler words than your previous average.</p>
+								<div class="overview-tip-card">
+									<p class="overview-metric-tip">Tip</p>
+									<p class="overview-metric-tip-text">Close your mouth when not saying any deliberate words to stop sounds like "uh"</p>
+								</div>
+							</div>
+
+							<!-- Pace Section -->
+							<div class="overview-metric-card">
+								<h3 class="overview-metric-title">Pace</h3>
+								<p class="overview-metric-text" id="overviewPaceText">Your pace was 130 words/min and within the recommended range.</p>
+								<div class="overview-tip-card">
+									<p class="overview-metric-tip">Tip</p>
+									<p class="overview-metric-tip-text">Keep up the good work!</p>
+								</div>
+							</div>
+
+							<!-- Pitch Variation Section -->
+							<div class="overview-metric-card">
+								<h3 class="overview-metric-title">Pitch variation</h3>
+								<p class="overview-metric-text" id="overviewPitchText">Your pitch reached both the recommended upper and lower band resulting in a better range compared to previous average.</p>
+								<div class="overview-tip-card">
+									<p class="overview-metric-tip">Tip</p>
+									<p class="overview-metric-tip-text">Remember to go down on statements, up on questions, and make your voice feel alive</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="learn-actions-dual">
+							<button class="learn-nav-btn back" id="learnOverviewBackButton" aria-label="Previous step" title="Previous step">
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<line x1="5" y1="12" x2="19" y2="12" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" />
+									<path d="M11 6l-6 6 6 6" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</button>
+							<button class="learn-nav-btn forward" id="learnOverviewFinishButton" aria-label="Finish" title="Finish">
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<path d="M5 12.5l5 5 9-10" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</button>
+						</div>
+					</div>
 				</section>
 
-				<nav class="bottom-nav" aria-label="Primary navigation">
-					<svg class="icon profile" viewBox="0 0 24 24" aria-hidden="true">
-						<circle cx="12" cy="8" r="3.7" />
-						<path d="M4 19c1.9-2.8 4.8-4.2 8-4.2s6.1 1.4 8 4.2" />
-						<circle cx="12" cy="12" r="10" />
-					</svg>
-
-					<svg class="record-icon" viewBox="0 0 36 36" aria-hidden="true">
-						<circle cx="18" cy="18" r="15.2" fill="#ffffff" stroke="#ff0000" stroke-width="3" />
-						<circle cx="18" cy="18" r="9.2" fill="#ff0000" stroke="none" />
-					</svg>
-
-					<svg class="icon home" viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M3.2 10.2L12 3.3l8.8 6.9V21H3.2z" />
-					</svg>
-
-					<svg class="icon search" viewBox="0 0 24 24" aria-hidden="true">
-						<circle cx="10.5" cy="10.5" r="7" />
-						<line x1="16" y1="16" x2="21" y2="21" />
-						<line x1="7.8" y1="11" x2="7.8" y2="13.5" />
-						<line x1="10.5" y1="8" x2="10.5" y2="13.5" />
-						<line x1="13.2" y1="9.8" x2="13.2" y2="13.5" />
-					</svg>
-
-					<svg class="icon folder" viewBox="0 0 24 24" aria-hidden="true">
-						<path d="M3 8h6.5l1.7 2H21v8.3A1.7 1.7 0 0 1 19.3 20H4.7A1.7 1.7 0 0 1 3 18.3z" />
-					</svg>
-				</nav>
 
 				<div class="learn-info-overlay" id="learnInfoOverlay" hidden>
 					<div class="learn-info-popup" id="learnInfoPopup" role="dialog" aria-modal="true" aria-labelledby="learnInfoPopupTitle">
@@ -330,5 +349,6 @@
 		</div>
 	</div>
 	<script src="frontend/app.js"></script>
+	<script src="frontend/bottom-nav.js"></script>
 </body>
 </html>
