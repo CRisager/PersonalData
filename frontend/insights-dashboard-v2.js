@@ -625,7 +625,7 @@
 		const visibleRecordingsByDate = sortRecordingsByDate(visibleRecordings);
 		const layout = buildLayout(definition, usePreviewLayout);
 		const containerWidth = Math.max(Math.floor(container.getBoundingClientRect().width || container.clientWidth || 0), 1);
-		layout.height = usePreviewLayout ? 260 : isOverview ? 300 : 360;
+		layout.height = usePreviewLayout ? 260 : isOverview ? 150 : 360;
 		layout.width = usePreviewLayout ? containerWidth : undefined;
 		layout.autosize = true;
 		layout.xaxis.tickangle = usePreviewLayout ? -20 : isOverview ? -10 : 0;
@@ -716,7 +716,7 @@
 		// For all non-fillerRecording-preview cases, run the detailed trace builder
 		if (!(usePreviewLayout && definition.key === 'fillerRecording')) {
 			layout.template = "plotly_white";
-			if (!usePreviewLayout) layout.height = isOverview ? 300 : 600;
+			if (!usePreviewLayout) layout.height = isOverview ? 150 : 600;
 
 			if (definition.key === 'pace' || definition.key === 'pitch') {
 				const result = buildWpmAndPitchTraces(definition, detailSet);
@@ -736,7 +736,7 @@
 				}
 
 				if (definition.key === "pace") {
-					if (!usePreviewLayout) layout.height = isOverview ? 300 : 480;
+					if (!usePreviewLayout) layout.height = isOverview ? 150 : 480;
 					layout.title = { text: "" };
 					layout.xaxis.type = "date";
 					layout.xaxis.autorange = false;
@@ -821,7 +821,7 @@
 				});
 				layout.showlegend = !usePreviewLayout && !isOverview;
 				layout.title = { text: "" };
-				layout.height = isOverview ? 280 : undefined;
+				layout.height = isOverview ? 140 : undefined;
 				layout.xaxis.type = "date";
 				layout.xaxis.tickformat = tickConfig.tickformat;
 				layout.xaxis.dtick = tickConfig.dtick;
@@ -901,7 +901,7 @@
 					const marginTop = isOverview ? 18 : 30;
 					const marginLeft = 0;
 					const marginRight = isOverview ? 20 : 35;
-					const fixedViewportHeight = isOverview ? 210 : 400;
+					const fixedViewportHeight = isOverview ? 150 : 400;
 					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
 					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
 					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
@@ -972,8 +972,8 @@
 					// Compute a fixed chart area height based on the card's square size.
 					// Use the card's layout (width == height due to aspect-ratio) and reserve
 					// space for the header so the chart area becomes a stable box.
-					const cardEl = container.closest('.insight-card');
-					let chartAreaH = 220;
+					const cardEl = container.closest('.insight-card, .insight-v2-card');
+					let chartAreaH = 150;
 					if (cardEl) {
 						const cardRect = cardEl.getBoundingClientRect();
 						const headerEl = cardEl.querySelector('.insight-card-header');
@@ -1111,7 +1111,8 @@
 
 	function createCard(definition, recordings, initialSelection) {
 		const card = document.createElement("section");
-		card.className = "insight-card";
+		const isV2 = document.body.getAttribute("data-version") === "v2";
+		card.className = isV2 ? "insight-v2-card" : "insight-card";
 		card.tabIndex = 0;
 		card.setAttribute("role", "button");
 		card.setAttribute("aria-label", `${definition.title} details`);

@@ -1352,11 +1352,29 @@ body {
 	outline: none;
 }
 
-.insight-card:hover,
-.insight-card:focus-visible {
-	transform: translateY(-1px);
-	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+.insight-v2-card {
+	width: min(100%, 380px);
+	height: auto;
+	aspect-ratio: 2 / 1;
+	border: none;
+	border-radius: 20px;
+	background: #ffffff;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+	padding: 14px 14px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	cursor: pointer;
+	transition: transform 0.18s ease, box-shadow 0.18s ease;
+	outline: none;
+
+	overflow: hidden;
+	min-height: 0;
 }
+
+.insight-card:hover,
+.insight-card:focus-visible,
+
 
 .insight-card-header,
 .plot-toolbar {
@@ -1399,12 +1417,12 @@ body {
 }
 
 /* v2-specific: make overview cards static (no hover visual changes, hide dropdowns) */
-body[data-version="v2"] .insight-card {
+body[data-version="v2"] .insight-v2-card {
 	cursor: default;
 }
 
-body[data-version="v2"] .insight-card:hover,
-body[data-version="v2"] .insight-card:focus-visible {
+body[data-version="v2"] .insight-v2-card:hover,
+body[data-version="v2"] .insight-v2-card:focus-visible {
 	transform: none;
 	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
