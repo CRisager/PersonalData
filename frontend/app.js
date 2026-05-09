@@ -65,6 +65,12 @@ const learnPitchChart = document.getElementById("learnPitchChart");
 const learnPitchMessage = document.getElementById("learnPitchMessage");
 const learnPitchBackButton = document.getElementById("learnPitchBackButton");
 const learnPitchFinishButton = document.getElementById("learnPitchFinishButton");
+const learnViewOverview = document.getElementById("learnViewOverview");
+const learnOverviewBackButton = document.getElementById("learnOverviewBackButton");
+const learnOverviewFinishButton = document.getElementById("learnOverviewFinishButton");
+const overviewFillerText = document.getElementById("overviewFillerText");
+const overviewPaceText = document.getElementById("overviewPaceText");
+const overviewPitchText = document.getElementById("overviewPitchText");
 const learnInfoTriggers = Array.from(document.querySelectorAll(".learn-info-trigger"));
 const learnInfoOverlay = document.getElementById("learnInfoOverlay");
 const learnInfoPopupTitle = document.getElementById("learnInfoPopupTitle");
@@ -332,7 +338,7 @@ function initializePreviewScreen() {
 		return;
 	}
 
-	const target = ["idle", "record", "confirm", "learn"].includes(PREVIEW_SCREEN)
+	const target = ["idle", "record", "confirm", "learn", "overview"].includes(PREVIEW_SCREEN)
 		? PREVIEW_SCREEN
 		: "idle";
 
@@ -361,6 +367,13 @@ function initializePreviewScreen() {
 
 	if (target === "learn") {
 		showLearnView(buildPreviewResult());
+	} else if (target === "overview") {
+		currentLearnResult = buildPreviewResult();
+		confirmView.hidden = true;
+		setStep("learn");
+		const title = recordingName && recordingName.value ? recordingName.value.trim() : "Recording";
+		if (pageTitle) pageTitle.textContent = title || "Recording";
+		showLearnOverview(currentLearnResult);
 	}
 
 	showPreviewModeHint();
@@ -735,8 +748,12 @@ function showRecordingView() {
 	recordingView.hidden = false;
 	confirmView.hidden = true;
 	learnView.hidden = true;
+	learnViewStep2.hidden = true;
 	if (learnViewStep3) {
 		learnViewStep3.hidden = true;
+	}
+	if (learnViewOverview) {
+		learnViewOverview.hidden = true;
 	}
 	pageTitle.textContent = "New recording";
 	setStep("record");
@@ -746,8 +763,12 @@ function showRecordingView() {
 function showIdleView() {
 	closeLearnInfoPopup();
 	learnView.hidden = true;
+	learnViewStep2.hidden = true;
 	if (learnViewStep3) {
 		learnViewStep3.hidden = true;
+	}
+	if (learnViewOverview) {
+		learnViewOverview.hidden = true;
 	}
 	confirmView.hidden = true;
 	recordingView.hidden = true;
@@ -763,8 +784,12 @@ function showConfirmView() {
 	recordingView.hidden = true;
 	confirmView.hidden = false;
 	learnView.hidden = true;
+	learnViewStep2.hidden = true;
 	if (learnViewStep3) {
 		learnViewStep3.hidden = true;
+	}
+	if (learnViewOverview) {
+		learnViewOverview.hidden = true;
 	}
 	syncHeaderWithName();
 	void syncNextDefaultRecordingName();
@@ -1426,6 +1451,9 @@ function showLearnStep(step, result) {
 	idleView.hidden = true;
 	recordingView.hidden = true;
 	confirmView.hidden = true;
+	if (learnViewOverview) {
+		learnViewOverview.hidden = true;
+	}
 	document.body.classList.remove("is-recording");
 
 	if (step === 1) {
@@ -1904,7 +1932,17 @@ function initializeRecordingPage() {
 		learnPitchBackButton.addEventListener("click", () => showLearnStep(2, currentLearnResult));
 	}
 	if (learnPitchFinishButton) {
-		learnPitchFinishButton.addEventListener("click", clearPreviewAndReturnToIdle);
+		learnPitchFinishButton.addEventListener("click", () => {
+			if (currentLearnResult) {
+				showLearnOverview(currentLearnResult);
+			}
+		});
+	}
+	if (learnOverviewBackButton) {
+		learnOverviewBackButton.addEventListener("click", () => showLearnStep(3, currentLearnResult));
+	}
+	if (learnOverviewFinishButton) {
+		learnOverviewFinishButton.addEventListener("click", clearPreviewAndReturnToIdle);
 	}
 	recordingName.addEventListener("input", syncHeaderWithName);
 	recordingName.addEventListener("focus", () => {
@@ -1937,49 +1975,87 @@ function initializeRecordingPage() {
 	void syncNextDefaultRecordingName({ force: true });
 }
 
-function setupBottomNavZones() {
-	const bottomNav = document.querySelector(".bottom-nav");
-	if (!bottomNav) {
-		return;
-	}
-
-	const isInsightsPage = window.location.pathname.includes("insights.html");
-	const recordIcon = document.querySelector(".record-icon");
-	if (recordIcon) {
-		recordIcon.style.cursor = "pointer";
-		recordIcon.addEventListener("click", (ev) => {
-			ev.stopPropagation();
-			if (isInsightsPage) {
-				window.location.href = "../index.html";
-				return;
-			}
-
-			showRecordingView();
-		});
-	}
-
-	bottomNav.addEventListener("click", (ev) => {
-		const rect = bottomNav.getBoundingClientRect();
-		const x = ev.clientX - rect.left;
-		if (rect.width <= 0) return;
-		const zone = Math.floor((x / rect.width) * 5);
-
-		if (zone === 1) {
-			if (isInsightsPage) {
-				window.location.href = "../index.html";
-			} else {
-				showRecordingView();
-			}
-		} else if (zone === 3) {
-			if (!isInsightsPage) {
-				window.location.href = "frontend/insights.html";
-			}
-		}
-	});
-}
 
 if (hasRecordingUi) {
 	initializeRecordingPage();
 }
 
-setupBottomNavZones();
+window.__showRecordingView = showRecordingView;
+
+function showLearnOverview(result) {
+	if (!learnViewOverview) {
+		return;
+	}
+
+	// Filler words data
+	const fillerMetrics = result && result.filler_metrics ? result.filler_metrics : {};
+	const fillerPercentageRaw = Number(fillerMetrics.filler_percentage);
+	const fillerPercentage = Number.isFinite(fillerPercentageRaw)
+		? Math.max(0, Math.min(100, fillerPercentageRaw))
+		: 0;
+	const fillerHistory = loadFillerHistory();
+	const previousFillerAverage = calculateRecencyWeightedAverage(fillerHistory, HISTORY_DECAY);
+
+	// Pace data
+	const wpm = Number(result && result.wpm) || 0;
+	const validWpm = Number.isFinite(wpm) ? Math.max(0, Math.min(400, wpm)) : 0;
+	const isWithinRecommendedPace = validWpm >= 120 && validWpm <= 150;
+
+	// Pitch data
+	const pitchSummary = result && result.pitch ? result.pitch : {};
+	const pitchSeries = result && result.pitch_series ? result.pitch_series : [];
+	const currentPitchVariation = calculatePitchVariation(pitchSeries, pitchSummary);
+	const pitchHistory = loadPitchVariationHistory();
+	const previousPitchAverage = calculateRecencyWeightedAverage(pitchHistory, PITCH_HISTORY_DECAY);
+	const observedMin = Number(pitchSummary.min_pitch_semitones);
+	const observedMax = Number(pitchSummary.max_pitch_semitones);
+	const reachesBothBands = Number.isFinite(observedMin) && Number.isFinite(observedMax)
+		? (observedMin <= -3 && observedMax >= 3)
+		: false;
+
+	// Update filler words text
+	if (overviewFillerText) {
+		let fillerHTML = `You used <strong>${fillerPercentage.toFixed(1)}%</strong> filler words.`;
+		if (Number.isFinite(previousFillerAverage)) {
+			if (fillerPercentage < previousFillerAverage) {
+				const diff = (previousFillerAverage - fillerPercentage).toFixed(1);
+				fillerHTML = `You used <strong>${diff}%</strong> less filler words than your previous average.`;
+			} else if (fillerPercentage > previousFillerAverage) {
+				const diff = (fillerPercentage - previousFillerAverage).toFixed(1);
+				fillerHTML = `You used <strong>${diff}%</strong> more filler words than your previous average.`;
+			} else {
+				fillerHTML = `You matched your previous filler-word average.`;
+			}
+		}
+		overviewFillerText.innerHTML = fillerHTML;
+	}
+
+	// Update pace text
+	if (overviewPaceText) {
+		const paceStatus = isWithinRecommendedPace ? "and within the recommended range" : "and outside the recommended range";
+		overviewPaceText.innerHTML = `Your pace was <strong>${Math.round(validWpm)} words/min</strong> ${paceStatus}.`;
+	}
+
+	// Update pitch text
+	if (overviewPitchText) {
+		let pitchHTML = "Your pitch variation is being analyzed.";
+		if (Number.isFinite(currentPitchVariation)) {
+			if (reachesBothBands) {
+				pitchHTML = `Your pitch reached both the recommended <strong>upper</strong> and <strong>lower band</strong> resulting in a better range compared to previous average.`;
+			} else if (observedMax > 5 || observedMin < -5) {
+				pitchHTML = `Your pitch <strong>exceeds</strong> the recommended variation, which may sound exaggerated.`;
+			} else {
+				pitchHTML = `Your pitch is within a <strong>reasonable range</strong>. Keep working on varying your tone!`;
+			}
+		}
+		overviewPitchText.innerHTML = pitchHTML;
+	}
+
+	// Hide other learn views
+	learnView.hidden = true;
+	learnViewStep2.hidden = true;
+	if (learnViewStep3) {
+		learnViewStep3.hidden = true;
+	}
+	learnViewOverview.hidden = false;
+}

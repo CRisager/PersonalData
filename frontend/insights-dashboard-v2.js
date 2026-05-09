@@ -625,7 +625,7 @@
 		const visibleRecordingsByDate = sortRecordingsByDate(visibleRecordings);
 		const layout = buildLayout(definition, usePreviewLayout);
 		const containerWidth = Math.max(Math.floor(container.getBoundingClientRect().width || container.clientWidth || 0), 1);
-		layout.height = usePreviewLayout ? 260 : isOverview ? 300 : 360;
+		layout.height = usePreviewLayout ? 260 : isOverview ? 150 : 360;
 		layout.width = usePreviewLayout ? containerWidth : undefined;
 		layout.autosize = true;
 		layout.xaxis.tickangle = usePreviewLayout ? -20 : isOverview ? -10 : 0;
@@ -704,19 +704,6 @@
 			const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
 			layout.height = Math.max(120, layout.margin.t + displayedPreview.length * barHeightPerRecording + layout.margin.b);
 			layout.showlegend = false;
-			// Ensure all recording labels appear as y-axis ticks in the compact preview
-			layout.yaxis = layout.yaxis || {};
-			layout.yaxis.nticks = Math.max(3, displayedPreview.length);
-			// Match detailed plot behaviour: explicitly set category order/array
-			// so each recording name appears as a y-axis tick in the preview.
-			layout.yaxis.categoryorder = 'array';
-			layout.yaxis.categoryarray = labels;
-			layout.yaxis.autorange = 'reversed';
-			// Ensure ticks are placed for every category (labels array) — use explicit tickmode
-			layout.yaxis.tickmode = 'array';
-			layout.yaxis.tickvals = labels;
-			layout.yaxis.ticktext = labels;
-			layout.yaxis.tickfont = layout.yaxis.tickfont || { size: 11 };
 		}
 		// Build a detailSet for detailed views or a visible subset for previews
 		const detailSet = usePreviewLayout
@@ -729,7 +716,7 @@
 		// For all non-fillerRecording-preview cases, run the detailed trace builder
 		if (!(usePreviewLayout && definition.key === 'fillerRecording')) {
 			layout.template = "plotly_white";
-			if (!usePreviewLayout) layout.height = isOverview ? 300 : 600;
+			if (!usePreviewLayout) layout.height = isOverview ? 150 : 600;
 
 			if (definition.key === 'pace' || definition.key === 'pitch') {
 				const result = buildWpmAndPitchTraces(definition, detailSet);
@@ -749,7 +736,7 @@
 				}
 
 				if (definition.key === "pace") {
-					if (!usePreviewLayout) layout.height = isOverview ? 300 : 480;
+					if (!usePreviewLayout) layout.height = isOverview ? 150 : 480;
 					layout.title = { text: "" };
 					layout.xaxis.type = "date";
 					layout.xaxis.autorange = false;
@@ -834,7 +821,7 @@
 				});
 				layout.showlegend = !usePreviewLayout && !isOverview;
 				layout.title = { text: "" };
-				layout.height = isOverview ? 280 : undefined;
+				layout.height = isOverview ? 140 : undefined;
 				layout.xaxis.type = "date";
 				layout.xaxis.tickformat = tickConfig.tickformat;
 				layout.xaxis.dtick = tickConfig.dtick;
@@ -914,7 +901,7 @@
 					const marginTop = isOverview ? 18 : 30;
 					const marginLeft = 0;
 					const marginRight = isOverview ? 20 : 35;
-					const fixedViewportHeight = isOverview ? 210 : 400;
+					const fixedViewportHeight = isOverview ? 150 : 400;
 					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
 					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
 					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
@@ -985,8 +972,8 @@
 					// Compute a fixed chart area height based on the card's square size.
 					// Use the card's layout (width == height due to aspect-ratio) and reserve
 					// space for the header so the chart area becomes a stable box.
-					const cardEl = container.closest('.insight-card');
-					let chartAreaH = 220;
+					const cardEl = container.closest('.insight-card, .insight-v2-card');
+					let chartAreaH = 150;
 					if (cardEl) {
 						const cardRect = cardEl.getBoundingClientRect();
 						const headerEl = cardEl.querySelector('.insight-card-header');
@@ -1009,6 +996,30 @@
 			}
 
 			plotTarget = scrollPane;
+		}
+
+		// For overview cards in v2 we want static, non-interactive previews:
+		// - disable hover/tooltips
+		// - disable hovermode
+		if (isOverview) {
+			try {
+				layout.hovermode = false;
+			} catch (e) {
+				// ignore
+			}
+			try {
+				traces = (traces || []).map((t) => {
+					try {
+						t.hoverinfo = 'none';
+					} catch (e) {}
+					try {
+						t.hovertemplate = '';
+					} catch (e) {}
+					return t;
+				});
+			} catch (e) {
+				// ignore
+			}
 		}
 
 		Plotly.react(plotTarget, traces, Object.assign({}, layout, extraLayout), {
@@ -1100,7 +1111,8 @@
 
 	function createCard(definition, recordings, initialSelection) {
 		const card = document.createElement("section");
-		card.className = "insight-card";
+		const isV2 = document.body.getAttribute("data-version") === "v2";
+		card.className = isV2 ? "insight-v2-card" : "insight-card";
 		card.tabIndex = 0;
 		card.setAttribute("role", "button");
 		card.setAttribute("aria-label", `${definition.title} details`);
@@ -1123,11 +1135,8 @@
 
 		const controls = document.createElement("div");
 		controls.className = "insight-card-controls";
-		let timeframeSelect = null;
-		if (definition.key === "pace" || definition.key === "pitch" || definition.key === "fillerTrend" || definition.key === "fillerRecording") {
-			timeframeSelect = createTimeframeSelect("all_time");
-			controls.appendChild(timeframeSelect);
-		}
+		// Overview cards in v2 are static: do not render timeframe dropdowns here.
+		// Detailed views still create controls in their own code path.
 
 		header.append(titleWrap, controls);
 
@@ -1137,8 +1146,8 @@
 		card.append(header, chart);
 
 		const rerender = () => {
-			// Overview cards always render the full dataset.
-			renderPlotInto(chart, definition, recordings, initialSelection, true, timeframeSelect ? timeframeSelect.value : undefined, true);
+			// Overview cards always render the full dataset. Disable hover/tooltips for overview cards.
+			renderPlotInto(chart, definition, recordings, initialSelection, true, undefined, true);
 		};
 
 		const scheduleInitialRerender = () => {
@@ -1167,17 +1176,10 @@
 			}
 		};
 
-		if (timeframeSelect) {
-			timeframeSelect.addEventListener("click", (event) => event.stopPropagation());
-			timeframeSelect.addEventListener("change", (event) => {
-				event.stopPropagation();
-				rerender();
-			});
-		}
+		// No controls to wire for overview cards.
 
 		card.addEventListener("click", () => {
-			let url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
-			if (timeframeSelect) url += `&timeframe=${encodeURIComponent(timeframeSelect.value)}`;
+			const url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
 			window.location.href = url;
 		});
 		card.addEventListener("keydown", (event) => {
@@ -1186,8 +1188,7 @@
 			}
 
 			event.preventDefault();
-			let url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
-			if (timeframeSelect) url += `&timeframe=${encodeURIComponent(timeframeSelect.value)}`;
+			const url = `plot.html?plot=${encodeURIComponent(definition.key)}&count=${encodeURIComponent(initialSelection)}`;
 			window.location.href = url;
 		});
 

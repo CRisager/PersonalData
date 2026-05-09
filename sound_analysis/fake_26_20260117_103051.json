@@ -20,13 +20,12 @@
     "total_filler_words": 15,
     "filler_percentage": 10.56,
     "filler_word_counts": {
-      "I guess": 4,
       "I mean": 2,
       "actually": 1,
       "okay": 1,
       "so": 3,
       "um": 2,
-      "well": 1,
+      "well": 5,
       "you know": 1
     }
   },

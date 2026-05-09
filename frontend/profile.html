@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Personal Data - Profile</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-active-nav="profile">
+	<div class="phone-stage" id="phoneStage">
+		<div class="phone-shell">
+			<main class="phone" aria-label="Profile screen">
+				<header class="header">Profile</header>
+
+				<section class="content profile-content">
+
+					<div class="profile-avatar-wrap">
+						<div class="profile-avatar" aria-label="Profile picture placeholder">
+							<svg viewBox="0 0 24 24" aria-hidden="true">
+								<circle cx="12" cy="8" r="3.7" />
+								<path d="M4 19c1.9-2.8 4.8-4.2 8-4.2s6.1 1.4 8 4.2" />
+							</svg>
+						</div>
+					</div>
+
+					<div class="profile-fields">
+
+						<div class="profile-field">
+							<label class="profile-field-label" for="profileName">Name</label>
+							<div class="profile-input-row">
+								<input
+									id="profileName"
+									class="profile-input"
+									type="text"
+									value="Your Name"
+									aria-label="Profile name"
+								/>
+								<button class="edit-name-btn" aria-label="Edit name" title="Edit name" onclick="document.getElementById('profileName').focus(); document.getElementById('profileName').select();">
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M4 20h4.2L19 9.2 14.8 5 4 15.8z" fill="none" stroke="#21afa2" stroke-width="2" stroke-linejoin="round"/>
+										<path d="M12.8 7 17 11.2" fill="none" stroke="#21afa2" stroke-width="2" stroke-linecap="round"/>
+									</svg>
+								</button>
+							</div>
+						</div>
+
+						<div class="profile-field">
+							<label class="profile-field-label" for="profilePassword">Password</label>
+							<div class="profile-input-row">
+								<input
+									id="profilePassword"
+									class="profile-input"
+									type="password"
+									value="password123"
+									aria-label="Password"
+								/>
+								<button class="edit-name-btn" aria-label="Edit password" title="Edit password" onclick="document.getElementById('profilePassword').focus(); document.getElementById('profilePassword').select();">
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M4 20h4.2L19 9.2 14.8 5 4 15.8z" fill="none" stroke="#21afa2" stroke-width="2" stroke-linejoin="round"/>
+										<path d="M12.8 7 17 11.2" fill="none" stroke="#21afa2" stroke-width="2" stroke-linecap="round"/>
+									</svg>
+								</button>
+							</div>
+						</div>
+
+					</div>
+
+					<button class="profile-settings-btn" disabled aria-disabled="true" aria-label="Settings — coming soon">
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<circle cx="12" cy="12" r="3" />
+							<path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+						</svg>
+						Settings
+						<span class="profile-settings-soon">coming soon</span>
+					</button>
+
+				</section>
+			</main>
+		</div>
+	</div>
+	<script src="bottom-nav.js"></script>
+</body>
+</html>
