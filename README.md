@@ -16,7 +16,7 @@ Start the local app by copy pasting this into the terminal:
 python main.py --serve --port 8000
 ```
 
-Then open `http://127.0.0.1:8000` in your browser.
+Then open `http://127.0.0.1:8000` in your browser. 
 
 
 
