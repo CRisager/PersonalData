@@ -1467,6 +1467,10 @@ body[data-version="v2"] .insight-card-controls {
 	height: 100% !important;
 }
 
+.plot-chart-wrap .filler-chart-scroll .js-plotly-plot {
+	height: auto !important;
+}
+
 .plot-panel {
 	width: min(100%, 380px);
 	min-height: 0;
@@ -1496,7 +1500,8 @@ body[data-version="v2"] .insight-card-controls {
 	min-height: 0;
 	border-radius: 12px;
 	background: #ffffff;
-	overflow: hidden;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .filler-chart-scroll {

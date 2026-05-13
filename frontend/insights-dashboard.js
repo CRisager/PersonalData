@@ -843,8 +843,9 @@
 				
 				const marginBot = isOverview ? 28 : 50;
 				const marginTop = isOverview ? 18 : 30;
-				const marginLeft = 0;
 				const marginRight = isOverview ? 20 : 35;
+				const maxLabelLen = labels.length ? Math.max(...labels.map(l => l.length)) : 0;
+				const marginLeft = isOverview ? 0 : Math.max(50, maxLabelLen * 7);
 
 				let totalChartHeight;
 				if (isOverview) {
@@ -861,20 +862,17 @@
 				layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
 				layout.template = "plotly_white";
 				layout.height = totalChartHeight;
-				layout.showlegend = !isOverview;
-				layout.legend = {
-					orientation: "h",
-					yanchor: "bottom",
-					y: isOverview ? -0.08 : -0.12,
-					xanchor: "left",
-					x: 0,
-					font: { size: 11 },
-				};
+				if (!isOverview) {
+					layout.autosize = false;
+					layout.width = Math.round(container.getBoundingClientRect().width || container.clientWidth || 0);
+				}
+				layout.showlegend = false;
 				
 				layout.yaxis = layout.yaxis || {};
 				layout.yaxis.categoryorder = 'array';
 				layout.yaxis.categoryarray = labels;
 				layout.yaxis.autorange = 'reversed';
+				layout.yaxis.automargin = isOverview;
 				layout.xaxis = layout.xaxis || {};
 				layout.xaxis.ticksuffix = '%';
 				const maxFiller = Math.max(...(detailSet.length ? detailSet : recordings).map((r) => Number(r.filler_percentage) || 0), 10);
@@ -899,7 +897,9 @@
 		if (definition.key === 'fillerRecording') {
 			let scrollPane = container.querySelector('.filler-chart-scroll');
 			if (!scrollPane) {
-				container.style.cssText += ';display:flex;flex-direction:column;overflow:hidden;';
+				container.style.cssText += isOverview
+					? ';display:flex;flex-direction:column;overflow:hidden;'
+					: ';display:flex;flex-direction:column;';
 				scrollPane = document.createElement('div');
 				scrollPane.className = 'filler-chart-scroll';
 				container.appendChild(scrollPane);
@@ -921,9 +921,9 @@
 					scrollPane.style.maxHeight = '100%';
 					scrollPane.style.minHeight = '0';
 				} else {
-					// For detail views, leave scrolling to CSS/legend pane
+					// Detail: let chartWrap scroll; scrollPane just holds the chart content
 					scrollPane.style.height = '';
-					scrollPane.style.overflowY = '';
+					scrollPane.style.overflowY = 'visible';
 				}
 			}
 
