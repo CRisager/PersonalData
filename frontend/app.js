@@ -998,7 +998,7 @@ function buildPitchVariationChartMarkup({ pitchSeries, previousAverageVariation 
 		? pitchSeries
 			.map((point) => ({
 				time: Number(point && point.time),
-				pitch: Number(point && (point.pitch_semitones ?? point.pitch_st)),
+				pitch: !Boolean(point && point.voiced) ? 0 : Number(point && (point.pitch_semitones ?? point.pitch_st)),
 				voiced: Boolean(point && point.voiced),
 			}))
 			.filter((point) => Number.isFinite(point.time))

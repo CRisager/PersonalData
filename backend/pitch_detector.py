@@ -40,12 +40,16 @@ def _detect_pitch_librosa(
     if len(y) == 0:
         raise ValueError("Audio is empty after silence trimming.")
 
-    f0, voiced_flag, _ = librosa.pyin(
+    f0, voiced_flag, voiced_probs = librosa.pyin(
         y,
         fmin=fmin,
         fmax=fmax,
         sr=sr,
     )
+    # Silence often triggers low-confidence voiced detections near fmin, producing
+    # extremely negative semitone values. Require >50% voicing confidence.
+    voiced_flag = voiced_flag & (voiced_probs > 0.5)
+    f0[~voiced_flag] = np.nan
     time = librosa.frames_to_time(np.arange(len(f0)), sr=sr)
 
     if trim_unvoiced_edges:
