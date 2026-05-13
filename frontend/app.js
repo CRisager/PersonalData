@@ -1999,7 +1999,7 @@ function showLearnOverview(result) {
 	// Pace data
 	const wpm = Number(result && result.wpm) || 0;
 	const validWpm = Number.isFinite(wpm) ? Math.max(0, Math.min(400, wpm)) : 0;
-	const isWithinRecommendedPace = validWpm >= 120 && validWpm <= 150;
+	const isWithinRecommendedPace = validWpm >= 120 && validWpm <= 160;
 
 	// Pitch data
 	const pitchSummary = result && result.pitch ? result.pitch : {};
