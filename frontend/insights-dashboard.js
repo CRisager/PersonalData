@@ -11,7 +11,7 @@
 
 	const TIMEFRAME_OPTIONS = [
 		{ label: "This week", value: "this_week" },
-		{ label: "Month", value: "month" },
+		{ label: "This month", value: "month" },
 		{ label: "6 months", value: "six_months" },
 		{ label: "Year", value: "year" },
 		{ label: "All time", value: "all_time" },
@@ -54,7 +54,7 @@
 		},
 		fillerRecording: {
 			key: "fillerRecording",
-			title: "Filler words per recording",
+			title: "Filler count per recording",
 			subtitle: "Compare filler-word percentage within individual recordings.",
 			kind: "bar",
 			getValue: (recording) => Number(recording.filler_percentage),
@@ -1044,7 +1044,7 @@
 		controls.className = "insight-card-controls";
 		let timeframeSelect = null;
 		if (definition.key === "pace" || definition.key === "pitch" || definition.key === "fillerTrend" || definition.key === "fillerRecording") {
-			timeframeSelect = createTimeframeSelect("all_time");
+			timeframeSelect = createTimeframeSelect("month");
 			controls.appendChild(timeframeSelect);
 		}
 
@@ -1184,7 +1184,7 @@
 		const select = createCountSelect(selectedCount);
 		let timeframeSelect = null;
 		if (definition.key === "pace" || definition.key === "pitch" || definition.key === "fillerTrend" || definition.key === "fillerRecording") {
-			timeframeSelect = createTimeframeSelect("all_time");
+			timeframeSelect = createTimeframeSelect("month");
 			controls.appendChild(timeframeSelect);
 		} else {
 			// Fallback (currently unused): keep count selector for non-timeframe plots.
@@ -1206,7 +1206,7 @@
 
 		const rerender = () => {
 			const effectiveCount = timeframeSelect ? "all" : select.value;
-			renderPlotInto(chartWrap, definition, recordings, effectiveCount, false, timeframeSelect ? timeframeSelect.value : "all_time");
+			renderPlotInto(chartWrap, definition, recordings, effectiveCount, false, timeframeSelect ? timeframeSelect.value : "month");
 		};
 
 		if (!timeframeSelect) {

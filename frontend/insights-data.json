@@ -2,7 +2,7 @@
   "ok": true,
   "recordings": [
     {
-      "recording_name": "fake 1",
+      "recording_name": "Statistics",
       "created_at": "2026-02-04T21:33:37",
       "filler_counts": {
         "I mean": 1,
@@ -21,7 +21,7 @@
       "pitch_max_semitones": 2.27
     },
     {
-      "recording_name": "fake 2",
+      "recording_name": "Take 1",
       "created_at": "2026-02-05T16:40:22",
       "filler_counts": {
         "I guess": 2,
@@ -47,6 +47,46 @@
       "pitch_max_semitones": 1.01
     },
     {
+      "recording_name": "Interview part1",
+      "created_at": "2026-02-06T12:11:24",
+      "filler_counts": {
+        "i guess": 1,
+        "i mean": 1,
+        "like": 1,
+        "yeah": 1
+      },
+      "duration_seconds": 61.9,
+      "wpm": 184.17,
+      "total_words": 190,
+      "filler_percentage": 2.11,
+      "total_filler_words": 4,
+      "pitch_range": 9.45,
+      "pitch_mean_semitones": -0.68,
+      "pitch_min_semitones": -8.4,
+      "pitch_max_semitones": 10.5
+    },
+    {
+      "recording_name": "Interview part 2",
+      "created_at": "2026-02-06T12:28:44",
+      "filler_counts": {
+        "basically": 1,
+        "kind of": 1,
+        "like": 1,
+        "so": 4,
+        "uh": 2,
+        "you know": 3
+      },
+      "duration_seconds": 85.14,
+      "wpm": 190.27,
+      "total_words": 270,
+      "filler_percentage": 4.44,
+      "total_filler_words": 12,
+      "pitch_range": 13.6,
+      "pitch_mean_semitones": -0.76,
+      "pitch_min_semitones": -14.1,
+      "pitch_max_semitones": 13.1
+    },
+    {
       "recording_name": "Recording 2 4",
       "created_at": "2026-02-08T13:32:37",
       "filler_counts": {
@@ -65,6 +105,24 @@
       "pitch_mean_semitones": -0.65,
       "pitch_min_semitones": -18.4,
       "pitch_max_semitones": 9.1
+    },
+    {
+      "recording_name": "Test Recording",
+      "created_at": "2026-02-09T12:03:25",
+      "filler_counts": {
+        "okay": 1,
+        "so": 1,
+        "yeah": 1
+      },
+      "duration_seconds": 31.256,
+      "wpm": 115.18,
+      "total_words": 60,
+      "filler_percentage": 5.0,
+      "total_filler_words": 3,
+      "pitch_range": 12.8,
+      "pitch_mean_semitones": 0.66,
+      "pitch_min_semitones": -15.9,
+      "pitch_max_semitones": 9.7
     },
     {
       "recording_name": "LongerTesting",
@@ -88,7 +146,7 @@
       "pitch_max_semitones": 9.7
     },
     {
-      "recording_name": "fake 3",
+      "recording_name": "Job 1",
       "created_at": "2026-02-12T18:10:40",
       "filler_counts": {
         "I guess": 1,
@@ -112,7 +170,7 @@
       "pitch_max_semitones": 6.2
     },
     {
-      "recording_name": "fake 4",
+      "recording_name": "Job 2",
       "created_at": "2026-02-14T12:09:22",
       "filler_counts": {
         "I guess": 1,
@@ -134,7 +192,7 @@
       "pitch_max_semitones": 0.39
     },
     {
-      "recording_name": "fake 5",
+      "recording_name": "Thesis",
       "created_at": "2026-02-15T21:52:36",
       "filler_counts": {
         "I guess": 3,
@@ -160,7 +218,7 @@
       "pitch_max_semitones": 3.51
     },
     {
-      "recording_name": "fake 6",
+      "recording_name": "Meeting 1",
       "created_at": "2026-02-18T11:16:54",
       "filler_counts": {
         "I guess": 2,
@@ -186,7 +244,7 @@
       "pitch_max_semitones": 6.1
     },
     {
-      "recording_name": "fake 7",
+      "recording_name": "Presentation 1",
       "created_at": "2026-02-26T22:17:24",
       "filler_counts": {
         "I guess": 2,
@@ -206,7 +264,7 @@
       "pitch_max_semitones": 3.61
     },
     {
-      "recording_name": "fake 8",
+      "recording_name": "Analysis 1",
       "created_at": "2026-02-28T22:56:39",
       "filler_counts": {
         "I guess": 5,
@@ -233,7 +291,7 @@
       "pitch_max_semitones": 1.24
     },
     {
-      "recording_name": "fake 9",
+      "recording_name": "Demo 1",
       "created_at": "2026-03-01T20:31:04",
       "filler_counts": {
         "kind of": 1
@@ -268,7 +326,7 @@
       "pitch_max_semitones": 17.8
     },
     {
-      "recording_name": "fake 10",
+      "recording_name": "Test 1",
       "created_at": "2026-03-02T20:13:59",
       "filler_counts": {
         "actually": 2,
@@ -289,7 +347,7 @@
       "pitch_max_semitones": 1.17
     },
     {
-      "recording_name": "fake 11",
+      "recording_name": "Report 1",
       "created_at": "2026-03-04T16:48:26",
       "filler_counts": {
         "I guess": 2,
@@ -316,7 +374,7 @@
       "pitch_max_semitones": 4.85
     },
     {
-      "recording_name": "fake 12",
+      "recording_name": "Review 1",
       "created_at": "2026-03-08T10:29:07",
       "filler_counts": {
         "I guess": 1,
@@ -361,6 +419,22 @@
       "pitch_max_semitones": 9.6
     },
     {
+      "recording_name": "Help me?!?",
+      "created_at": "2026-03-09T12:09:56",
+      "filler_counts": {
+        "actually": 1
+      },
+      "duration_seconds": 33.472,
+      "wpm": 148.78,
+      "total_words": 83,
+      "filler_percentage": 1.2,
+      "total_filler_words": 1,
+      "pitch_range": 10.7,
+      "pitch_mean_semitones": -0.02,
+      "pitch_min_semitones": -9.4,
+      "pitch_max_semitones": 12.0
+    },
+    {
       "recording_name": "Valencia Trip",
       "created_at": "2026-03-15T16:42:13",
       "filler_counts": {
@@ -377,7 +451,7 @@
       "pitch_max_semitones": 25.2
     },
     {
-      "recording_name": "Skii Trip So Good",
+      "recording_name": "Skii Trip",
       "created_at": "2026-03-16T02:34:06",
       "filler_counts": {},
       "duration_seconds": 29.344,
@@ -441,7 +515,7 @@
       "pitch_max_semitones": 10.7
     },
     {
-      "recording_name": "fake 13",
+      "recording_name": "Conference 1",
       "created_at": "2026-03-27T07:52:28",
       "filler_counts": {
         "so": 1,
@@ -472,7 +546,7 @@
       "pitch_max_semitones": 6.9
     },
     {
-      "recording_name": "fake 14",
+      "recording_name": "Workshop 1",
       "created_at": "2026-04-06T07:13:08",
       "filler_counts": {
         "I guess": 3,
@@ -499,7 +573,7 @@
       "pitch_max_semitones": 0.56
     },
     {
-      "recording_name": "fake 15",
+      "recording_name": "Seminar 1",
       "created_at": "2026-04-11T18:07:40",
       "filler_counts": {
         "I guess": 1,
@@ -521,7 +595,7 @@
       "pitch_max_semitones": 5.08
     },
     {
-      "recording_name": "fake 16",
+      "recording_name": "Lecture 1",
       "created_at": "2026-04-13T12:17:18",
       "filler_counts": {
         "I guess": 2,
@@ -547,7 +621,7 @@
       "pitch_max_semitones": 0.71
     },
     {
-      "recording_name": "fake 17",
+      "recording_name": "Talk 1",
       "created_at": "2026-04-17T14:34:50",
       "filler_counts": {
         "I guess": 6,
@@ -574,7 +648,7 @@
       "pitch_max_semitones": 3.95
     },
     {
-      "recording_name": "fake 18",
+      "recording_name": "Interview 1",
       "created_at": "2026-04-19T20:46:42",
       "filler_counts": {
         "I guess": 1,
@@ -601,7 +675,7 @@
       "pitch_max_semitones": 6.9
     },
     {
-      "recording_name": "fake 19",
+      "recording_name": "Session 1",
       "created_at": "2026-04-23T18:33:22",
       "filler_counts": {
         "I mean": 1,
@@ -619,7 +693,7 @@
       "pitch_max_semitones": 3.23
     },
     {
-      "recording_name": "fake 20",
+      "recording_name": "Call 1",
       "created_at": "2026-04-25T21:01:21",
       "filler_counts": {
         "I guess": 4,
@@ -645,7 +719,7 @@
       "pitch_max_semitones": 0.67
     },
     {
-      "recording_name": "fake 21",
+      "recording_name": "Meeting 2",
       "created_at": "2026-04-28T07:03:59",
       "filler_counts": {
         "actually": 1,
@@ -665,7 +739,7 @@
       "pitch_max_semitones": 6.05
     },
     {
-      "recording_name": "fake 22",
+      "recording_name": "Presentation 2",
       "created_at": "2026-05-01T10:00:54",
       "filler_counts": {
         "I guess": 1,
@@ -689,7 +763,7 @@
       "pitch_max_semitones": 0.52
     },
     {
-      "recording_name": "fake 23",
+      "recording_name": "Analysis 2",
       "created_at": "2026-05-03T09:14:24",
       "filler_counts": {
         "I guess": 4,
@@ -716,7 +790,25 @@
       "pitch_max_semitones": 3.34
     },
     {
-      "recording_name": "Final Presentation 1",
+      "recording_name": "Presentation 2",
+      "created_at": "2026-05-04T08:24:56",
+      "filler_counts": {
+        "actually": 1,
+        "so": 3,
+        "yeah": 1
+      },
+      "duration_seconds": 121.98,
+      "wpm": 117.07,
+      "total_words": 238,
+      "filler_percentage": 2.1,
+      "total_filler_words": 5,
+      "pitch_range": 12.65,
+      "pitch_mean_semitones": 0.41,
+      "pitch_min_semitones": -14.0,
+      "pitch_max_semitones": 11.3
+    },
+    {
+      "recording_name": "Presentation 1",
       "created_at": "2026-05-06T08:19:38",
       "filler_counts": {
         "kind of": 1,
@@ -734,25 +826,7 @@
       "pitch_max_semitones": 10.6
     },
     {
-      "recording_name": "Presentation 2",
-      "created_at": "2026-05-06T08:24:56",
-      "filler_counts": {
-        "actually": 1,
-        "so": 3,
-        "yeah": 1
-      },
-      "duration_seconds": 121.98,
-      "wpm": 117.07,
-      "total_words": 238,
-      "filler_percentage": 2.1,
-      "total_filler_words": 5,
-      "pitch_range": 12.65,
-      "pitch_mean_semitones": 0.41,
-      "pitch_min_semitones": -14.0,
-      "pitch_max_semitones": 11.3
-    },
-    {
-      "recording_name": "fake 24",
+      "recording_name": "Demo 2",
       "created_at": "2026-05-06T16:51:33",
       "filler_counts": {
         "I guess": 2,
@@ -779,7 +853,139 @@
       "pitch_max_semitones": 6.22
     },
     {
-      "recording_name": "fake 25",
+      "recording_name": "Pilottest1",
+      "created_at": "2026-05-08T22:13:59",
+      "filler_counts": {
+        "actually": 1,
+        "i guess": 2,
+        "kind of": 5,
+        "like": 5,
+        "literally": 1,
+        "okay": 3,
+        "or something": 2,
+        "right": 1,
+        "so": 15,
+        "yeah": 4
+      },
+      "duration_seconds": 326.72,
+      "wpm": 132.77,
+      "total_words": 723,
+      "filler_percentage": 5.39,
+      "total_filler_words": 39,
+      "pitch_range": 13.75,
+      "pitch_mean_semitones": -0.43,
+      "pitch_min_semitones": -15.6,
+      "pitch_max_semitones": 11.9
+    },
+    {
+      "recording_name": "summer",
+      "created_at": "2026-05-09T13:20:37",
+      "filler_counts": {
+        "i guess": 1,
+        "right": 2,
+        "so": 3,
+        "yeah": 1
+      },
+      "duration_seconds": 42.224,
+      "wpm": 144.94,
+      "total_words": 102,
+      "filler_percentage": 6.86,
+      "total_filler_words": 7,
+      "pitch_range": 13.75,
+      "pitch_mean_semitones": 0.51,
+      "pitch_min_semitones": -14.3,
+      "pitch_max_semitones": 13.2
+    },
+    {
+      "recording_name": "Recording_49",
+      "created_at": "2026-05-09T13:48:39",
+      "filler_counts": {
+        "so": 3,
+        "yeah": 1
+      },
+      "duration_seconds": 51.168,
+      "wpm": 154.78,
+      "total_words": 132,
+      "filler_percentage": 3.03,
+      "total_filler_words": 4,
+      "pitch_range": 13.1,
+      "pitch_mean_semitones": 1.34,
+      "pitch_min_semitones": -4.55,
+      "pitch_max_semitones": 21.65
+    },
+    {
+      "recording_name": "Recording_50",
+      "created_at": "2026-05-10T19:14:46",
+      "filler_counts": {
+        "i guess": 3,
+        "like": 2,
+        "okay": 1,
+        "so": 2,
+        "well": 1,
+        "yeah": 2
+      },
+      "duration_seconds": 44.192,
+      "wpm": 133.06,
+      "total_words": 98,
+      "filler_percentage": 11.22,
+      "total_filler_words": 11,
+      "pitch_range": 13.3,
+      "pitch_mean_semitones": 0.63,
+      "pitch_min_semitones": -9.1,
+      "pitch_max_semitones": 17.5
+    },
+    {
+      "recording_name": "My Vacay",
+      "created_at": "2026-05-11T09:21:10",
+      "filler_counts": {
+        "actually": 1,
+        "so": 3,
+        "yeah": 1
+      },
+      "duration_seconds": 56.7,
+      "wpm": 143.92,
+      "total_words": 136,
+      "filler_percentage": 3.68,
+      "total_filler_words": 5,
+      "pitch_range": 12.95,
+      "pitch_mean_semitones": 0.41,
+      "pitch_min_semitones": -12.3,
+      "pitch_max_semitones": 13.6
+    },
+    {
+      "recording_name": "mother's day",
+      "created_at": "2026-05-11T10:55:41",
+      "filler_counts": {
+        "so": 2
+      },
+      "duration_seconds": 48.608,
+      "wpm": 169.11,
+      "total_words": 137,
+      "filler_percentage": 1.46,
+      "total_filler_words": 2,
+      "pitch_range": 7.3,
+      "pitch_mean_semitones": 0.25,
+      "pitch_min_semitones": -4.0,
+      "pitch_max_semitones": 10.6
+    },
+    {
+      "recording_name": "\u00d8v",
+      "created_at": "2026-05-11T12:53:13",
+      "filler_counts": {
+        "right": 1
+      },
+      "duration_seconds": 46.2,
+      "wpm": 127.27,
+      "total_words": 98,
+      "filler_percentage": 1.02,
+      "total_filler_words": 1,
+      "pitch_range": 9.15,
+      "pitch_mean_semitones": 0.69,
+      "pitch_min_semitones": -5.7,
+      "pitch_max_semitones": 12.6
+    },
+    {
+      "recording_name": "Test 2",
       "created_at": "2026-05-13T14:00:36",
       "filler_counts": {
         "actually": 1,
@@ -799,16 +1005,15 @@
       "pitch_max_semitones": 2.31
     },
     {
-      "recording_name": "fake 26",
+      "recording_name": "Report 2",
       "created_at": "2026-05-17T10:30:51",
       "filler_counts": {
-        "I guess": 4,
         "I mean": 2,
         "actually": 1,
         "okay": 1,
         "so": 3,
         "um": 2,
-        "well": 1,
+        "well": 5,
         "you know": 1
       },
       "duration_seconds": 100.989,
@@ -822,13 +1027,12 @@
       "pitch_max_semitones": 1.19
     },
     {
-      "recording_name": "fake 27",
+      "recording_name": "Review 2",
       "created_at": "2026-05-18T11:13:11",
       "filler_counts": {
         "actually": 1,
         "like": 1,
-        "um": 1,
-        "well": 1
+        "well": 2
       },
       "duration_seconds": 73.456,
       "wpm": 183.78,
@@ -841,7 +1045,7 @@
       "pitch_max_semitones": 6.19
     },
     {
-      "recording_name": "fake 28",
+      "recording_name": "Conference 2",
       "created_at": "2026-05-22T20:50:21",
       "filler_counts": {
         "I guess": 1,
@@ -851,8 +1055,8 @@
         "okay": 1,
         "right": 1,
         "uh": 2,
-        "um": 3,
-        "well": 1
+        "um": 1,
+        "well": 2
       },
       "duration_seconds": 222.326,
       "wpm": 136.83,
@@ -865,7 +1069,7 @@
       "pitch_max_semitones": 0.72
     },
     {
-      "recording_name": "fake 29",
+      "recording_name": "Workshop 2",
       "created_at": "2026-05-27T08:52:51",
       "filler_counts": {
         "I guess": 4,
@@ -892,7 +1096,7 @@
       "pitch_max_semitones": 4.28
     },
     {
-      "recording_name": "fake 30",
+      "recording_name": "Seminar 2",
       "created_at": "2026-05-28T11:47:49",
       "filler_counts": {
         "I guess": 4,

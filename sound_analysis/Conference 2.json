@@ -1,0 +1,2731 @@
+{
+  "recording_name": "Conference 2",
+  "category": "Synthetic",
+  "created_at": "2026-05-22T20:50:21",
+  "audio": {
+    "path": "Sound_recordings/Conference 2.wav",
+    "sample_rate": 16000
+  },
+  "transcript": {
+    "text": "We measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage um and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the um session and we measured pace filler usage um and uh pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we uh measured pace filler usage and pitch variation across the kind of session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch kind of variation across the session and we measured pace actually filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler I guess usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and right we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch okay variation across the session and we well measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we I mean measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the session and we measured pace filler usage and pitch variation across the."
+  },
+  "speed": {
+    "duration_seconds": 222.326,
+    "total_words": 507,
+    "wpm": 136.83
+  },
+  "filler": {
+    "dataset_path": "/Users/andreabolvig/Documents/GitHub/PersonalData/backend/FillerWordData.json",
+    "total_words": 507,
+    "total_filler_words": 13,
+    "filler_percentage": 2.56,
+    "filler_word_counts": {
+      "I guess": 1,
+      "I mean": 1,
+      "actually": 1,
+      "kind of": 2,
+      "okay": 1,
+      "right": 1,
+      "uh": 2,
+      "um": 1,
+      "well": 2
+    }
+  },
+  "pitch": {
+    "summary": {
+      "mean_pitch": 160.56,
+      "min_pitch": 151.35,
+      "max_pitch": 170.02,
+      "median_pitch": 160.6,
+      "mean_pitch_semitones": -0.29,
+      "min_pitch_semitones": -1.3,
+      "max_pitch_semitones": 0.72,
+      "median_pitch_semitones": -0.27,
+      "pitch_reference_hz": 160.6,
+      "voiced_ratio": 0.7843
+    },
+    "series": [
+      {
+        "time": 0.0,
+        "pitch_hz": 160.48,
+        "pitch_semitones": -0.283,
+        "voiced": true
+      },
+      {
+        "time": 0.5,
+        "pitch_hz": 161.49,
+        "pitch_semitones": -0.174,
+        "voiced": true
+      },
+      {
+        "time": 1.0,
+        "pitch_hz": 162.47,
+        "pitch_semitones": -0.069,
+        "voiced": true
+      },
+      {
+        "time": 1.5,
+        "pitch_hz": 163.4,
+        "pitch_semitones": 0.03,
+        "voiced": true
+      },
+      {
+        "time": 2.0,
+        "pitch_hz": 164.28,
+        "pitch_semitones": 0.122,
+        "voiced": true
+      },
+      {
+        "time": 2.5,
+        "pitch_hz": 165.09,
+        "pitch_semitones": 0.208,
+        "voiced": true
+      },
+      {
+        "time": 3.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 3.5,
+        "pitch_hz": 166.54,
+        "pitch_semitones": 0.359,
+        "voiced": true
+      },
+      {
+        "time": 4.0,
+        "pitch_hz": 167.15,
+        "pitch_semitones": 0.423,
+        "voiced": true
+      },
+      {
+        "time": 4.5,
+        "pitch_hz": 167.69,
+        "pitch_semitones": 0.478,
+        "voiced": true
+      },
+      {
+        "time": 5.0,
+        "pitch_hz": 168.13,
+        "pitch_semitones": 0.524,
+        "voiced": true
+      },
+      {
+        "time": 5.5,
+        "pitch_hz": 168.47,
+        "pitch_semitones": 0.559,
+        "voiced": true
+      },
+      {
+        "time": 6.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 6.5,
+        "pitch_hz": 168.82,
+        "pitch_semitones": 0.595,
+        "voiced": true
+      },
+      {
+        "time": 7.0,
+        "pitch_hz": 168.85,
+        "pitch_semitones": 0.597,
+        "voiced": true
+      },
+      {
+        "time": 7.5,
+        "pitch_hz": 168.79,
+        "pitch_semitones": 0.591,
+        "voiced": true
+      },
+      {
+        "time": 8.0,
+        "pitch_hz": 168.67,
+        "pitch_semitones": 0.579,
+        "voiced": true
+      },
+      {
+        "time": 8.5,
+        "pitch_hz": 168.51,
+        "pitch_semitones": 0.563,
+        "voiced": true
+      },
+      {
+        "time": 9.0,
+        "pitch_hz": 168.33,
+        "pitch_semitones": 0.544,
+        "voiced": true
+      },
+      {
+        "time": 9.5,
+        "pitch_hz": 168.14,
+        "pitch_semitones": 0.524,
+        "voiced": true
+      },
+      {
+        "time": 10.0,
+        "pitch_hz": 167.94,
+        "pitch_semitones": 0.504,
+        "voiced": true
+      },
+      {
+        "time": 10.5,
+        "pitch_hz": 167.72,
+        "pitch_semitones": 0.481,
+        "voiced": true
+      },
+      {
+        "time": 11.0,
+        "pitch_hz": 167.47,
+        "pitch_semitones": 0.455,
+        "voiced": true
+      },
+      {
+        "time": 11.5,
+        "pitch_hz": 167.17,
+        "pitch_semitones": 0.424,
+        "voiced": true
+      },
+      {
+        "time": 12.0,
+        "pitch_hz": 166.79,
+        "pitch_semitones": 0.385,
+        "voiced": true
+      },
+      {
+        "time": 12.5,
+        "pitch_hz": 166.33,
+        "pitch_semitones": 0.337,
+        "voiced": true
+      },
+      {
+        "time": 13.0,
+        "pitch_hz": 165.77,
+        "pitch_semitones": 0.279,
+        "voiced": true
+      },
+      {
+        "time": 13.5,
+        "pitch_hz": 165.11,
+        "pitch_semitones": 0.21,
+        "voiced": true
+      },
+      {
+        "time": 14.0,
+        "pitch_hz": 164.36,
+        "pitch_semitones": 0.131,
+        "voiced": true
+      },
+      {
+        "time": 14.5,
+        "pitch_hz": 163.54,
+        "pitch_semitones": 0.044,
+        "voiced": true
+      },
+      {
+        "time": 15.0,
+        "pitch_hz": 162.65,
+        "pitch_semitones": -0.05,
+        "voiced": true
+      },
+      {
+        "time": 15.5,
+        "pitch_hz": 161.73,
+        "pitch_semitones": -0.148,
+        "voiced": true
+      },
+      {
+        "time": 16.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 16.5,
+        "pitch_hz": 159.85,
+        "pitch_semitones": -0.35,
+        "voiced": true
+      },
+      {
+        "time": 17.0,
+        "pitch_hz": 158.91,
+        "pitch_semitones": -0.453,
+        "voiced": true
+      },
+      {
+        "time": 17.5,
+        "pitch_hz": 157.98,
+        "pitch_semitones": -0.554,
+        "voiced": true
+      },
+      {
+        "time": 18.0,
+        "pitch_hz": 157.06,
+        "pitch_semitones": -0.655,
+        "voiced": true
+      },
+      {
+        "time": 18.5,
+        "pitch_hz": 156.17,
+        "pitch_semitones": -0.753,
+        "voiced": true
+      },
+      {
+        "time": 19.0,
+        "pitch_hz": 155.32,
+        "pitch_semitones": -0.849,
+        "voiced": true
+      },
+      {
+        "time": 19.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 20.0,
+        "pitch_hz": 153.78,
+        "pitch_semitones": -1.021,
+        "voiced": true
+      },
+      {
+        "time": 20.5,
+        "pitch_hz": 153.13,
+        "pitch_semitones": -1.094,
+        "voiced": true
+      },
+      {
+        "time": 21.0,
+        "pitch_hz": 152.6,
+        "pitch_semitones": -1.154,
+        "voiced": true
+      },
+      {
+        "time": 21.5,
+        "pitch_hz": 152.19,
+        "pitch_semitones": -1.201,
+        "voiced": true
+      },
+      {
+        "time": 22.0,
+        "pitch_hz": 151.92,
+        "pitch_semitones": -1.232,
+        "voiced": true
+      },
+      {
+        "time": 22.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 23.0,
+        "pitch_hz": 151.76,
+        "pitch_semitones": -1.249,
+        "voiced": true
+      },
+      {
+        "time": 23.5,
+        "pitch_hz": 151.86,
+        "pitch_semitones": -1.239,
+        "voiced": true
+      },
+      {
+        "time": 24.0,
+        "pitch_hz": 152.04,
+        "pitch_semitones": -1.218,
+        "voiced": true
+      },
+      {
+        "time": 24.5,
+        "pitch_hz": 152.27,
+        "pitch_semitones": -1.191,
+        "voiced": true
+      },
+      {
+        "time": 25.0,
+        "pitch_hz": 152.55,
+        "pitch_semitones": -1.159,
+        "voiced": true
+      },
+      {
+        "time": 25.5,
+        "pitch_hz": 152.86,
+        "pitch_semitones": -1.125,
+        "voiced": true
+      },
+      {
+        "time": 26.0,
+        "pitch_hz": 153.18,
+        "pitch_semitones": -1.089,
+        "voiced": true
+      },
+      {
+        "time": 26.5,
+        "pitch_hz": 153.52,
+        "pitch_semitones": -1.05,
+        "voiced": true
+      },
+      {
+        "time": 27.0,
+        "pitch_hz": 153.88,
+        "pitch_semitones": -1.01,
+        "voiced": true
+      },
+      {
+        "time": 27.5,
+        "pitch_hz": 154.27,
+        "pitch_semitones": -0.966,
+        "voiced": true
+      },
+      {
+        "time": 28.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 28.5,
+        "pitch_hz": 155.19,
+        "pitch_semitones": -0.862,
+        "voiced": true
+      },
+      {
+        "time": 29.0,
+        "pitch_hz": 155.73,
+        "pitch_semitones": -0.802,
+        "voiced": true
+      },
+      {
+        "time": 29.5,
+        "pitch_hz": 156.32,
+        "pitch_semitones": -0.737,
+        "voiced": true
+      },
+      {
+        "time": 30.0,
+        "pitch_hz": 156.96,
+        "pitch_semitones": -0.666,
+        "voiced": true
+      },
+      {
+        "time": 30.5,
+        "pitch_hz": 157.64,
+        "pitch_semitones": -0.592,
+        "voiced": true
+      },
+      {
+        "time": 31.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 31.5,
+        "pitch_hz": 159.07,
+        "pitch_semitones": -0.435,
+        "voiced": true
+      },
+      {
+        "time": 32.0,
+        "pitch_hz": 159.82,
+        "pitch_semitones": -0.353,
+        "voiced": true
+      },
+      {
+        "time": 32.5,
+        "pitch_hz": 160.6,
+        "pitch_semitones": -0.269,
+        "voiced": true
+      },
+      {
+        "time": 33.0,
+        "pitch_hz": 161.41,
+        "pitch_semitones": -0.182,
+        "voiced": true
+      },
+      {
+        "time": 33.5,
+        "pitch_hz": 162.25,
+        "pitch_semitones": -0.092,
+        "voiced": true
+      },
+      {
+        "time": 34.0,
+        "pitch_hz": 163.13,
+        "pitch_semitones": 0.001,
+        "voiced": true
+      },
+      {
+        "time": 34.5,
+        "pitch_hz": 164.04,
+        "pitch_semitones": 0.098,
+        "voiced": true
+      },
+      {
+        "time": 35.0,
+        "pitch_hz": 164.97,
+        "pitch_semitones": 0.196,
+        "voiced": true
+      },
+      {
+        "time": 35.5,
+        "pitch_hz": 165.9,
+        "pitch_semitones": 0.292,
+        "voiced": true
+      },
+      {
+        "time": 36.0,
+        "pitch_hz": 166.79,
+        "pitch_semitones": 0.385,
+        "voiced": true
+      },
+      {
+        "time": 36.5,
+        "pitch_hz": 167.62,
+        "pitch_semitones": 0.471,
+        "voiced": true
+      },
+      {
+        "time": 37.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 37.5,
+        "pitch_hz": 168.94,
+        "pitch_semitones": 0.607,
+        "voiced": true
+      },
+      {
+        "time": 38.0,
+        "pitch_hz": 169.4,
+        "pitch_semitones": 0.654,
+        "voiced": true
+      },
+      {
+        "time": 38.5,
+        "pitch_hz": 169.69,
+        "pitch_semitones": 0.684,
+        "voiced": true
+      },
+      {
+        "time": 39.0,
+        "pitch_hz": 169.84,
+        "pitch_semitones": 0.699,
+        "voiced": true
+      },
+      {
+        "time": 39.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 40.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 40.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 41.0,
+        "pitch_hz": 169.2,
+        "pitch_semitones": 0.633,
+        "voiced": true
+      },
+      {
+        "time": 41.5,
+        "pitch_hz": 168.82,
+        "pitch_semitones": 0.595,
+        "voiced": true
+      },
+      {
+        "time": 42.0,
+        "pitch_hz": 168.38,
+        "pitch_semitones": 0.55,
+        "voiced": true
+      },
+      {
+        "time": 42.5,
+        "pitch_hz": 167.89,
+        "pitch_semitones": 0.499,
+        "voiced": true
+      },
+      {
+        "time": 43.0,
+        "pitch_hz": 167.34,
+        "pitch_semitones": 0.442,
+        "voiced": true
+      },
+      {
+        "time": 43.5,
+        "pitch_hz": 166.74,
+        "pitch_semitones": 0.38,
+        "voiced": true
+      },
+      {
+        "time": 44.0,
+        "pitch_hz": 166.09,
+        "pitch_semitones": 0.312,
+        "voiced": true
+      },
+      {
+        "time": 44.5,
+        "pitch_hz": 165.39,
+        "pitch_semitones": 0.24,
+        "voiced": true
+      },
+      {
+        "time": 45.0,
+        "pitch_hz": 164.68,
+        "pitch_semitones": 0.164,
+        "voiced": true
+      },
+      {
+        "time": 45.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 46.0,
+        "pitch_hz": 163.22,
+        "pitch_semitones": 0.01,
+        "voiced": true
+      },
+      {
+        "time": 46.5,
+        "pitch_hz": 162.5,
+        "pitch_semitones": -0.066,
+        "voiced": true
+      },
+      {
+        "time": 47.0,
+        "pitch_hz": 161.81,
+        "pitch_semitones": -0.139,
+        "voiced": true
+      },
+      {
+        "time": 47.5,
+        "pitch_hz": 161.15,
+        "pitch_semitones": -0.21,
+        "voiced": true
+      },
+      {
+        "time": 48.0,
+        "pitch_hz": 160.5,
+        "pitch_semitones": -0.28,
+        "voiced": true
+      },
+      {
+        "time": 48.5,
+        "pitch_hz": 159.86,
+        "pitch_semitones": -0.35,
+        "voiced": true
+      },
+      {
+        "time": 49.0,
+        "pitch_hz": 159.21,
+        "pitch_semitones": -0.421,
+        "voiced": true
+      },
+      {
+        "time": 49.5,
+        "pitch_hz": 158.53,
+        "pitch_semitones": -0.495,
+        "voiced": true
+      },
+      {
+        "time": 50.0,
+        "pitch_hz": 157.81,
+        "pitch_semitones": -0.573,
+        "voiced": true
+      },
+      {
+        "time": 50.5,
+        "pitch_hz": 157.06,
+        "pitch_semitones": -0.655,
+        "voiced": true
+      },
+      {
+        "time": 51.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 51.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 52.0,
+        "pitch_hz": 154.72,
+        "pitch_semitones": -0.916,
+        "voiced": true
+      },
+      {
+        "time": 52.5,
+        "pitch_hz": 153.98,
+        "pitch_semitones": -0.999,
+        "voiced": true
+      },
+      {
+        "time": 53.0,
+        "pitch_hz": 153.3,
+        "pitch_semitones": -1.075,
+        "voiced": true
+      },
+      {
+        "time": 53.5,
+        "pitch_hz": 152.71,
+        "pitch_semitones": -1.142,
+        "voiced": true
+      },
+      {
+        "time": 54.0,
+        "pitch_hz": 152.22,
+        "pitch_semitones": -1.198,
+        "voiced": true
+      },
+      {
+        "time": 54.5,
+        "pitch_hz": 151.84,
+        "pitch_semitones": -1.241,
+        "voiced": true
+      },
+      {
+        "time": 55.0,
+        "pitch_hz": 151.57,
+        "pitch_semitones": -1.271,
+        "voiced": true
+      },
+      {
+        "time": 55.5,
+        "pitch_hz": 151.42,
+        "pitch_semitones": -1.289,
+        "voiced": true
+      },
+      {
+        "time": 56.0,
+        "pitch_hz": 151.36,
+        "pitch_semitones": -1.295,
+        "voiced": true
+      },
+      {
+        "time": 56.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 57.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 57.5,
+        "pitch_hz": 151.79,
+        "pitch_semitones": -1.246,
+        "voiced": true
+      },
+      {
+        "time": 58.0,
+        "pitch_hz": 152.13,
+        "pitch_semitones": -1.207,
+        "voiced": true
+      },
+      {
+        "time": 58.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 59.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 59.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 60.0,
+        "pitch_hz": 154.47,
+        "pitch_semitones": -0.944,
+        "voiced": true
+      },
+      {
+        "time": 60.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 61.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 61.5,
+        "pitch_hz": 156.95,
+        "pitch_semitones": -0.668,
+        "voiced": true
+      },
+      {
+        "time": 62.0,
+        "pitch_hz": 157.79,
+        "pitch_semitones": -0.575,
+        "voiced": true
+      },
+      {
+        "time": 62.5,
+        "pitch_hz": 158.61,
+        "pitch_semitones": -0.485,
+        "voiced": true
+      },
+      {
+        "time": 63.0,
+        "pitch_hz": 159.39,
+        "pitch_semitones": -0.401,
+        "voiced": true
+      },
+      {
+        "time": 63.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 64.0,
+        "pitch_hz": 160.79,
+        "pitch_semitones": -0.249,
+        "voiced": true
+      },
+      {
+        "time": 64.5,
+        "pitch_hz": 161.44,
+        "pitch_semitones": -0.179,
+        "voiced": true
+      },
+      {
+        "time": 65.0,
+        "pitch_hz": 162.07,
+        "pitch_semitones": -0.112,
+        "voiced": true
+      },
+      {
+        "time": 65.5,
+        "pitch_hz": 162.7,
+        "pitch_semitones": -0.045,
+        "voiced": true
+      },
+      {
+        "time": 66.0,
+        "pitch_hz": 163.34,
+        "pitch_semitones": 0.023,
+        "voiced": true
+      },
+      {
+        "time": 66.5,
+        "pitch_hz": 163.99,
+        "pitch_semitones": 0.092,
+        "voiced": true
+      },
+      {
+        "time": 67.0,
+        "pitch_hz": 164.66,
+        "pitch_semitones": 0.163,
+        "voiced": true
+      },
+      {
+        "time": 67.5,
+        "pitch_hz": 165.34,
+        "pitch_semitones": 0.234,
+        "voiced": true
+      },
+      {
+        "time": 68.0,
+        "pitch_hz": 166.01,
+        "pitch_semitones": 0.304,
+        "voiced": true
+      },
+      {
+        "time": 68.5,
+        "pitch_hz": 166.66,
+        "pitch_semitones": 0.371,
+        "voiced": true
+      },
+      {
+        "time": 69.0,
+        "pitch_hz": 167.26,
+        "pitch_semitones": 0.434,
+        "voiced": true
+      },
+      {
+        "time": 69.5,
+        "pitch_hz": 167.81,
+        "pitch_semitones": 0.49,
+        "voiced": true
+      },
+      {
+        "time": 70.0,
+        "pitch_hz": 168.29,
+        "pitch_semitones": 0.54,
+        "voiced": true
+      },
+      {
+        "time": 70.5,
+        "pitch_hz": 168.7,
+        "pitch_semitones": 0.583,
+        "voiced": true
+      },
+      {
+        "time": 71.0,
+        "pitch_hz": 169.05,
+        "pitch_semitones": 0.618,
+        "voiced": true
+      },
+      {
+        "time": 71.5,
+        "pitch_hz": 169.32,
+        "pitch_semitones": 0.645,
+        "voiced": true
+      },
+      {
+        "time": 72.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 72.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 73.0,
+        "pitch_hz": 169.64,
+        "pitch_semitones": 0.679,
+        "voiced": true
+      },
+      {
+        "time": 73.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 74.0,
+        "pitch_hz": 169.34,
+        "pitch_semitones": 0.648,
+        "voiced": true
+      },
+      {
+        "time": 74.5,
+        "pitch_hz": 168.99,
+        "pitch_semitones": 0.612,
+        "voiced": true
+      },
+      {
+        "time": 75.0,
+        "pitch_hz": 168.5,
+        "pitch_semitones": 0.561,
+        "voiced": true
+      },
+      {
+        "time": 75.5,
+        "pitch_hz": 167.86,
+        "pitch_semitones": 0.496,
+        "voiced": true
+      },
+      {
+        "time": 76.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 76.5,
+        "pitch_hz": 166.22,
+        "pitch_semitones": 0.326,
+        "voiced": true
+      },
+      {
+        "time": 77.0,
+        "pitch_hz": 165.28,
+        "pitch_semitones": 0.227,
+        "voiced": true
+      },
+      {
+        "time": 77.5,
+        "pitch_hz": 164.29,
+        "pitch_semitones": 0.124,
+        "voiced": true
+      },
+      {
+        "time": 78.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 78.5,
+        "pitch_hz": 162.33,
+        "pitch_semitones": -0.084,
+        "voiced": true
+      },
+      {
+        "time": 79.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 79.5,
+        "pitch_hz": 160.52,
+        "pitch_semitones": -0.278,
+        "voiced": true
+      },
+      {
+        "time": 80.0,
+        "pitch_hz": 159.7,
+        "pitch_semitones": -0.367,
+        "voiced": true
+      },
+      {
+        "time": 80.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 81.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 81.5,
+        "pitch_hz": 157.51,
+        "pitch_semitones": -0.606,
+        "voiced": true
+      },
+      {
+        "time": 82.0,
+        "pitch_hz": 156.85,
+        "pitch_semitones": -0.679,
+        "voiced": true
+      },
+      {
+        "time": 82.5,
+        "pitch_hz": 156.22,
+        "pitch_semitones": -0.748,
+        "voiced": true
+      },
+      {
+        "time": 83.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 83.5,
+        "pitch_hz": 155.08,
+        "pitch_semitones": -0.876,
+        "voiced": true
+      },
+      {
+        "time": 84.0,
+        "pitch_hz": 154.58,
+        "pitch_semitones": -0.931,
+        "voiced": true
+      },
+      {
+        "time": 84.5,
+        "pitch_hz": 154.13,
+        "pitch_semitones": -0.981,
+        "voiced": true
+      },
+      {
+        "time": 85.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 85.5,
+        "pitch_hz": 153.41,
+        "pitch_semitones": -1.063,
+        "voiced": true
+      },
+      {
+        "time": 86.0,
+        "pitch_hz": 153.12,
+        "pitch_semitones": -1.095,
+        "voiced": true
+      },
+      {
+        "time": 86.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 87.0,
+        "pitch_hz": 152.65,
+        "pitch_semitones": -1.148,
+        "voiced": true
+      },
+      {
+        "time": 87.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 88.0,
+        "pitch_hz": 152.28,
+        "pitch_semitones": -1.19,
+        "voiced": true
+      },
+      {
+        "time": 88.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 89.0,
+        "pitch_hz": 152.06,
+        "pitch_semitones": -1.216,
+        "voiced": true
+      },
+      {
+        "time": 89.5,
+        "pitch_hz": 152.04,
+        "pitch_semitones": -1.218,
+        "voiced": true
+      },
+      {
+        "time": 90.0,
+        "pitch_hz": 152.11,
+        "pitch_semitones": -1.209,
+        "voiced": true
+      },
+      {
+        "time": 90.5,
+        "pitch_hz": 152.3,
+        "pitch_semitones": -1.188,
+        "voiced": true
+      },
+      {
+        "time": 91.0,
+        "pitch_hz": 152.61,
+        "pitch_semitones": -1.153,
+        "voiced": true
+      },
+      {
+        "time": 91.5,
+        "pitch_hz": 153.06,
+        "pitch_semitones": -1.102,
+        "voiced": true
+      },
+      {
+        "time": 92.0,
+        "pitch_hz": 153.63,
+        "pitch_semitones": -1.038,
+        "voiced": true
+      },
+      {
+        "time": 92.5,
+        "pitch_hz": 154.32,
+        "pitch_semitones": -0.96,
+        "voiced": true
+      },
+      {
+        "time": 93.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 93.5,
+        "pitch_hz": 155.98,
+        "pitch_semitones": -0.775,
+        "voiced": true
+      },
+      {
+        "time": 94.0,
+        "pitch_hz": 156.9,
+        "pitch_semitones": -0.673,
+        "voiced": true
+      },
+      {
+        "time": 94.5,
+        "pitch_hz": 157.85,
+        "pitch_semitones": -0.569,
+        "voiced": true
+      },
+      {
+        "time": 95.0,
+        "pitch_hz": 158.81,
+        "pitch_semitones": -0.464,
+        "voiced": true
+      },
+      {
+        "time": 95.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 96.0,
+        "pitch_hz": 160.72,
+        "pitch_semitones": -0.257,
+        "voiced": true
+      },
+      {
+        "time": 96.5,
+        "pitch_hz": 161.66,
+        "pitch_semitones": -0.156,
+        "voiced": true
+      },
+      {
+        "time": 97.0,
+        "pitch_hz": 162.58,
+        "pitch_semitones": -0.058,
+        "voiced": true
+      },
+      {
+        "time": 97.5,
+        "pitch_hz": 163.47,
+        "pitch_semitones": 0.037,
+        "voiced": true
+      },
+      {
+        "time": 98.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 98.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 99.0,
+        "pitch_hz": 165.84,
+        "pitch_semitones": 0.286,
+        "voiced": true
+      },
+      {
+        "time": 99.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 100.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 100.5,
+        "pitch_hz": 167.44,
+        "pitch_semitones": 0.453,
+        "voiced": true
+      },
+      {
+        "time": 101.0,
+        "pitch_hz": 167.77,
+        "pitch_semitones": 0.487,
+        "voiced": true
+      },
+      {
+        "time": 101.5,
+        "pitch_hz": 168.01,
+        "pitch_semitones": 0.512,
+        "voiced": true
+      },
+      {
+        "time": 102.0,
+        "pitch_hz": 168.18,
+        "pitch_semitones": 0.529,
+        "voiced": true
+      },
+      {
+        "time": 102.5,
+        "pitch_hz": 168.3,
+        "pitch_semitones": 0.541,
+        "voiced": true
+      },
+      {
+        "time": 103.0,
+        "pitch_hz": 168.38,
+        "pitch_semitones": 0.55,
+        "voiced": true
+      },
+      {
+        "time": 103.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 104.0,
+        "pitch_hz": 168.51,
+        "pitch_semitones": 0.563,
+        "voiced": true
+      },
+      {
+        "time": 104.5,
+        "pitch_hz": 168.56,
+        "pitch_semitones": 0.568,
+        "voiced": true
+      },
+      {
+        "time": 105.0,
+        "pitch_hz": 168.58,
+        "pitch_semitones": 0.57,
+        "voiced": true
+      },
+      {
+        "time": 105.5,
+        "pitch_hz": 168.55,
+        "pitch_semitones": 0.567,
+        "voiced": true
+      },
+      {
+        "time": 106.0,
+        "pitch_hz": 168.46,
+        "pitch_semitones": 0.558,
+        "voiced": true
+      },
+      {
+        "time": 106.5,
+        "pitch_hz": 168.28,
+        "pitch_semitones": 0.539,
+        "voiced": true
+      },
+      {
+        "time": 107.0,
+        "pitch_hz": 168.0,
+        "pitch_semitones": 0.51,
+        "voiced": true
+      },
+      {
+        "time": 107.5,
+        "pitch_hz": 167.61,
+        "pitch_semitones": 0.47,
+        "voiced": true
+      },
+      {
+        "time": 108.0,
+        "pitch_hz": 167.12,
+        "pitch_semitones": 0.419,
+        "voiced": true
+      },
+      {
+        "time": 108.5,
+        "pitch_hz": 166.52,
+        "pitch_semitones": 0.357,
+        "voiced": true
+      },
+      {
+        "time": 109.0,
+        "pitch_hz": 165.84,
+        "pitch_semitones": 0.287,
+        "voiced": true
+      },
+      {
+        "time": 109.5,
+        "pitch_hz": 165.09,
+        "pitch_semitones": 0.208,
+        "voiced": true
+      },
+      {
+        "time": 110.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 110.5,
+        "pitch_hz": 163.43,
+        "pitch_semitones": 0.033,
+        "voiced": true
+      },
+      {
+        "time": 111.0,
+        "pitch_hz": 162.53,
+        "pitch_semitones": -0.062,
+        "voiced": true
+      },
+      {
+        "time": 111.5,
+        "pitch_hz": 161.6,
+        "pitch_semitones": -0.162,
+        "voiced": true
+      },
+      {
+        "time": 112.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 112.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 113.0,
+        "pitch_hz": 158.65,
+        "pitch_semitones": -0.481,
+        "voiced": true
+      },
+      {
+        "time": 113.5,
+        "pitch_hz": 157.65,
+        "pitch_semitones": -0.59,
+        "voiced": true
+      },
+      {
+        "time": 114.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 114.5,
+        "pitch_hz": 155.77,
+        "pitch_semitones": -0.798,
+        "voiced": true
+      },
+      {
+        "time": 115.0,
+        "pitch_hz": 154.94,
+        "pitch_semitones": -0.891,
+        "voiced": true
+      },
+      {
+        "time": 115.5,
+        "pitch_hz": 154.21,
+        "pitch_semitones": -0.973,
+        "voiced": true
+      },
+      {
+        "time": 116.0,
+        "pitch_hz": 153.6,
+        "pitch_semitones": -1.041,
+        "voiced": true
+      },
+      {
+        "time": 116.5,
+        "pitch_hz": 153.12,
+        "pitch_semitones": -1.096,
+        "voiced": true
+      },
+      {
+        "time": 117.0,
+        "pitch_hz": 152.76,
+        "pitch_semitones": -1.136,
+        "voiced": true
+      },
+      {
+        "time": 117.5,
+        "pitch_hz": 152.52,
+        "pitch_semitones": -1.163,
+        "voiced": true
+      },
+      {
+        "time": 118.0,
+        "pitch_hz": 152.38,
+        "pitch_semitones": -1.179,
+        "voiced": true
+      },
+      {
+        "time": 118.5,
+        "pitch_hz": 152.31,
+        "pitch_semitones": -1.187,
+        "voiced": true
+      },
+      {
+        "time": 119.0,
+        "pitch_hz": 152.31,
+        "pitch_semitones": -1.187,
+        "voiced": true
+      },
+      {
+        "time": 119.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 120.0,
+        "pitch_hz": 152.41,
+        "pitch_semitones": -1.176,
+        "voiced": true
+      },
+      {
+        "time": 120.5,
+        "pitch_hz": 152.51,
+        "pitch_semitones": -1.165,
+        "voiced": true
+      },
+      {
+        "time": 121.0,
+        "pitch_hz": 152.64,
+        "pitch_semitones": -1.15,
+        "voiced": true
+      },
+      {
+        "time": 121.5,
+        "pitch_hz": 152.81,
+        "pitch_semitones": -1.13,
+        "voiced": true
+      },
+      {
+        "time": 122.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 122.5,
+        "pitch_hz": 153.31,
+        "pitch_semitones": -1.074,
+        "voiced": true
+      },
+      {
+        "time": 123.0,
+        "pitch_hz": 153.64,
+        "pitch_semitones": -1.036,
+        "voiced": true
+      },
+      {
+        "time": 123.5,
+        "pitch_hz": 154.04,
+        "pitch_semitones": -0.992,
+        "voiced": true
+      },
+      {
+        "time": 124.0,
+        "pitch_hz": 154.48,
+        "pitch_semitones": -0.942,
+        "voiced": true
+      },
+      {
+        "time": 124.5,
+        "pitch_hz": 154.98,
+        "pitch_semitones": -0.887,
+        "voiced": true
+      },
+      {
+        "time": 125.0,
+        "pitch_hz": 155.51,
+        "pitch_semitones": -0.827,
+        "voiced": true
+      },
+      {
+        "time": 125.5,
+        "pitch_hz": 156.08,
+        "pitch_semitones": -0.764,
+        "voiced": true
+      },
+      {
+        "time": 126.0,
+        "pitch_hz": 156.69,
+        "pitch_semitones": -0.696,
+        "voiced": true
+      },
+      {
+        "time": 126.5,
+        "pitch_hz": 157.34,
+        "pitch_semitones": -0.625,
+        "voiced": true
+      },
+      {
+        "time": 127.0,
+        "pitch_hz": 158.04,
+        "pitch_semitones": -0.547,
+        "voiced": true
+      },
+      {
+        "time": 127.5,
+        "pitch_hz": 158.81,
+        "pitch_semitones": -0.464,
+        "voiced": true
+      },
+      {
+        "time": 128.0,
+        "pitch_hz": 159.64,
+        "pitch_semitones": -0.373,
+        "voiced": true
+      },
+      {
+        "time": 128.5,
+        "pitch_hz": 160.55,
+        "pitch_semitones": -0.275,
+        "voiced": true
+      },
+      {
+        "time": 129.0,
+        "pitch_hz": 161.52,
+        "pitch_semitones": -0.171,
+        "voiced": true
+      },
+      {
+        "time": 129.5,
+        "pitch_hz": 162.53,
+        "pitch_semitones": -0.062,
+        "voiced": true
+      },
+      {
+        "time": 130.0,
+        "pitch_hz": 163.57,
+        "pitch_semitones": 0.048,
+        "voiced": true
+      },
+      {
+        "time": 130.5,
+        "pitch_hz": 164.6,
+        "pitch_semitones": 0.156,
+        "voiced": true
+      },
+      {
+        "time": 131.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 131.5,
+        "pitch_hz": 166.48,
+        "pitch_semitones": 0.353,
+        "voiced": true
+      },
+      {
+        "time": 132.0,
+        "pitch_hz": 167.28,
+        "pitch_semitones": 0.436,
+        "voiced": true
+      },
+      {
+        "time": 132.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 133.0,
+        "pitch_hz": 168.49,
+        "pitch_semitones": 0.561,
+        "voiced": true
+      },
+      {
+        "time": 133.5,
+        "pitch_hz": 168.91,
+        "pitch_semitones": 0.604,
+        "voiced": true
+      },
+      {
+        "time": 134.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 134.5,
+        "pitch_hz": 169.38,
+        "pitch_semitones": 0.652,
+        "voiced": true
+      },
+      {
+        "time": 135.0,
+        "pitch_hz": 169.46,
+        "pitch_semitones": 0.661,
+        "voiced": true
+      },
+      {
+        "time": 135.5,
+        "pitch_hz": 169.46,
+        "pitch_semitones": 0.66,
+        "voiced": true
+      },
+      {
+        "time": 136.0,
+        "pitch_hz": 169.37,
+        "pitch_semitones": 0.651,
+        "voiced": true
+      },
+      {
+        "time": 136.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 137.0,
+        "pitch_hz": 168.94,
+        "pitch_semitones": 0.607,
+        "voiced": true
+      },
+      {
+        "time": 137.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 138.0,
+        "pitch_hz": 168.18,
+        "pitch_semitones": 0.529,
+        "voiced": true
+      },
+      {
+        "time": 138.5,
+        "pitch_hz": 167.7,
+        "pitch_semitones": 0.479,
+        "voiced": true
+      },
+      {
+        "time": 139.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 139.5,
+        "pitch_hz": 166.57,
+        "pitch_semitones": 0.362,
+        "voiced": true
+      },
+      {
+        "time": 140.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 140.5,
+        "pitch_hz": 165.35,
+        "pitch_semitones": 0.235,
+        "voiced": true
+      },
+      {
+        "time": 141.0,
+        "pitch_hz": 164.75,
+        "pitch_semitones": 0.172,
+        "voiced": true
+      },
+      {
+        "time": 141.5,
+        "pitch_hz": 164.15,
+        "pitch_semitones": 0.109,
+        "voiced": true
+      },
+      {
+        "time": 142.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 142.5,
+        "pitch_hz": 162.98,
+        "pitch_semitones": -0.015,
+        "voiced": true
+      },
+      {
+        "time": 143.0,
+        "pitch_hz": 162.36,
+        "pitch_semitones": -0.081,
+        "voiced": true
+      },
+      {
+        "time": 143.5,
+        "pitch_hz": 161.71,
+        "pitch_semitones": -0.15,
+        "voiced": true
+      },
+      {
+        "time": 144.0,
+        "pitch_hz": 161.01,
+        "pitch_semitones": -0.226,
+        "voiced": true
+      },
+      {
+        "time": 144.5,
+        "pitch_hz": 160.24,
+        "pitch_semitones": -0.308,
+        "voiced": true
+      },
+      {
+        "time": 145.0,
+        "pitch_hz": 159.42,
+        "pitch_semitones": -0.398,
+        "voiced": true
+      },
+      {
+        "time": 145.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 146.0,
+        "pitch_hz": 157.65,
+        "pitch_semitones": -0.591,
+        "voiced": true
+      },
+      {
+        "time": 146.5,
+        "pitch_hz": 156.75,
+        "pitch_semitones": -0.69,
+        "voiced": true
+      },
+      {
+        "time": 147.0,
+        "pitch_hz": 155.88,
+        "pitch_semitones": -0.787,
+        "voiced": true
+      },
+      {
+        "time": 147.5,
+        "pitch_hz": 155.05,
+        "pitch_semitones": -0.879,
+        "voiced": true
+      },
+      {
+        "time": 148.0,
+        "pitch_hz": 154.29,
+        "pitch_semitones": -0.964,
+        "voiced": true
+      },
+      {
+        "time": 148.5,
+        "pitch_hz": 153.6,
+        "pitch_semitones": -1.041,
+        "voiced": true
+      },
+      {
+        "time": 149.0,
+        "pitch_hz": 153.01,
+        "pitch_semitones": -1.108,
+        "voiced": true
+      },
+      {
+        "time": 149.5,
+        "pitch_hz": 152.5,
+        "pitch_semitones": -1.165,
+        "voiced": true
+      },
+      {
+        "time": 150.0,
+        "pitch_hz": 152.08,
+        "pitch_semitones": -1.213,
+        "voiced": true
+      },
+      {
+        "time": 150.5,
+        "pitch_hz": 151.76,
+        "pitch_semitones": -1.25,
+        "voiced": true
+      },
+      {
+        "time": 151.0,
+        "pitch_hz": 151.52,
+        "pitch_semitones": -1.277,
+        "voiced": true
+      },
+      {
+        "time": 151.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 152.0,
+        "pitch_hz": 151.35,
+        "pitch_semitones": -1.297,
+        "voiced": true
+      },
+      {
+        "time": 152.5,
+        "pitch_hz": 151.43,
+        "pitch_semitones": -1.288,
+        "voiced": true
+      },
+      {
+        "time": 153.0,
+        "pitch_hz": 151.63,
+        "pitch_semitones": -1.265,
+        "voiced": true
+      },
+      {
+        "time": 153.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 154.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 154.5,
+        "pitch_hz": 152.93,
+        "pitch_semitones": -1.117,
+        "voiced": true
+      },
+      {
+        "time": 155.0,
+        "pitch_hz": 153.55,
+        "pitch_semitones": -1.047,
+        "voiced": true
+      },
+      {
+        "time": 155.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 156.0,
+        "pitch_hz": 154.94,
+        "pitch_semitones": -0.891,
+        "voiced": true
+      },
+      {
+        "time": 156.5,
+        "pitch_hz": 155.65,
+        "pitch_semitones": -0.811,
+        "voiced": true
+      },
+      {
+        "time": 157.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 157.5,
+        "pitch_hz": 157.03,
+        "pitch_semitones": -0.659,
+        "voiced": true
+      },
+      {
+        "time": 158.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 158.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 159.0,
+        "pitch_hz": 158.95,
+        "pitch_semitones": -0.448,
+        "voiced": true
+      },
+      {
+        "time": 159.5,
+        "pitch_hz": 159.59,
+        "pitch_semitones": -0.378,
+        "voiced": true
+      },
+      {
+        "time": 160.0,
+        "pitch_hz": 160.26,
+        "pitch_semitones": -0.307,
+        "voiced": true
+      },
+      {
+        "time": 160.5,
+        "pitch_hz": 160.95,
+        "pitch_semitones": -0.232,
+        "voiced": true
+      },
+      {
+        "time": 161.0,
+        "pitch_hz": 161.67,
+        "pitch_semitones": -0.154,
+        "voiced": true
+      },
+      {
+        "time": 161.5,
+        "pitch_hz": 162.42,
+        "pitch_semitones": -0.074,
+        "voiced": true
+      },
+      {
+        "time": 162.0,
+        "pitch_hz": 163.19,
+        "pitch_semitones": 0.007,
+        "voiced": true
+      },
+      {
+        "time": 162.5,
+        "pitch_hz": 163.95,
+        "pitch_semitones": 0.088,
+        "voiced": true
+      },
+      {
+        "time": 163.0,
+        "pitch_hz": 164.7,
+        "pitch_semitones": 0.167,
+        "voiced": true
+      },
+      {
+        "time": 163.5,
+        "pitch_hz": 165.43,
+        "pitch_semitones": 0.244,
+        "voiced": true
+      },
+      {
+        "time": 164.0,
+        "pitch_hz": 166.13,
+        "pitch_semitones": 0.316,
+        "voiced": true
+      },
+      {
+        "time": 164.5,
+        "pitch_hz": 166.79,
+        "pitch_semitones": 0.385,
+        "voiced": true
+      },
+      {
+        "time": 165.0,
+        "pitch_hz": 167.41,
+        "pitch_semitones": 0.449,
+        "voiced": true
+      },
+      {
+        "time": 165.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 166.0,
+        "pitch_hz": 168.52,
+        "pitch_semitones": 0.564,
+        "voiced": true
+      },
+      {
+        "time": 166.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 167.0,
+        "pitch_hz": 169.42,
+        "pitch_semitones": 0.656,
+        "voiced": true
+      },
+      {
+        "time": 167.5,
+        "pitch_hz": 169.74,
+        "pitch_semitones": 0.689,
+        "voiced": true
+      },
+      {
+        "time": 168.0,
+        "pitch_hz": 169.95,
+        "pitch_semitones": 0.71,
+        "voiced": true
+      },
+      {
+        "time": 168.5,
+        "pitch_hz": 170.02,
+        "pitch_semitones": 0.718,
+        "voiced": true
+      },
+      {
+        "time": 169.0,
+        "pitch_hz": 169.94,
+        "pitch_semitones": 0.709,
+        "voiced": true
+      },
+      {
+        "time": 169.5,
+        "pitch_hz": 169.7,
+        "pitch_semitones": 0.685,
+        "voiced": true
+      },
+      {
+        "time": 170.0,
+        "pitch_hz": 169.3,
+        "pitch_semitones": 0.643,
+        "voiced": true
+      },
+      {
+        "time": 170.5,
+        "pitch_hz": 168.75,
+        "pitch_semitones": 0.587,
+        "voiced": true
+      },
+      {
+        "time": 171.0,
+        "pitch_hz": 168.08,
+        "pitch_semitones": 0.518,
+        "voiced": true
+      },
+      {
+        "time": 171.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 172.0,
+        "pitch_hz": 166.49,
+        "pitch_semitones": 0.354,
+        "voiced": true
+      },
+      {
+        "time": 172.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 173.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 173.5,
+        "pitch_hz": 163.93,
+        "pitch_semitones": 0.086,
+        "voiced": true
+      },
+      {
+        "time": 174.0,
+        "pitch_hz": 163.1,
+        "pitch_semitones": -0.002,
+        "voiced": true
+      },
+      {
+        "time": 174.5,
+        "pitch_hz": 162.29,
+        "pitch_semitones": -0.089,
+        "voiced": true
+      },
+      {
+        "time": 175.0,
+        "pitch_hz": 161.49,
+        "pitch_semitones": -0.174,
+        "voiced": true
+      },
+      {
+        "time": 175.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 176.0,
+        "pitch_hz": 159.93,
+        "pitch_semitones": -0.342,
+        "voiced": true
+      },
+      {
+        "time": 176.5,
+        "pitch_hz": 159.17,
+        "pitch_semitones": -0.424,
+        "voiced": true
+      },
+      {
+        "time": 177.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 177.5,
+        "pitch_hz": 157.73,
+        "pitch_semitones": -0.582,
+        "voiced": true
+      },
+      {
+        "time": 178.0,
+        "pitch_hz": 157.07,
+        "pitch_semitones": -0.655,
+        "voiced": true
+      },
+      {
+        "time": 178.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 179.0,
+        "pitch_hz": 155.88,
+        "pitch_semitones": -0.786,
+        "voiced": true
+      },
+      {
+        "time": 179.5,
+        "pitch_hz": 155.35,
+        "pitch_semitones": -0.844,
+        "voiced": true
+      },
+      {
+        "time": 180.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 180.5,
+        "pitch_hz": 154.41,
+        "pitch_semitones": -0.95,
+        "voiced": true
+      },
+      {
+        "time": 181.0,
+        "pitch_hz": 153.98,
+        "pitch_semitones": -0.999,
+        "voiced": true
+      },
+      {
+        "time": 181.5,
+        "pitch_hz": 153.55,
+        "pitch_semitones": -1.047,
+        "voiced": true
+      },
+      {
+        "time": 182.0,
+        "pitch_hz": 153.13,
+        "pitch_semitones": -1.095,
+        "voiced": true
+      },
+      {
+        "time": 182.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 183.0,
+        "pitch_hz": 152.34,
+        "pitch_semitones": -1.184,
+        "voiced": true
+      },
+      {
+        "time": 183.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 184.0,
+        "pitch_hz": 151.75,
+        "pitch_semitones": -1.251,
+        "voiced": true
+      },
+      {
+        "time": 184.5,
+        "pitch_hz": 151.59,
+        "pitch_semitones": -1.269,
+        "voiced": true
+      },
+      {
+        "time": 185.0,
+        "pitch_hz": 151.55,
+        "pitch_semitones": -1.274,
+        "voiced": true
+      },
+      {
+        "time": 185.5,
+        "pitch_hz": 151.64,
+        "pitch_semitones": -1.264,
+        "voiced": true
+      },
+      {
+        "time": 186.0,
+        "pitch_hz": 151.86,
+        "pitch_semitones": -1.238,
+        "voiced": true
+      },
+      {
+        "time": 186.5,
+        "pitch_hz": 152.22,
+        "pitch_semitones": -1.198,
+        "voiced": true
+      },
+      {
+        "time": 187.0,
+        "pitch_hz": 152.69,
+        "pitch_semitones": -1.144,
+        "voiced": true
+      },
+      {
+        "time": 187.5,
+        "pitch_hz": 153.27,
+        "pitch_semitones": -1.078,
+        "voiced": true
+      },
+      {
+        "time": 188.0,
+        "pitch_hz": 153.94,
+        "pitch_semitones": -1.003,
+        "voiced": true
+      },
+      {
+        "time": 188.5,
+        "pitch_hz": 154.67,
+        "pitch_semitones": -0.92,
+        "voiced": true
+      },
+      {
+        "time": 189.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 189.5,
+        "pitch_hz": 156.3,
+        "pitch_semitones": -0.74,
+        "voiced": true
+      },
+      {
+        "time": 190.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 190.5,
+        "pitch_hz": 158.07,
+        "pitch_semitones": -0.544,
+        "voiced": true
+      },
+      {
+        "time": 191.0,
+        "pitch_hz": 159.01,
+        "pitch_semitones": -0.442,
+        "voiced": true
+      },
+      {
+        "time": 191.5,
+        "pitch_hz": 159.95,
+        "pitch_semitones": -0.339,
+        "voiced": true
+      },
+      {
+        "time": 192.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 192.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 193.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 193.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 194.0,
+        "pitch_hz": 164.33,
+        "pitch_semitones": 0.128,
+        "voiced": true
+      },
+      {
+        "time": 194.5,
+        "pitch_hz": 165.0,
+        "pitch_semitones": 0.199,
+        "voiced": true
+      },
+      {
+        "time": 195.0,
+        "pitch_hz": 165.58,
+        "pitch_semitones": 0.259,
+        "voiced": true
+      },
+      {
+        "time": 195.5,
+        "pitch_hz": 166.08,
+        "pitch_semitones": 0.311,
+        "voiced": true
+      },
+      {
+        "time": 196.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 196.5,
+        "pitch_hz": 166.87,
+        "pitch_semitones": 0.393,
+        "voiced": true
+      },
+      {
+        "time": 197.0,
+        "pitch_hz": 167.2,
+        "pitch_semitones": 0.428,
+        "voiced": true
+      },
+      {
+        "time": 197.5,
+        "pitch_hz": 167.52,
+        "pitch_semitones": 0.461,
+        "voiced": true
+      },
+      {
+        "time": 198.0,
+        "pitch_hz": 167.83,
+        "pitch_semitones": 0.493,
+        "voiced": true
+      },
+      {
+        "time": 198.5,
+        "pitch_hz": 168.14,
+        "pitch_semitones": 0.525,
+        "voiced": true
+      },
+      {
+        "time": 199.0,
+        "pitch_hz": 168.43,
+        "pitch_semitones": 0.554,
+        "voiced": true
+      },
+      {
+        "time": 199.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 200.0,
+        "pitch_hz": 168.89,
+        "pitch_semitones": 0.602,
+        "voiced": true
+      },
+      {
+        "time": 200.5,
+        "pitch_hz": 169.02,
+        "pitch_semitones": 0.616,
+        "voiced": true
+      },
+      {
+        "time": 201.0,
+        "pitch_hz": 169.07,
+        "pitch_semitones": 0.62,
+        "voiced": true
+      },
+      {
+        "time": 201.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 202.0,
+        "pitch_hz": 168.84,
+        "pitch_semitones": 0.597,
+        "voiced": true
+      },
+      {
+        "time": 202.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 203.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 203.5,
+        "pitch_hz": 167.74,
+        "pitch_semitones": 0.483,
+        "voiced": true
+      },
+      {
+        "time": 204.0,
+        "pitch_hz": 167.19,
+        "pitch_semitones": 0.427,
+        "voiced": true
+      },
+      {
+        "time": 204.5,
+        "pitch_hz": 166.57,
+        "pitch_semitones": 0.363,
+        "voiced": true
+      },
+      {
+        "time": 205.0,
+        "pitch_hz": 165.88,
+        "pitch_semitones": 0.29,
+        "voiced": true
+      },
+      {
+        "time": 205.5,
+        "pitch_hz": 165.1,
+        "pitch_semitones": 0.209,
+        "voiced": true
+      },
+      {
+        "time": 206.0,
+        "pitch_hz": 164.25,
+        "pitch_semitones": 0.119,
+        "voiced": true
+      },
+      {
+        "time": 206.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 207.0,
+        "pitch_hz": 162.33,
+        "pitch_semitones": -0.084,
+        "voiced": true
+      },
+      {
+        "time": 207.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 208.0,
+        "pitch_hz": 160.23,
+        "pitch_semitones": -0.309,
+        "voiced": true
+      },
+      {
+        "time": 208.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 209.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 209.5,
+        "pitch_hz": 157.19,
+        "pitch_semitones": -0.641,
+        "voiced": true
+      },
+      {
+        "time": 210.0,
+        "pitch_hz": 156.33,
+        "pitch_semitones": -0.737,
+        "voiced": true
+      },
+      {
+        "time": 210.5,
+        "pitch_hz": 155.56,
+        "pitch_semitones": -0.821,
+        "voiced": true
+      },
+      {
+        "time": 211.0,
+        "pitch_hz": 154.91,
+        "pitch_semitones": -0.894,
+        "voiced": true
+      },
+      {
+        "time": 211.5,
+        "pitch_hz": 154.37,
+        "pitch_semitones": -0.954,
+        "voiced": true
+      },
+      {
+        "time": 212.0,
+        "pitch_hz": 153.93,
+        "pitch_semitones": -1.004,
+        "voiced": true
+      },
+      {
+        "time": 212.5,
+        "pitch_hz": 153.56,
+        "pitch_semitones": -1.045,
+        "voiced": true
+      },
+      {
+        "time": 213.0,
+        "pitch_hz": 153.27,
+        "pitch_semitones": -1.079,
+        "voiced": true
+      },
+      {
+        "time": 213.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 214.0,
+        "pitch_hz": 152.82,
+        "pitch_semitones": -1.129,
+        "voiced": true
+      },
+      {
+        "time": 214.5,
+        "pitch_hz": 152.65,
+        "pitch_semitones": -1.148,
+        "voiced": true
+      },
+      {
+        "time": 215.0,
+        "pitch_hz": 152.53,
+        "pitch_semitones": -1.163,
+        "voiced": true
+      },
+      {
+        "time": 215.5,
+        "pitch_hz": 152.45,
+        "pitch_semitones": -1.172,
+        "voiced": true
+      },
+      {
+        "time": 216.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 216.5,
+        "pitch_hz": 152.45,
+        "pitch_semitones": -1.171,
+        "voiced": true
+      },
+      {
+        "time": 217.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 217.5,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 218.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 218.5,
+        "pitch_hz": 153.16,
+        "pitch_semitones": -1.09,
+        "voiced": true
+      },
+      {
+        "time": 219.0,
+        "pitch_hz": null,
+        "pitch_semitones": null,
+        "voiced": false
+      },
+      {
+        "time": 219.5,
+        "pitch_hz": 153.8,
+        "pitch_semitones": -1.018,
+        "voiced": true
+      },
+      {
+        "time": 220.0,
+        "pitch_hz": 154.19,
+        "pitch_semitones": -0.975,
+        "voiced": true
+      },
+      {
+        "time": 220.5,
+        "pitch_hz": 154.62,
+        "pitch_semitones": -0.927,
+        "voiced": true
+      },
+      {
+        "time": 221.0,
+        "pitch_hz": 155.11,
+        "pitch_semitones": -0.871,
+        "voiced": true
+      },
+      {
+        "time": 221.5,
+        "pitch_hz": 155.68,
+        "pitch_semitones": -0.808,
+        "voiced": true
+      },
+      {
+        "time": 222.0,
+        "pitch_hz": 156.35,
+        "pitch_semitones": -0.734,
+        "voiced": true
+      }
+    ],
+    "detector_settings": {
+      "backend": "librosa",
+      "fmin": 80.0,
+      "fmax": 400.0,
+      "trim_silence": true,
+      "trim_top_db": 30.0,
+      "trim_unvoiced_edges": true
+    }
+  },
+  "artifacts": {
+    "pitch_plot_path": null
+  }
+}
