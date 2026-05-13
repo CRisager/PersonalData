@@ -897,7 +897,7 @@
 				container.style.cssText += ';display:flex;flex-direction:column;';
 				chartPane = document.createElement('div');
 				chartPane.className = 'filler-trend-chart';
-				chartPane.style.cssText = 'flex:1;min-height:0;';
+				chartPane.style.cssText = 'flex:1;min-height:0;overflow:hidden;';
 				container.appendChild(chartPane);
 				const legendPane = document.createElement('div');
 				legendPane.className = 'filler-chart-legend';
@@ -1065,6 +1065,10 @@
 		if (usePreviewLayout) {
 			window.requestAnimationFrame(() => {
 				Plotly.Plots.resize(container);
+			});
+		} else if (!isOverview && definition.key === 'fillerTrend') {
+			window.requestAnimationFrame(() => {
+				Plotly.Plots.resize(plotTarget);
 			});
 		}
 	}
