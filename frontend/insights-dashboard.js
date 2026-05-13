@@ -517,8 +517,8 @@
 					{
 						type: 'scatter', mode: 'lines+markers', name: 'Average variation', x: dates, y: avg,
 						line: { color: PALETTE[2], width: 2.5 }, marker: { size: 6 },
-						customdata: dates.map((d, i) => [minv[i], maxv[i]]),
-						hovertemplate: '<b>%{x|%b %d, %Y}</b><br>Avg: %{y:.2f} st<br>Min: %{customdata[0]:.2f} st<br>Max: %{customdata[1]:.2f} st<extra></extra>'
+						customdata: orderedPitch.map((r, i) => [minv[i], maxv[i], r.recording_name]),
+						hovertemplate: '<b>%{customdata[2]}</b><br>Avg: %{y:.2f} st<br>Min: %{customdata[0]:.2f} st<br>Max: %{customdata[1]:.2f} st<extra></extra>'
 					},
 					{
 						type: 'scatter', mode: 'lines', name: `Overall average (${isNaN(overallAvg)?'':overallAvg.toFixed(2)})`, x: dates, y: dates.map(()=>overallAvg),
@@ -669,6 +669,7 @@
 		let traces = [trace];
 		let extraLayout = {};
 		let fillerLegendItems = null;
+		let fillerTrendLegendItems = null;
 
 		// Build a detailSet for detailed views or a visible subset for previews
 		const detailSet = usePreviewLayout
@@ -773,18 +774,14 @@
 							hovertemplate: `<b>%{x|%b %d, %Y}</b><br>${word}: %{y:.2f}%<extra></extra>`,
 						};
 				});
-				traces.unshift({
-					type: "scatter",
-					mode: "none",
-					name: "Disable all",
-					x: [],
-					y: [],
-					showlegend: !usePreviewLayout,
-					hoverinfo: "none",
-					line: { color: "#999" },
-					marker: { color: "#999" },
-				});
-				layout.showlegend = !usePreviewLayout && !isOverview;
+				if (!usePreviewLayout && !isOverview) {
+					fillerTrendLegendItems = fillerWords.map((word, idx) => ({
+						word,
+						color: PALETTE[idx % PALETTE.length],
+						traceIndex: idx,
+					}));
+				}
+				layout.showlegend = false;
 				layout.title = { text: "" };
 				layout.height = isOverview ? 280 : undefined;
 				layout.xaxis.type = "date";
@@ -864,7 +861,7 @@
 				layout.height = totalChartHeight;
 				if (!isOverview) {
 					layout.autosize = false;
-					layout.width = Math.round(container.getBoundingClientRect().width || container.clientWidth || 0);
+					layout.width = Math.round(container.offsetWidth || container.clientWidth || 0);
 				}
 				layout.showlegend = false;
 				
@@ -894,6 +891,20 @@
 		}
 
 		let plotTarget = container;
+		if (definition.key === 'fillerTrend' && !usePreviewLayout && !isOverview) {
+			let chartPane = container.querySelector('.filler-trend-chart');
+			if (!chartPane) {
+				container.style.cssText += ';display:flex;flex-direction:column;';
+				chartPane = document.createElement('div');
+				chartPane.className = 'filler-trend-chart';
+				chartPane.style.cssText = 'flex:1;min-height:0;';
+				container.appendChild(chartPane);
+				const legendPane = document.createElement('div');
+				legendPane.className = 'filler-chart-legend';
+				container.appendChild(legendPane);
+			}
+			plotTarget = chartPane;
+		}
 		if (definition.key === 'fillerRecording') {
 			let scrollPane = container.querySelector('.filler-chart-scroll');
 			if (!scrollPane) {
@@ -952,7 +963,7 @@
 						return v !== "legendonly" && v !== false;
 					});
 					const updates = fillerLegendItems.map(() => anyVisible ? "legendonly" : true);
-					Plotly.restyle(plotTarget, "visible", updates, fillerLegendItems.map((item) => item.traceIndex));
+					Plotly.restyle(plotTarget, { visible: updates }, fillerLegendItems.map((item) => item.traceIndex));
 					updateLegendItemVisibility();
 				});
 				legendPane.appendChild(disableAllItem);
@@ -973,7 +984,7 @@
 						const trace = plotTarget.data && plotTarget.data[item.traceIndex];
 						const currentVisible = trace ? trace.visible : true;
 						const newVisible = currentVisible === "legendonly" || currentVisible === false ? true : "legendonly";
-						Plotly.restyle(plotTarget, "visible", newVisible, [item.traceIndex]);
+						Plotly.restyle(plotTarget, { visible: [newVisible] }, [item.traceIndex]);
 						updateLegendItemVisibility();
 					});
 					legendPane.appendChild(span);
@@ -984,7 +995,7 @@
 					fillerLegendItems.forEach((item) => {
 						const span = legendPane.querySelectorAll('.filler-legend-item')[item.traceIndex + 1];
 						const trace = plotTarget.data[item.traceIndex];
-						const isVisible = trace && trace.visible && trace.visible !== "legendonly";
+						const isVisible = trace && trace.visible !== false && trace.visible !== "legendonly";
 						if (span) {
 							span.style.opacity = isVisible ? '1' : '0.4';
 						}
@@ -994,20 +1005,61 @@
 			}
 		}
 
-		if (!usePreviewLayout && !isOverview && definition.key === "fillerTrend" && !container._fillerLegendBound) {
-			container._fillerLegendBound = true;
-			container.on("plotly_legendclick", function(data) {
-				if (data.data[data.curveNumber].name !== "Disable all") return;
-				const realIndices = data.data
-					.map((t, i) => t.name !== "Disable all" ? i : null)
-					.filter(i => i !== null);
-				const anyVisible = realIndices.some(i => {
-					const v = data.data[i].visible;
-					return v !== "legendonly" && v !== false;
+		if (!usePreviewLayout && !isOverview && definition.key === "fillerTrend" && fillerTrendLegendItems) {
+			const legendPane = container.querySelector('.filler-chart-legend');
+			if (legendPane) {
+				legendPane.innerHTML = '';
+
+				const disableAllItem = document.createElement('span');
+				disableAllItem.className = 'filler-legend-item filler-legend-disable-all';
+				disableAllItem.style.cursor = 'pointer';
+				disableAllItem.textContent = 'Disable all';
+				disableAllItem.addEventListener('click', () => {
+					const anyVisible = fillerTrendLegendItems.some((item) => {
+						const trace = plotTarget.data && plotTarget.data[item.traceIndex];
+						const v = trace ? trace.visible : true;
+						return v !== "legendonly" && v !== false;
+					});
+					const updates = fillerTrendLegendItems.map(() => anyVisible ? "legendonly" : true);
+					Plotly.restyle(plotTarget, { visible: updates }, fillerTrendLegendItems.map((item) => item.traceIndex));
+					updateFillerTrendLegend();
 				});
-				Plotly.restyle(container, "visible", realIndices.map(() => anyVisible ? "legendonly" : true), realIndices);
-				return false;
-			});
+				legendPane.appendChild(disableAllItem);
+
+				fillerTrendLegendItems.forEach((item) => {
+					const span = document.createElement('span');
+					span.className = 'filler-legend-item';
+					span.style.cursor = 'pointer';
+					const swatch = document.createElement('span');
+					swatch.className = 'filler-legend-swatch';
+					swatch.style.background = item.color;
+					const label = document.createElement('span');
+					label.textContent = item.word;
+					span.appendChild(swatch);
+					span.appendChild(label);
+					span.addEventListener('click', () => {
+						const trace = plotTarget.data && plotTarget.data[item.traceIndex];
+						const currentVisible = trace ? trace.visible : true;
+						const newVisible = currentVisible === "legendonly" || currentVisible === false ? true : "legendonly";
+						Plotly.restyle(plotTarget, { visible: [newVisible] }, [item.traceIndex]);
+						updateFillerTrendLegend();
+					});
+					legendPane.appendChild(span);
+				});
+
+				function updateFillerTrendLegend() {
+					if (!plotTarget.data) return;
+					fillerTrendLegendItems.forEach((item) => {
+						const span = legendPane.querySelectorAll('.filler-legend-item')[item.traceIndex + 1];
+						const trace = plotTarget.data[item.traceIndex];
+						const isVisible = trace && trace.visible !== false && trace.visible !== "legendonly";
+						if (span) {
+							span.style.opacity = isVisible ? '1' : '0.4';
+						}
+					});
+				}
+				updateFillerTrendLegend();
+			}
 		}
 
 		if (usePreviewLayout) {
@@ -1177,7 +1229,7 @@
 
 		const intro = document.createElement("p");
 		intro.className = "plot-intro";
-		intro.textContent = "Use the dropdown to adjust the visible time frame. \n Hover over data points to see specifics.";
+		intro.textContent = "Use the dropdown to adjust the visible time frame. Click legend items to show or hide elements. \n Hover over data points to see specifics.";
 
 		const controls = document.createElement("div");
 		controls.className = "plot-toolbar-controls";
