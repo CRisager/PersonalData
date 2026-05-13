@@ -75,13 +75,13 @@
 
 		const indexHref = isInFrontend ? "../index.html" : "index.html";
 		const insightsHref = isInFrontend ? "insights.html" : "frontend/insights.html";
-		const insightsV2Href = isInFrontend ? "insights_v2.html" : "frontend/insights_v2.html";
+		const folderHref = isInFrontend ? "folder.html" : "frontend/folder.html";
 
-		const isOnInsightsV2 = pathname.includes("insights_v2");
 		const isOnPlot = pathname.includes("plot.html");
-		const isOnInsights = pathname.includes("insights") && !isOnInsightsV2;
+		const isOnInsights = pathname.includes("insights");
 		const isOnProfile = pathname.includes("profile.html");
 		const isOnHome = pathname.includes("home.html");
+		const isOnFolder = pathname.includes("folder.html");
 
 		const profileHref = isInFrontend ? "profile.html" : "frontend/profile.html";
 		const homeHref = isInFrontend ? "home.html" : "frontend/home.html";
@@ -142,10 +142,8 @@
 			folderIcon.style.cursor = "pointer";
 			folderIcon.addEventListener("click", function (e) {
 				e.stopPropagation();
-				if (isOnInsightsV2) {
-					window.location.href = "insights.html";
-				} else {
-					window.location.href = insightsV2Href;
+				if (!isOnFolder) {
+					window.location.href = folderHref;
 				}
 			});
 		}

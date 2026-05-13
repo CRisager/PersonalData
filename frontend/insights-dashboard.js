@@ -670,54 +670,6 @@
 		let extraLayout = {};
 		let fillerLegendItems = null;
 
-		// Preview: for fillerRecording, build the stacked breakdown (compact)
-		if (usePreviewLayout && definition.key === 'fillerRecording') {
-			const detailSetPreview = sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount));
-			const selectedPreview = [...detailSetPreview].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
-			const displayedPreview = selectedPreview.slice(0, 7);
-			const labels = displayedPreview.map((r) => String(r.recording_name || "Unknown recording"));
-			const dates = displayedPreview.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
-			const totals = displayedPreview.map((r) => Number(r.filler_percentage) || 0);
-			const fillerWords = collectFillerWords(displayedPreview.length ? displayedPreview : recordings);
-			traces = fillerWords.map((word, idx) => {
-				const values = displayedPreview.map((r) => {
-					const tot = Number(r.total_words) || 1;
-					const count = r.filler_counts && r.filler_counts[word] ? Number(r.filler_counts[word]) : 0;
-					return (count / Math.max(1, tot)) * 100.0;
-				});
-				return {
-					type: 'bar', orientation: 'h', name: word, y: labels, x: values, marker: { color: PALETTE[idx % PALETTE.length] },
-					showlegend: false,
-					customdata: displayedPreview.map((r, i) => [word, labels[i], dates[i], totals[i], Number(r.total_words) || 0]),
-					hovertemplate: '<b>%{customdata[1]}</b><br>Date: %{customdata[2]}<br>Filler word: %{customdata[0]}<br>Word share: %{x:.2f}%<br>Total filler: %{customdata[3]:.2f}%<br>Total words: %{customdata[4]:.0f}<extra></extra>',
-				};
-			});
-			fillerLegendItems = traces.map((t, idx) => ({ word: t.name, color: t.marker ? t.marker.color : '#999', traceIndex: idx }));
-			// Preview layout: compact
-			layout.barmode = 'stack';
-			layout.margin = { l: 0, r: 25, t: 20, b: 30 };
-			layout.template = "plotly_white";
-			// compute height so up to 7 bars fit
-			const maxVisibleBars = 7;
-			const fixedViewportHeight = 220;
-			const availableHeightForBars = fixedViewportHeight - layout.margin.b - layout.margin.t;
-			const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
-			layout.height = Math.max(120, layout.margin.t + displayedPreview.length * barHeightPerRecording + layout.margin.b);
-			layout.showlegend = false;
-			// Ensure all recording labels appear as y-axis ticks in the compact preview
-			layout.yaxis = layout.yaxis || {};
-			layout.yaxis.nticks = Math.max(3, displayedPreview.length);
-			// Match detailed plot behaviour: explicitly set category order/array
-			// so each recording name appears as a y-axis tick in the preview.
-			layout.yaxis.categoryorder = 'array';
-			layout.yaxis.categoryarray = labels;
-			layout.yaxis.autorange = 'reversed';
-			// Ensure ticks are placed for every category (labels array) — use explicit tickmode
-			layout.yaxis.tickmode = 'array';
-			layout.yaxis.tickvals = labels;
-			layout.yaxis.ticktext = labels;
-			layout.yaxis.tickfont = layout.yaxis.tickfont || { size: 11 };
-		}
 		// Build a detailSet for detailed views or a visible subset for previews
 		const detailSet = usePreviewLayout
 			? sortRecordingsByDate(getVisibleRecordings(recordings, definition.selectedCount))
@@ -864,8 +816,7 @@
 				const fillerWords = collectFillerWords(detailSet.length ? detailSet : recordings);
 				const selected = [...detailSet].sort((a, b) => (Number(b.filler_percentage) || 0) - (Number(a.filler_percentage) || 0));
 				
-				// For preview, limit to top 7 bars; for detail, show all
-				const displayedRecordings = usePreviewLayout ? selected.slice(0, 7) : selected;
+				const displayedRecordings = selected;
 				const labels = displayedRecordings.map((r) => String(r.recording_name || "Unknown recording"));
 				const dates = displayedRecordings.map((r, i) => formatRecordingLabel(toChartDateValue(r, i)));
 				const totals = displayedRecordings.map((r) => Number(r.filler_percentage) || 0);
@@ -890,49 +841,35 @@
 					traceIndex: idx,
 				}));
 				
-				if (usePreviewLayout) {
-					// Preview: show top 7 bars in scrollable container
-					const maxVisibleBars = 7;
-					const marginBot = 30;
-					const marginTop = 20;
-					const marginLeft = 0;
-					const marginRight = 25;
-					const fixedViewportHeight = 220;
-					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
-					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
-					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
-					
-					layout.barmode = 'stack';
-					layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
-					layout.template = "plotly_white";
-					layout.height = totalChartHeight;
-					layout.showlegend = false;
+				const marginBot = isOverview ? 28 : 50;
+				const marginTop = isOverview ? 18 : 30;
+				const marginLeft = 0;
+				const marginRight = isOverview ? 20 : 35;
+
+				let totalChartHeight;
+				if (isOverview) {
+					totalChartHeight = Math.max(280, Math.round(container.getBoundingClientRect().height || container.clientHeight || 0));
 				} else {
-					// Detail view: show all bars in scrollable container
-					const maxVisibleBars = isOverview ? 6 : 15;
-					const marginBot = isOverview ? 28 : 50;
-					const marginTop = isOverview ? 18 : 30;
-					const marginLeft = 0;
-					const marginRight = isOverview ? 20 : 35;
-					const fixedViewportHeight = isOverview ? 210 : 400;
+					const maxVisibleBars = 15;
+					const fixedViewportHeight = 400;
 					const availableHeightForBars = fixedViewportHeight - marginBot - marginTop;
 					const barHeightPerRecording = availableHeightForBars / maxVisibleBars;
-					const totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
-					
-					layout.barmode = 'stack';
-					layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
-					layout.template = "plotly_white";
-					layout.height = totalChartHeight;
-					layout.showlegend = !isOverview;
-					layout.legend = {
-						orientation: "h",
-						yanchor: "bottom",
-						y: isOverview ? -0.08 : -0.12,
-						xanchor: "left",
-						x: 0,
-						font: { size: 11 },
-					};
+					totalChartHeight = marginTop + (displayedRecordings.length * barHeightPerRecording) + marginBot;
 				}
+
+				layout.barmode = 'stack';
+				layout.margin = { l: marginLeft, r: marginRight, t: marginTop, b: marginBot };
+				layout.template = "plotly_white";
+				layout.height = totalChartHeight;
+				layout.showlegend = !isOverview;
+				layout.legend = {
+					orientation: "h",
+					yanchor: "bottom",
+					y: isOverview ? -0.08 : -0.12,
+					xanchor: "left",
+					x: 0,
+					font: { size: 11 },
+				};
 				
 				layout.yaxis = layout.yaxis || {};
 				layout.yaxis.categoryorder = 'array';
@@ -942,12 +879,7 @@
 				layout.xaxis.ticksuffix = '%';
 				const maxFiller = Math.max(...(detailSet.length ? detailSet : recordings).map((r) => Number(r.filler_percentage) || 0), 10);
 				layout.xaxis.range = [0, Math.min(100, maxFiller * 1.2 + 3)];
-				layout.xaxis.title = usePreviewLayout
-					? { text: "% of spoken words", standoff: 10 }
-					: { text: "% of all spoken words", standoff: 12 };
-				if (usePreviewLayout) {
-					layout.yaxis.title = "Recording";
-				}
+				layout.xaxis.title = { text: "% of all spoken words", standoff: 12 };
 				layout.title = { text: "" };
 				if (!displayedRecordings.length) {
 					extraLayout.annotations = [{
@@ -978,29 +910,16 @@
 				}
 			}
 
-			// Constrain overview cards: set scroll pane height to the chart container's
-			// computed height so the card remains fixed and extra bars become scrollable.
+			// For overview cards, constrain the scroll pane to the card's chart area.
+			// The chart height matches this value, so no scrolling occurs — bars simply
+			// resize to fill the available space as the recording count changes.
 			if (scrollPane) {
 				if (isOverview) {
-					// Compute a fixed chart area height based on the card's square size.
-					// Use the card's layout (width == height due to aspect-ratio) and reserve
-					// space for the header so the chart area becomes a stable box.
-					const cardEl = container.closest('.insight-card');
-					let chartAreaH = 220;
-					if (cardEl) {
-						const cardRect = cardEl.getBoundingClientRect();
-						const headerEl = cardEl.querySelector('.insight-card-header');
-						const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
-						// aim for square card: use card height minus header as available chart area
-						chartAreaH = Math.max(80, Math.floor(cardRect.height - headerH - 8));
-					}
+					const chartAreaH = Math.max(80, Math.round(container.getBoundingClientRect().height || container.clientHeight || 0));
 					scrollPane.style.height = `${chartAreaH}px`;
-					scrollPane.style.overflowY = 'auto';
+					scrollPane.style.overflowY = 'hidden';
 					scrollPane.style.maxHeight = '100%';
 					scrollPane.style.minHeight = '0';
-				} else if (usePreviewLayout) {
-					// For compact previews, allow Plotly-driven heights but keep overflow available
-					scrollPane.style.overflowY = 'auto';
 				} else {
 					// For detail views, leave scrolling to CSS/legend pane
 					scrollPane.style.height = '';
